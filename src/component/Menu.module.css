@@ -48,6 +48,90 @@
   font-weight: 700;
   text-shadow: 1px 1px 1px rgb(124, 121, 121);
 }
+
+.menu-input-container {
+  display: grid;
+  grid-auto-flow: row;
+  border: 2px solid rgb(195, 190, 202);
+  border-radius: 3px;
+  width: 350px;
+  height: fit-content;
+  padding: 15px;
+  margin: 10px;
+}
+.menu-input-container button {
+  margin-top: 10px;
+  justify-self: end;
+  width: 80px;
+  height: 30px;
+  background: rgb(63, 108, 145);
+  border-radius: 3px;
+  border: 1px solid rgb(195, 190, 202);
+  color: rgb(255, 255, 255);
+}
+
+.item-Title {
+  color: rgb(75, 72, 72);
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 1px 1px 1px rgb(195, 190, 202);
+  text-align: left;
+  border-bottom: 1px solid rgb(195, 190, 202);
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+
+.item-Container {
+  display: grid;
+  grid-auto-flow: row;
+  height: fit-content;
+  padding: 5px;
+  margin: 10px;
+  width: 450px;
+  border: 1px solid rgb(195, 190, 202);
+}
+
+.item-Content {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  width: 100%;
+  height: 45px;
+  margin-bottom: 3px;
+  align-items: center;
+}
+.item-Content:last-child {
+  margin-bottom: 0px;
+}
+
+.item-Name {
+  background: rgb(124, 121, 121);
+  text-align: left;
+  font-weight: 700;
+  color: rgb(255, 255, 255);
+  height: 100%;
+  display: grid;
+  align-content: center;
+}
+.item-Name div {
+  padding-left: 5px;
+}
+
+.item-Box {
+  text-align: left;
+
+  height: 100%;
+  width: 100%;
+}
+
+.item-Box input {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* border-radius: 3px; */
+  border: 1px solid rgb(195, 190, 202);
+  padding: 4px 6px 4px 6px;
+}
+
 /* 
 header {
   display: flex;
@@ -98,4 +182,4 @@ html {
 *:before,
 *:after {
   box-sizing: inherit;
-} */
+} */ ;

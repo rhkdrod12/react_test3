@@ -53,7 +53,6 @@ export function postFetch(url, data, callback) {
   console.log(url);
   console.log(data);
   return new Promise((resolve, reject) => {
-    console.log("여기~");
     axios
       .post(url, data)
       .then((res) => {

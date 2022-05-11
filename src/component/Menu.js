@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { postFetch, useGetFetch } from "../utils/commonUtils";
 import menuStyle from "./Menu.module.css";
+
+const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
 const Menu = () => {
   // customHook에서 state를 만들어서 반환시키기 때문에 state가 변화하면 이 화면도 자동적으로 갱신 될 것임
@@ -9,18 +11,17 @@ const Menu = () => {
   });
 
   useEffect(() => {
-    console.log("여기여기");
-    const source = new EventSource("https://localhost:8080/menu/sse");
+    console.log("SSE 실행");
+    const source = new EventSource("http://localhost:8080/menu/sse");
     source.onmessage = ({ data }) => {
       var jsonData = JSON.parse(data);
-      setMenus((item) => [...item, jsonData]);
+      console.log(jsonData);
+      if (jsonData.type === "HEADER") setMenus((item) => [...item, jsonData]);
     };
   }, []);
 
   // const menuContentStyle = menuStyle["menu-content"];
   // const menuItemStyle = menuStyle["menu-item"];
-
-  const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
   return (
     <div className={menuContentStyle}>
@@ -45,7 +46,6 @@ const MenuItem = ({ name, Number, url, className }) => {
 export const InsertMenu = () => {
   return (
     <div>
-      <div>메뉴 삽입</div>
       <div>
         <InputBox></InputBox>
       </div>
@@ -60,15 +60,15 @@ const InputBox = () => {
   // 리랜더링이 진행된다. 기존값을 바꾸는 형태로 하게 되면 업데이트를 감지하지 못할 수 있음.
   // 어차피 for문 한번 돌리는건 그렇게 시간이 오래걸리는 작업은 아니니..
 
-  const menuDataSet = {
-    menuId: { name: "메뉴 ID", show: false },
-    type: { name: "메뉴 타입" },
-    name: { name: "메뉴 이름" },
-    url: { name: "메뉴 URL" },
-    upperMenu: { name: "상위 메뉴" },
-    menuDepth: { name: "메뉴 깊이" },
-    menuOrder: { name: "정렬 순서" },
-  };
+  // const menuDataSet = {
+  //   menuId: { name: "메뉴 ID", show: false },
+  //   type: { name: "메뉴 타입" },
+  //   name: { name: "메뉴 이름" },
+  //   url: { name: "메뉴 URL" },
+  //   upperMenu: { name: "상위 메뉴" },
+  //   menuDepth: { name: "메뉴 깊이" },
+  //   menuOrder: { name: "정렬 순서" },
+  // };
 
   const menuData = {
     menuId: "",
@@ -82,42 +82,61 @@ const InputBox = () => {
 
   const [menuItem, setMenuItem] = useState(menuData);
   const { type, name, url, upperMenu, menuDepth, menuOrder } = menuItem;
-  const onChange = ({ target: { value, name } }) => {
-    setMenuItem((item) => ({ ...item, [name]: value }));
-  };
-  const onClick = (e) => {
-    console.log(e);
-    debugger;
+  const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
 
+  const onChange = useCallback(({ target: { value, name } }) => {
+    setMenuItem((item) => ({ ...item, [name]: value }));
+  });
+
+  const onClick = (e) => {
     postFetch("/menu/insertSee", [menuItem]).then((data) => {
+      console.log("실행 결과값:");
       console.log(data);
     });
   };
 
   return (
-    <div>
-      <div>
-        {/* 원래는 셀렉트 박스로 처리하는게 맞긴하다만은 일단 임시적으로 처리합시다. */}
-        <span>메뉴 타입: </span>
-        <input name="type" value={type} onChange={onChange}></input>
+    <div className={menuInputContainer}>
+      <div className={itemTitle}>메뉴 삽입</div>
+
+      <div className={itemContainer}>
+        <MemoItem name="type" value={type} onChange={onChange}>
+          메뉴 타입
+        </MemoItem>
+        <MemoItem name="name" value={name} onChange={onChange}>
+          메뉴 이름
+        </MemoItem>
+        <MemoItem name="url" value={url} onChange={onChange}>
+          메뉴 URL
+        </MemoItem>
+        <MemoItem name="menuOrder" value={menuOrder} onChange={onChange}>
+          메뉴 순서
+        </MemoItem>
       </div>
-      <div>
-        <span>메뉴 이름: </span>
-        <input name="name" value={name} onChange={onChange}></input>
-      </div>
-      <div>
-        <span>메뉴 URL: </span>
-        <input name="url" value={url} onChange={onChange}></input>
-      </div>
-      <div>
-        <span>메뉴 순서: </span>
-        <input name="menuOrder" value={menuOrder} onChange={onChange}></input>
-      </div>
+
       <button className="" onClick={onClick}>
-        클릭!
+        추가
       </button>
     </div>
   );
 };
+
+const Item = ({ children, name, value, onChange }) => {
+  console.log(`render ${name}`);
+  const { "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
+
+  return (
+    <div className={itemContent}>
+      <div className={itemName}>
+        <div>{children}</div>
+      </div>
+      <div className={itemBox}>
+        <input name={name} value={value} onChange={onChange}></input>
+      </div>
+    </div>
+  );
+};
+
+const MemoItem = memo(Item);
 
 export default Menu;
