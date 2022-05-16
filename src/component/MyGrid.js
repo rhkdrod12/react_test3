@@ -1,30 +1,34 @@
 import React from "react";
 import "./DefaultCss.css";
 import gridStyle from "./gridStyle.module.css";
+import styeld from "styled-components";
+import useScroll from "../Hook/useScroll";
 
-const MyGrid = ({ columns, rootStyle }) => {
+const MyGrid = ({ columns, rootStyle, style }) => {
   const columns2 = [
     { field: "id", headerName: "ID", width: 90 },
     {
       field: "firstName",
       headerName: "성",
-      width: 150,
+      width: 200,
       // editable: true,
     },
     {
       field: "lastName",
       headerName: "이름",
-      width: 150,
+      width: 200,
       // editable: true,
     },
     {
       field: "age",
       headerName: "나이",
       type: "number",
-      width: 110,
+      width: "auto",
       // editable: true,
     },
   ];
+
+  columns = columns2;
 
   const rows = [
     { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
@@ -37,24 +41,41 @@ const MyGrid = ({ columns, rootStyle }) => {
     { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
     { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
     { id: 10, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    { id: 11, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    { id: 12, lastName: "Roxie", firstName: "Harvey", age: 65 },
   ];
 
   console.log(columns2);
+
+  // 컨테이너 범위지정
+  const width = columns.map(({ width }) => (!isNaN(width) ? width + "px" : width)).join(" ");
+
+  const gridInStyle = {
+    width: width,
+  };
+
   return (
-    <div style={rootStyle} className={gridStyle["grid-root"]}>
-      <GridHeaderContainer columns={columns2}></GridHeaderContainer>
-      <GridDataContainer columns={columns2} data={rows}></GridDataContainer>
+    <div style={style} className={gridStyle["grid-root"]}>
+      <GridHeaderContainer columns={columns2} gridInStyle={gridInStyle}></GridHeaderContainer>
+      <GridDataContainer columns={columns2} data={rows} gridInStyle={gridInStyle}></GridDataContainer>
     </div>
   );
 };
 
-const GridHeaderContainer = ({ columns }) => {
+const StyleGridWidth = styeld.div`
+  grid-template-columns: ${(props) => props.width || "auto"}
+`;
+
+const GridHeaderContainer = ({ columns, gridInStyle }) => {
+  console.log("테스트");
+
   return (
-    <div className={gridStyle["grid-header-container"]}>
+    <StyleGridWidth {...gridInStyle} className={gridStyle["grid-header-container"]}>
+      {/* <StyledGridHeaderContainer width={width}> */}
       {columns.map((column, idx) => (
         <ColumnHeaderCoulmn key={idx} {...column}></ColumnHeaderCoulmn>
       ))}
-    </div>
+    </StyleGridWidth>
   );
 };
 
@@ -73,14 +94,28 @@ const ColumnHeaderCoulmn = (props) => {
   );
 };
 
-const GridDataContainer = ({ columns, data }) => {
-  return <div className={gridStyle["grid-data-container"]}>{data ? data.map((coulmnData, idx) => <GridDataColumn key={idx} columns={columns} data={coulmnData}></GridDataColumn>) : null}</div>;
-};
-const GridDataColumn = ({ columns, data }) => {
+const GridDataContainer = ({ columns, data, gridInStyle }) => {
+  const [scrollTop, ref] = useScroll();
+  const itemCount = data.length;
+  const itemHegiht = 50;
+  const totalHeight = 50 * itemCount;
+  const containerHeight = 500;
+
+  const startIdx = Math.max(Math.floor(scrollTop / itemHegiht), 0);
+  const visibleCount = Math.floor(containerHeight / itemHegiht);
+  const offsetY = startIdx * itemHegiht;
+
   return (
-    <div className={gridStyle["grid-data-row"]}>
-      {columns ? columns.map((coulmnSettings, idx) => <ColumnBox key={idx} setting={coulmnSettings} value={data[coulmnSettings.field]}></ColumnBox>) : null}
+    <div className={gridStyle["grid-data-container"]} ref={ref} style={{ height: { totalHeight } }}>
+      {data ? data.map((coulmnData, idx) => <GridDataColumn key={idx} columns={columns} data={coulmnData} gridInStyle={gridInStyle}></GridDataColumn>) : null}
     </div>
+  );
+};
+const GridDataColumn = ({ columns, data, gridInStyle }) => {
+  return (
+    <StyleGridWidth className={gridStyle["grid-data-row"]} {...gridInStyle}>
+      {columns ? columns.map((coulmnSettings, idx) => <ColumnBox key={idx} setting={coulmnSettings} value={data[coulmnSettings.field]}></ColumnBox>) : null}
+    </StyleGridWidth>
   );
 };
 const ColumnBox = ({ setting, value }) => {

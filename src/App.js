@@ -14,8 +14,8 @@ function App() {
 
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}
-      <MuiDataGrid></MuiDataGrid>
-      <MyGrid></MyGrid>
+      {/* <MuiDataGrid></MuiDataGrid> */}
+      <MyGrid style={{ width: "800px", margin: "20px" }}></MyGrid>
       {/* <DynamicProp></DynamicProp> */}
     </div>
   );

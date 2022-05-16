@@ -1,4 +1,5 @@
-.grid-root {
+.grid-root * {
+  box-sizing: border-box;
 }
 
 .grid-header-container {
@@ -44,9 +45,17 @@
 .grid-data-container {
   display: grid;
   grid-auto-flow: row;
+  overflow: auto;
+  height: 250px;
 }
 
 .grid-data-row {
   display: grid;
   grid-auto-flow: column;
+  height: 50px;
+  align-content: center;
+  border-bottom: 1px solid rgba(224, 224, 224, 1);
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 400;
+  padding: 0px 10px 0px 10px;
 }
