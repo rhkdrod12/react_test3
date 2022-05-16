@@ -2,8 +2,8 @@ import DynamicProp from "./Component/DynamicProp";
 import Header from "./Component/Header";
 import MemoTest from "./Component/MemoTest";
 import { InsertMenu } from "./Component/Menu";
-import MuiDataGrid from "./Component/MuiDataGrid";
-import MuiSelect from "./Component/MuiSelect";
+// import MuiDataGrid from "./Component/MuiDataGrid";
+// import MuiSelect from "./Component/MuiSelect";
 import MyGrid from "./Component/MyGrid";
 
 function App() {

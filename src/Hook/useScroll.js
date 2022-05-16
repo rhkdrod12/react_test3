@@ -4,7 +4,6 @@ const useScroll = () => {
   const [scrollTop, setScrollTop] = useState();
   const ref = useRef();
   const onScroll = ({ target: { scrollTop } }) => {
-    console.log(scrollTop);
     return setScrollTop(scrollTop);
   };
 
