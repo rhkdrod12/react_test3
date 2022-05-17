@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import useScroll from "../Hook/useScroll";
+import useScroll from "../../Hook/useScroll";
 /**
  * 가상 스크롤 컴포넌트
  * @param {children} 자식 컴포넌트 배열

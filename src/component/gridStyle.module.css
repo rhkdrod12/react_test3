@@ -27,6 +27,7 @@
   font-size: 0.875em;
   grid-auto-flow: column;
   grid-template-columns: 1fr 10px;
+  /* border-right: 1px solid rgb(195, 190, 202); */
 }
 
 .grid-header-column-sortable {
@@ -39,6 +40,9 @@
 }
 
 .grid-header-columnSvg {
+  position: relative;
+  right: -10px;
+  z-index: 2;
   color: rgba(209, 209, 209, 0.87);
   text-align: right;
 }

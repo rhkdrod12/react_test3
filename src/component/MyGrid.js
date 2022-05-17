@@ -4,7 +4,7 @@ import gridStyle from "./gridStyle.module.css";
 import styled from "styled-components";
 
 import TextField from "@mui/material/TextField";
-import ScrollBox from "./ScrollBox";
+import ScrollBox from "./BasicComponent/ScrollBox";
 
 const MyGrid = ({ columns, rootStyle, style }) => {
   const columns2 = [
@@ -48,9 +48,9 @@ const MyGrid = ({ columns, rootStyle, style }) => {
     { id: 12, lastName: "Roxie", firstName: "Harvey", age: 65 },
   ];
 
-  for (var i = 13; i <= 5000; i++) {
-    rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i });
-  }
+  // for (var i = 13; i <= 5000; i++) {
+  //   rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i });
+  // }
 
   console.log(columns2);
 
@@ -132,7 +132,7 @@ const ColumnHeaderCoulmn = ({ field, headerName, headerType, editable, disabled 
 
 const GridDataContainer = ({ columns, rowData, gridInlineStyle }) => {
   const options = {
-    visibleCount: 5,
+    visibleCount: 10,
   };
 
   return (
@@ -170,8 +170,8 @@ const GridDataColumn = ({ setting, value }) => {
   return <div className={gridStyle["grid-data-column"]}>{comp}</div>;
 };
 
-const InputBox = ({ value, options }) => {
-  return <TextField sx={{ height: "100%" }}></TextField>;
-};
+// const InputBox = ({ value, options }) => {
+//   return <TextField sx={{ height: "100%" }}></TextField>;
+// };
 
 export default MyGrid;
