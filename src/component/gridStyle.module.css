@@ -48,7 +48,6 @@
   position: relative;
   grid-auto-flow: row;
   align-content: start;
-  /* overflow: auto; */
   height: 250px;
 }
 
