@@ -29,16 +29,6 @@ const MyGrid = ({ columns, rootStyle, style }) => {
       // width: "auto",
       // editable: true,
     },
-
-    {
-      field: "in",
-      headerName: "입력",
-      type: "input",
-      // width: "auto",
-      // editable: true,
-      // disabled: true,
-      // readOnly: true,
-    },
   ];
 
   columns = columns2;
@@ -66,8 +56,10 @@ const MyGrid = ({ columns, rootStyle, style }) => {
 
   // 컨테이너 범위지정
   const width = columns
-    .map(({ width }) => {
-      if (width == null) {
+    .map(({ width }, idx) => {
+      if (idx == columns.length - 1) {
+        return "auto";
+      } else if (width == null) {
         return "1fr";
       } else if (isNaN(width)) {
         return width;

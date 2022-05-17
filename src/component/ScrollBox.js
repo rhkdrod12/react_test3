@@ -19,10 +19,8 @@ const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, off
   const totalHeight = itemHeight * itemCount;
   // 시작 idx
   const startIdx = Math.max(Math.floor(scrollTop / itemHeight), 0);
-
   // 화면 표현 높이
   const containerHeight = itemHeight * visibleCount;
-
   // 마지막 idx
   const endIdx = startIdx + visibleCount + offsetCnt;
   // 현재 표기해야할 스크롤 위치
