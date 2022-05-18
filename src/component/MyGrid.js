@@ -12,7 +12,7 @@ const Btn = (props) => {
 };
 
 const MyGrid = ({ columns, rootStyle, style }) => {
-  const GridOption = [
+  columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
       field: "firstName",
@@ -45,8 +45,6 @@ const MyGrid = ({ columns, rootStyle, style }) => {
       width: 300,
     },
   ];
-
-  columns = GridOption;
 
   const rows = [
     // { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
@@ -87,15 +85,21 @@ const MyGrid = ({ columns, rootStyle, style }) => {
   const gridInlineStyle = {
     width: width,
   };
+
   /**
    * [Option 정의]
    * GridOption: 그리드의 전체적인 부분에 관한 옵션
-   * GridHeaderOtpion : Header 관련 옵션
-   * GridDataOption : Content 부분에 관한 옵션
-   * GridFooterOption : footer 부분 옵션
+   * HeaderOtpion : Header 관련 옵션
+   * DataOption : Content 부분에 관한 옵션
+   * FooterOption : footer 부분 옵션
    */
+  const gridOption = { columnInfo: columns };
+  const dataOption = {};
+  const headerOption = {};
+  const footerOption = {};
+
   return (
-    <GridContextProvider data={{ GridOption: GridOption }}>
+    <GridContextProvider data={{ GridOption: gridOption, DataOption: dataOption, HeaderOption: headerOption, FooterOption: footerOption }}>
       <div style={style} className={gridStyle["grid-root"]}>
         <GridHeaderContainer columns={GridOption} gridInlineStyle={gridInlineStyle}></GridHeaderContainer>
         <GridDataContainer columns={GridOption} rowData={rows} gridInlineStyle={gridInlineStyle}></GridDataContainer>
