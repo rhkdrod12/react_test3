@@ -3,10 +3,10 @@ import DynamicProp from "./Component/DynamicProp";
 import Header from "./Component/Header";
 import MemoTest from "./Component/MemoTest";
 import { InsertMenu } from "./Component/Menu";
+import MuiHeader from "./Component/MuiComp/MuiHeader";
 import MuiDataGrid from "./Component/MuiDataGrid";
 // import MuiSelect from "./Component/MuiSelect";
 import MyGrid from "./Component/MyGrid";
-import MuiHeader from "./MuiComp/MuiHeader";
 
 function App() {
   return (

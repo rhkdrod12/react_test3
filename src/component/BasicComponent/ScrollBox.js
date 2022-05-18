@@ -11,12 +11,13 @@ import useScroll from "../../Hook/useScroll";
  * 미리 생성시킬 개수 : offsetCnt(defualt 1)
  * @returns
  */
-const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1 } = {} }) => {
+const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1, scrollWidth = 10 } = {} }) => {
+  // 스크롤 이벤트 감지 훅 : 스크롤이 이동되면 현재의 스크롤 위치를 반환한다., ref는 스크롤를 감지할 영역
   const [scrollTop, ref] = useScroll();
-
-  const itemCount = children.length;
+  // 표기해야할 아이템 총개수
+  const itemTotalCount = children.length;
   // 최대 높이(스크롤의 길이)
-  const totalHeight = itemHeight * itemCount;
+  const totalHeight = itemHeight * itemTotalCount;
   // 시작 idx
   const startIdx = Math.max(Math.floor(scrollTop / itemHeight), 0);
   // 화면 표현 높이
@@ -27,8 +28,14 @@ const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, off
   const offsetY = startIdx * itemHeight;
 
   return (
-    <StyleOverflowDiv height={containerHeight} ref={ref}>
+    // 스크롤이 표기될 영역
+    <StyleOverflowDiv height={containerHeight} scrollWidth={scrollWidth} ref={ref}>
+      {/* 가상의 영역 (총 데이터가 표기해야할 높이를 계산하여 가지고 있는 영역) */}
       <StyleScrollDiv height={totalHeight}>
+        {/* 
+          List 출력 영역 
+          앞의 데이터를 filter하고 하는게 더 좋긴 하겠지만 큰 차이는 아닐꺼라 생각하기 때문에 문제는 없을 듯
+        */}
         <div style={{ transform: `translateY(${offsetY}px)` }}>{children.filter((item, idx) => idx >= startIdx && idx < endIdx)}</div>
       </StyleScrollDiv>
     </StyleOverflowDiv>
@@ -43,6 +50,19 @@ const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, off
 const StyleOverflowDiv = styled.div`
   overflow: auto;
   height: ${({ height }) => (!isNaN(height) ? `${height}px` : height)};
+  &::-webkit-scrollbar {
+    width: ${({ scrollWidth }) => (!isNaN(scrollWidth) ? `${scrollWidth}px` : scrollWidth)};
+  }
+  ${"" /* 스크롤바 배경 */}
+  &::-webkit-scrollbar-track {
+    background: rgbA(240, 240, 240, 1);
+    border-radius: 10px;
+  }
+  ${"" /* 스크롤바 */}
+  &::-webkit-scrollbar-thumb {
+    background: rgb(210, 210, 210);
+    border-radius: 10px;
+  }
 `;
 const StyleScrollDiv = styled.div`
   display: grid;

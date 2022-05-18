@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
 import "./DefaultCss.css";
 import gridStyle from "./gridStyle.module.css";
 import styled from "styled-components";
@@ -12,7 +12,7 @@ const Btn = (props) => {
 };
 
 const MyGrid = ({ columns, rootStyle, style }) => {
-  const columns2 = [
+  const GridOption = [
     { field: "id", headerName: "ID", width: 90 },
     {
       field: "firstName",
@@ -46,28 +46,28 @@ const MyGrid = ({ columns, rootStyle, style }) => {
     },
   ];
 
-  columns = columns2;
+  columns = GridOption;
 
   const rows = [
-    { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-    { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-    { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-    { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-    { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-    { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-    { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-    { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-    { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-    { id: 10, lastName: "Roxie", firstName: "Harvey", age: 65 },
-    { id: 11, lastName: "Roxie", firstName: "Harvey", age: 65 },
-    { id: 12, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    // { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
+    // { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
+    // { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
+    // { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
+    // { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
+    // { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
+    // { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
+    // { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
+    // { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    // { id: 10, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    // { id: 11, lastName: "Roxie", firstName: "Harvey", age: 65 },
+    // { id: 12, lastName: "Roxie", firstName: "Harvey", age: 65 },
   ];
 
-  for (var i = 13; i <= 5000; i++) {
+  for (var i = 0; i <= 5000; i++) {
     rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i });
   }
 
-  console.log(columns2);
+  console.log(GridOption);
 
   // 컨테이너 범위지정
   const width = columns
@@ -87,39 +87,22 @@ const MyGrid = ({ columns, rootStyle, style }) => {
   const gridInlineStyle = {
     width: width,
   };
-
+  /**
+   * [Option 정의]
+   * GridOption: 그리드의 전체적인 부분에 관한 옵션
+   * GridHeaderOtpion : Header 관련 옵션
+   * GridDataOption : Content 부분에 관한 옵션
+   * GridFooterOption : footer 부분 옵션
+   */
   return (
-    <div style={style} className={gridStyle["grid-root"]}>
-      <GridHeaderContainer columns={columns2} gridInlineStyle={gridInlineStyle}></GridHeaderContainer>
-      <GridDataContainer columns={columns2} rowData={rows} gridInlineStyle={gridInlineStyle}></GridDataContainer>
-    </div>
+    <GridContextProvider data={{ GridOption: GridOption }}>
+      <div style={style} className={gridStyle["grid-root"]}>
+        <GridHeaderContainer columns={GridOption} gridInlineStyle={gridInlineStyle}></GridHeaderContainer>
+        <GridDataContainer columns={GridOption} rowData={rows} gridInlineStyle={gridInlineStyle}></GridDataContainer>
+      </div>
+    </GridContextProvider>
   );
 };
-
-/*
- * =================================================================================
- * style-components
- * =================================================================================
- */
-const StyleGridContainer = styled.div`
-  grid-template-columns: ${({ width }) => {
-    return width || "auto";
-  }};
-`;
-const StyleDataContainer = styled.div`
-  overflow: auto;
-  height: ${({ height }) => (!isNaN(height) ? `${height}px` : height)};
-`;
-const StyleOverflowDiv = styled.div`
-  height: ${({ height }) => `${height}px`};
-`;
-const StyleInput = styled.input`
-  width: 100%;
-  border: 1px solid rgba(224, 224, 224, 1);
-  border-radius: 4px;
-  height: 30px;
-`;
-//==================================================================================
 
 const GridHeaderContainer = ({ columns, gridInlineStyle }) => {
   return (
@@ -150,6 +133,10 @@ const GridDataContainer = ({ columns, rowData, gridInlineStyle }) => {
     visibleCount: 5,
   };
 
+  const value = useContext(GridContext);
+
+  console.log("발류~:");
+  console.log(value);
   return (
     <ScrollBox itemCount={rowData.length} options={options}>
       {rowData ? rowData.map((coulmnData, idx) => <GridDataRow key={idx} columns={columns} data={coulmnData} gridInlineStyle={gridInlineStyle}></GridDataRow>) : null}
@@ -185,6 +172,41 @@ const GridDataColumn = ({ setting, value }) => {
       break;
   }
   return <div className={gridStyle["grid-data-column"]}>{comp}</div>;
+};
+
+/*
+ * =================================================================================
+ * style-components
+ * =================================================================================
+ */
+const StyleGridContainer = styled.div`
+  grid-template-columns: ${({ width }) => {
+    return width || "auto";
+  }};
+`;
+const StyleDataContainer = styled.div`
+  overflow: auto;
+  height: ${({ height }) => (!isNaN(height) ? `${height}px` : height)};
+`;
+const StyleOverflowDiv = styled.div`
+  height: ${({ height }) => `${height}px`};
+`;
+const StyleInput = styled.input`
+  width: 100%;
+  border: 1px solid rgba(224, 224, 224, 1);
+  border-radius: 4px;
+  height: 30px;
+`;
+//==================================================================================
+
+/**
+ * Grid Context
+ */
+
+const GridContext = createContext();
+
+const GridContextProvider = ({ children, data }) => {
+  return <GridContext.Provider value={data}>{children}</GridContext.Provider>;
 };
 
 export default MyGrid;

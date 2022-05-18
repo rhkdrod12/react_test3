@@ -13,7 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { Button } from "@mui/material";
 
-export default function MenuAppBar() {
+export default function MuiHeader() {
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -44,38 +44,39 @@ export default function MenuAppBar() {
 
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
-              <Button key={page} onClick={handleTest} sx={{ my: 2, color: "white", display: "block", fontSize: "1.25rem", margin: "0px", "&:hover": { color: "tomato" } }}>
+              <Button key={page} onClick={handleTest} sx={{ my: 2, color: "white", display: "block", fontSize: "1rem", margin: "0px", "&:hover": { color: "tomato" } }}>
                 {page}
               </Button>
             ))}
+            
+            {auth && (
+              <div>
+                {/* <AccountCircle /> */}
+                <Button key={"123"} onClick={handleMenu} sx={{ my: 2, color: "white", display: "block", fontSize: "1rem", margin: "0px", "&:hover": { textShadow: "1px 1px 1px 1px gray" } }}>
+                  테스트
+                </Button>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={handleClose}>Profile</MenuItem>
+                  <MenuItem onClick={handleClose}>My account</MenuItem>
+                  <MenuItem onClick={handleClose}>My account2</MenuItem>
+                </Menu>
+              </div>
+            )}
           </Box>
-
-          {auth && (
-            <div>
-              <IconButton size="large" aria-label="account of current user" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleMenu} color="inherit">
-                <AccountCircle />
-              </IconButton>
-
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
-              </Menu>
-            </div>
-          )}
         </Toolbar>
       </AppBar>
     </Box>
