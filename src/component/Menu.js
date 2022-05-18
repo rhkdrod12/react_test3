@@ -86,7 +86,7 @@ const InputBox = () => {
 
   const onChange = useCallback(({ target: { value, name } }) => {
     setMenuItem((item) => ({ ...item, [name]: value }));
-  });
+  }, [] );
 
   const onClick = (e) => {
     postFetch("/menu/insertSee", [menuItem]).then((data) => {

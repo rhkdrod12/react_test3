@@ -6,6 +6,11 @@ import styled from "styled-components";
 import TextField from "@mui/material/TextField";
 import ScrollBox from "./BasicComponent/ScrollBox";
 
+const Btn = (props) => {
+  const { onClick, name } = props;
+  return <button onClick={onClick}>{name}</button>;
+};
+
 const MyGrid = ({ columns, rootStyle, style }) => {
   const columns2 = [
     { field: "id", headerName: "ID", width: 90 },
@@ -29,6 +34,16 @@ const MyGrid = ({ columns, rootStyle, style }) => {
       // width: "auto",
       // editable: true,
     },
+    {
+      field: "btn",
+      headerName: "상세내용",
+      type: "component",
+      component: Btn,
+      componentOption: {
+        name: "이동",
+      },
+      width: 300,
+    },
   ];
 
   columns = columns2;
@@ -48,9 +63,9 @@ const MyGrid = ({ columns, rootStyle, style }) => {
     { id: 12, lastName: "Roxie", firstName: "Harvey", age: 65 },
   ];
 
-  // for (var i = 13; i <= 5000; i++) {
-  //   rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i });
-  // }
+  for (var i = 13; i <= 5000; i++) {
+    rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i });
+  }
 
   console.log(columns2);
 
@@ -132,7 +147,7 @@ const ColumnHeaderCoulmn = ({ field, headerName, headerType, editable, disabled 
 
 const GridDataContainer = ({ columns, rowData, gridInlineStyle }) => {
   const options = {
-    visibleCount: 10,
+    visibleCount: 5,
   };
 
   return (
@@ -156,22 +171,20 @@ const GridDataRow = ({ columns, data, gridInlineStyle }) => {
  * @returns
  */
 const GridDataColumn = ({ setting, value }) => {
-  const { field, type, editable, disabled = false, onChange, readOnly } = setting;
+  const { field, type, editable, disabled = false, onChange, readOnly, component } = setting;
   let comp;
 
   switch (type) {
     case "input":
       comp = <StyleInput></StyleInput>;
       break;
+    case "component":
+      comp = component;
     default:
       comp = value;
       break;
   }
   return <div className={gridStyle["grid-data-column"]}>{comp}</div>;
 };
-
-// const InputBox = ({ value, options }) => {
-//   return <TextField sx={{ height: "100%" }}></TextField>;
-// };
 
 export default MyGrid;
