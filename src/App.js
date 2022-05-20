@@ -6,7 +6,7 @@ import { InsertMenu } from "./Component/Menu";
 import MuiHeader from "./Component/MuiComp/MuiHeader";
 import MuiDataGrid from "./Component/MuiDataGrid";
 // import MuiSelect from "./Component/MuiSelect";
-import MyGrid from "./Component/MyGrid";
+import MyGrid, { TstGrid } from "./Component/MyGrid2";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}
       <MuiDataGrid></MuiDataGrid>
-      <MyGrid style={{ width: "800px", margin: "20px" }}></MyGrid>
+      <TstGrid></TstGrid>
       {/* <DynamicProp></DynamicProp> */}
     </div>
   );

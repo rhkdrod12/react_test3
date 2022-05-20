@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { postFetch, useGetFetch } from "../utils/commonUtils";
+import { postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "./Menu.module.css";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
@@ -86,7 +86,7 @@ const InputBox = () => {
 
   const onChange = useCallback(({ target: { value, name } }) => {
     setMenuItem((item) => ({ ...item, [name]: value }));
-  }, [] );
+  }, []);
 
   const onClick = (e) => {
     postFetch("/menu/insertSee", [menuItem]).then((data) => {
