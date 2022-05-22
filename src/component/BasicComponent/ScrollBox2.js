@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import useScroll from "../../Hook/useScroll";
+import defaultCssValue from "../../utils/commonUtils";
+
 /**
  * 가상 스크롤 컴포넌트
  * @param {children} 자식 컴포넌트 배열
@@ -11,7 +13,7 @@ import useScroll from "../../Hook/useScroll";
  * 미리 생성시킬 개수 : offsetCnt(defualt 1)
  * @returns
  */
-const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1, scrollWidth = 10 } = {} }) => {
+const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1, scrollWidth = 10, scrollDisplay = true } = {} }) => {
   // 스크롤 이벤트 감지 훅 : 스크롤이 이동되면 현재의 스크롤 위치를 반환한다., ref는 스크롤를 감지할 영역
   const [scrollTop, ref] = useScroll();
   // 표기해야할 아이템 총개수
@@ -29,7 +31,7 @@ const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, off
 
   return (
     // 스크롤이 표기될 영역
-    <StyleOverflowDiv height={containerHeight} scrollWidth={scrollWidth} ref={ref}>
+    <StyleOverflowDiv height={containerHeight} scrollWidth={scrollWidth} scrollDisplay={scrollDisplay} ref={ref}>
       {/* 가상의 영역 (총 데이터가 표기해야할 높이를 계산하여 가지고 있는 영역) */}
       <StyleScrollDiv height={totalHeight}>
         {/* 
@@ -49,20 +51,17 @@ const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, off
  */
 const StyleOverflowDiv = styled.div`
   overflow-y: auto;
-  height: ${({ height }) => (!isNaN(height) ? `${height}px` : height)};
+  height: ${({ height }) => defaultCssValue(height)};
+
   &::-webkit-scrollbar {
-    width: ${({ scrollWidth }) => (!isNaN(scrollWidth) ? `${scrollWidth}px` : scrollWidth)};
+    width: ${({ scrollWidth }) => (scrollDisplay ? defaultCssValue(scrollWidth) : "")};
     height: 10px;
   }
-  ${"" /* 스크롤바 배경 */}
   &::-webkit-scrollbar-track {
     background: rgbA(240, 240, 240, 1);
-    ${"" /* border-radius: 10px; */}
   }
-  ${"" /* 스크롤바 */}
   &::-webkit-scrollbar-thumb {
     background: rgb(210, 210, 210);
-    ${"" /* border-radius: 10px; */}
   }
 `;
 const StyleScrollDiv = styled.div`
@@ -70,7 +69,7 @@ const StyleScrollDiv = styled.div`
   position: relative;
   grid-auto-flow: row;
   align-content: start;
-  height: ${({ height }) => (height ? `${height}px` : "250px")};
+  height: ${({ height }) => defaultCssValue(height, "250px")};
 `;
 //==================================================================================
 

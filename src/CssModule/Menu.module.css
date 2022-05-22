@@ -1,7 +1,4 @@
 .menu-content {
-  /* display: flex;
-  flex-direction: row-reverse; */
-
   display: grid;
   grid-auto-flow: column;
   justify-content: end;
@@ -33,19 +30,19 @@
 }
 
 .header-wrap {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 1fr 4fr;
-  grid-auto-rows: minmax(50px, auto);
-  justify-items: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  background-color: rgb(214, 234, 238);
+  background-color: #ffe53f67;
+  height: 60px;
 }
 
 .header-title {
   text-align: center;
   font-size: 28px;
   font-weight: 700;
+  color: rgb(0, 0, 0);
   text-shadow: 1px 1px 1px rgb(124, 121, 121);
 }
 

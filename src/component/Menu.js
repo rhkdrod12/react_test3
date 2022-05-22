@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { postFetch, useGetFetch } from "../Hook/useFetch";
-import menuStyle from "./Menu.module.css";
+import menuStyle from "../CssModule/Menu.module.css";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 

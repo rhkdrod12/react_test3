@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext } from "react";
 import "./DefaultCss.css";
 import gridStyle from "./gridStyle.module.css";
 import styled from "styled-components";
@@ -6,18 +6,20 @@ import styled from "styled-components";
 import TextField from "@mui/material/TextField";
 import ScrollBox from "./BasicComponent/ScrollBox";
 
-const Btn = ({ rowData, columnInfo }) => {
-  var { name, ...attr } = columnInfo;
-  var value = rowData.url;
-  console.log("render btn");
-  var onClick = () => {
-    console.log(`${value} 로 이동`);
+const Btn = ({ columnInfo, rowData, value }) => {
+  const onClick = () => {
+    console.log("클릭!");
+    console.log("이동디오: ", value);
+    console.log(rowData);
   };
+
+  const { name } = columnInfo;
+
   return <button onClick={onClick}>{name}</button>;
 };
 
-const MyGrid = ({ columns: columnInfo, rootStyle, style }) => {
-  columnInfo = [
+const MyGrid = ({ columns, style }) => {
+  columns = [
     { field: "id", headerName: "ID", width: 90 },
     {
       field: "firstName",
@@ -36,15 +38,15 @@ const MyGrid = ({ columns: columnInfo, rootStyle, style }) => {
       field: "age",
       headerName: "나이",
       type: "number",
-      width: 100,
+      // width: "auto",
       // editable: true,
     },
     {
-      field: "btn",
+      field: "url",
       headerName: "상세내용",
       type: "component",
       Component: Btn,
-      name: "이동",
+      name: "이동하겠다",
       width: 300,
     },
   ];
@@ -65,13 +67,15 @@ const MyGrid = ({ columns: columnInfo, rootStyle, style }) => {
   ];
 
   for (var i = 0; i <= 5000; i++) {
-    rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i, url: "/home/stay" + i });
+    rows.push({ id: i, lastName: "길동" + i, firstName: `홍${i}`, age: i, url: "/nan/" + i });
   }
 
   // 컨테이너 범위지정
-  const width = columnInfo
+  const width = columns
     .map(({ width }, idx) => {
-      if (width == null) {
+      if (idx == columns.length - 1) {
+        return "auto";
+      } else if (width == null) {
         return "1fr";
       } else if (isNaN(width)) {
         return width;
@@ -92,27 +96,25 @@ const MyGrid = ({ columns: columnInfo, rootStyle, style }) => {
    * DataOption : Content 부분에 관한 옵션
    * FooterOption : footer 부분 옵션
    */
-  const gridOption = { columnInfo: columnInfo };
+  const gridOption = { columnInfo: columns };
   const dataOption = {};
   const headerOption = {};
   const footerOption = {};
 
   return (
-    <GridContextProvider data={{ GridOption: gridOption, DataOption: dataOption, HeaderOption: headerOption, FooterOption: footerOption }}>
+    <GridContextProvider data={{ GridOption: gridOption, DataOption: dataOption, HeaderOption: headerOption, FooterOption: footerOption, RowData: rows }}>
       <div style={style} className={gridStyle["grid-root"]}>
-        <div className={gridStyle["grid-root-container"]}>
-          <GridHeaderContainer columnInfo={gridOption.columnInfo} gridInlineStyle={gridInlineStyle}></GridHeaderContainer>
-          <GridDataContainer columnInfo={gridOption.columnInfo} rowData={rows} gridInlineStyle={gridInlineStyle}></GridDataContainer>
-        </div>
+        <GridHeaderContainer columns={gridOption.columnInfo} gridInlineStyle={gridInlineStyle}></GridHeaderContainer>
+        <GridDataContainer columns={gridOption.columnInfo} rowData={rows} gridInlineStyle={gridInlineStyle}></GridDataContainer>
       </div>
     </GridContextProvider>
   );
 };
 
-const GridHeaderContainer = ({ columnInfo, gridInlineStyle }) => {
+const GridHeaderContainer = ({ columns, gridInlineStyle }) => {
   return (
     <StyleGridContainer {...gridInlineStyle} className={gridStyle["grid-header-container"]}>
-      {columnInfo.map((column, idx) => (
+      {columns.map((column, idx) => (
         <ColumnHeaderCoulmn key={idx} {...column}></ColumnHeaderCoulmn>
       ))}
     </StyleGridContainer>
@@ -133,72 +135,65 @@ const ColumnHeaderCoulmn = ({ field, headerName, headerType, editable, disabled 
   );
 };
 
-const GridDataContainer = ({ columnInfo, rowData, gridInlineStyle }) => {
+const GridDataContainer = ({ columns, rowData, gridInlineStyle }) => {
   const options = {
     visibleCount: 5,
   };
 
-  const [selected, setSelected] = useState(-1);
-  const onSelected = (index) => {
-    setSelected(index != null ? index : -1);
-  };
+  const value = useContext(GridContext);
 
-  console.log("render GridDataContainer");
+  console.log("발류~:");
+  console.log(value);
   return (
     <ScrollBox itemCount={rowData.length} options={options}>
-      {rowData
-        ? rowData.map((coulmnData, idx) => (
-            <GridDataRow key={idx} index={idx} columns={columnInfo} data={coulmnData} gridInlineStyle={gridInlineStyle} onSelected={onSelected} selected={selected}></GridDataRow>
-          ))
-        : null}
+      {rowData ? rowData.map((coulmnData, idx) => <GridDataRow key={idx} columns={columns} data={coulmnData} gridInlineStyle={gridInlineStyle}></GridDataRow>) : null}
     </ScrollBox>
   );
 };
 
-const GridDataRow = ({ index, columns, data, gridInlineStyle, onSelected, selected, onEvent }) => {
-  console.log(`render GridDataRow${index} selected ${selected}`);
-
-  const onClick = () => {
-    if (selected != index) onSelected(index);
+const GridDataRow = ({ key, columns, data, gridInlineStyle }) => {
+  const [select, onSelect] = React.useState(false);
+  const onClick = (event) => {
+    console.log(event);
+    onSelect((flag) => !flag);
   };
-
+  // 여기에 부여하는 방식은 안된다는거네? 해당 열을 선택했다는 정보를 어디에 저장하고 있어야한다는건데
+  // 어차피 모든 곳에 다 부여하는건 아니니. 상관은 없을거 같긴한데..
   return (
-    <StyleGridContainer onClick={onClick} aria-rowindex={index} className={`${gridStyle["grid-data-row"]} ${selected == index ? gridStyle["grid-data-row-selected"] : ""}`} {...gridInlineStyle}>
-      {columns ? columns.map((columnInfo, idx) => <GridDataColumn key={idx} columnInfo={columnInfo} value={data[columnInfo.field]} rowData={data}></GridDataColumn>) : null}
+    <StyleGridContainer onClick={onClick} className={`${gridStyle["grid-data-row"]} ${select ? gridStyle["grid-data-row-selected"] : ""}`} {...gridInlineStyle}>
+      {columns ? columns.map((coulmnSettings, idx) => <GridDataColumn key={idx} columnInfo={coulmnSettings} rowData={data} value={data[coulmnSettings.field]}></GridDataColumn>) : null}
     </StyleGridContainer>
   );
 };
 
 /**
  * 음 기본적으로 필요한 놈들을 생각해봅니다.
- * 컴포넌트의 경우 rowData와 event가 필요하겠지..
  * @param {*} param0
  * @returns
  */
-const GridDataColumn = ({ columnInfo, value, rowData }) => {
+const GridDataColumn = React.memo(({ columnInfo, rowData, value }) => {
   const { field, type, editable, disabled = false, onChange, readOnly, Component } = columnInfo;
   let comp;
-
   switch (type) {
     case "input":
       comp = <StyleInput></StyleInput>;
       break;
     case "component":
-      comp = <Component rowData={rowData} value={value} columnInfo={columnInfo}></Component>;
+      comp = <Component columnInfo={columnInfo} rowData={rowData} value={value}></Component>;
       break;
     default:
       comp = value;
       break;
   }
   return <div className={gridStyle["grid-data-column"]}>{comp}</div>;
-};
+});
 
 /*
  * =================================================================================
  * style-components
  * =================================================================================
  */
-const StyleGridContainer = styled.div`
+const StyleGridContainer = styled.div.attrs({ "data-ho": "테스트" })`
   grid-template-columns: ${({ width }) => {
     return width || "auto";
   }};

@@ -48,7 +48,7 @@ export default function MuiHeader() {
                 {page}
               </Button>
             ))}
-            
+
             {auth && (
               <div>
                 {/* <AccountCircle /> */}

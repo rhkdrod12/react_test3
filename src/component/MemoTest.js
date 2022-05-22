@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useState } from "react";
 import Select from "react-select";
-import menuStyle from "./Menu.module.css";
+import menuStyle from "../CssModule/Menu.module.css";
 import selectStyle from "./Select.module.css";
 import styled from "styled-components";
 const MemoTest = () => {

@@ -7,18 +7,19 @@ import MuiHeader from "./Component/MuiComp/MuiHeader";
 import MuiDataGrid from "./Component/MuiDataGrid";
 // import MuiSelect from "./Component/MuiSelect";
 import MyGrid, { TstGrid } from "./Component/MyGrid2";
+import { DepthMenu } from "./Component/TestComp/DepthMenu";
 
 function App() {
   return (
     <div>
-      <MuiHeader></MuiHeader>
-      {/* <Header></Header> */}
+      <DepthMenu></DepthMenu>
+      {/* <MuiHeader></MuiHeader>
+      <Header></Header> */}
       {/* <InsertMenu></InsertMenu> */}
-
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}
-      <MuiDataGrid></MuiDataGrid>
-      <TstGrid></TstGrid>
+      {/* <MuiDataGrid></MuiDataGrid>
+      <TstGrid></TstGrid> */}
       {/* <DynamicProp></DynamicProp> */}
     </div>
   );

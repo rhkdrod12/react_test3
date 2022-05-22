@@ -1,14 +1,75 @@
 import React from "react";
 import Menu from "./Menu";
-import HeaderStyle from "./Menu.module.css";
+import HeaderStyle from "../CssModule/Menu.module.css";
+import MenuIcon from "@mui/icons-material/Menu";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+
+import styled from "styled-components";
+import { StyleDiv } from "./StyleComp/StyleComp";
+import { useMediaQuery } from "react-responsive";
 
 const Header = () => {
-  return (
+  const ss = { "border-radius": "100%", background: "white" };
+  // useMediaQuery => 화면의 크기가 변동을 감지할 수 있는 훅
+  // 재랜더링이 들어가기 때문에 안좋을 수도.. Media로 처리하는게 맞을지도..
+  // 재랜더링이 들어가면 하위 화면에 통신하는 애들이 있으면.. 문제가 생길텐데.
+  const isWidth = useMediaQuery({ minWidth: 1000 });
+
+  return isWidth ? (
     <header className={HeaderStyle["header-wrap"]}>
-      <div className={HeaderStyle["header-title"]}>Header title</div>
+      {/* 왼쪽 항목*/}
+      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 150, textAlign: "left", display: "flex" }}>
+        <MenuListIcon></MenuListIcon>
+        <StyleDiv className={HeaderStyle["header-title"]}>QLife</StyleDiv>
+      </StyleDiv>
+      {/* 메뉴항목 */}
       <Menu></Menu>
+      {/* 오른쪽 항목 */}
+      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 45, display: "flex", justifyContent: "center" }}>
+        <StyleFocusDiv>
+          <StyleDiv inStyle={{ width: 40, height: 40, display: "flex", justifyContent: "center", alignItems: "center", ...ss }}>
+            <PersonOutlineIcon></PersonOutlineIcon>
+          </StyleDiv>
+        </StyleFocusDiv>
+      </StyleDiv>
+    </header>
+  ) : (
+    <header className={HeaderStyle["header-wrap"]}>
+      <MenuListIcon color="primary"></MenuListIcon>
+      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left" }} className={HeaderStyle["header-title"]}>
+        QLife
+      </StyleDiv>
     </header>
   );
 };
+
+const MenuListIcon = () => {
+  return (
+    <StyleFocusDiv>
+      <MenuIcon></MenuIcon>
+    </StyleFocusDiv>
+  );
+};
+
+/* hover시 사이즈 살짝 크게 */
+const StyleFocusDiv = styled.button`
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  height: fit-content;
+  background-color: transparent;
+  outline: 0;
+  border: 0;
+  margin: 0;
+  padding: 10px;
+  position: relative;
+  &:hover {
+    cursor: pointer;
+  }
+  svg:hover {
+    transform: scale(1.1);
+  }
+`;
 
 export default Header;
