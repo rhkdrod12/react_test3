@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
+import { DepthMenu } from "./TestComp/DepthMenu";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -16,7 +17,10 @@ const Menu = () => {
     source.onmessage = ({ data }) => {
       var jsonData = JSON.parse(data);
       console.log(jsonData);
-      if (jsonData.type === "HEADER") setMenus((item) => [...item, jsonData]);
+      if (jsonData.type === "HEADER")
+        setMenus((item) => {
+          return [...item, jsonData];
+        });
     };
   }, []);
 
@@ -25,11 +29,12 @@ const Menu = () => {
 
   return (
     <div className={menuContentStyle}>
-      {Array.isArray(menus)
+      {/* {Array.isArray(menus)
         ? menus.map((item, index) => {
             return <MenuItem key={index} Number={index} name={item.name} url={item.url} className={menuItemStyle}></MenuItem>;
           })
-        : null}
+        : null} */}
+      {Array.isArray(menus) ? <DepthMenu menuList={menus}></DepthMenu> : null}
     </div>
   );
 };
@@ -105,6 +110,12 @@ const InputBox = () => {
         </MemoItem>
         <MemoItem name="name" value={name} onChange={onChange}>
           메뉴 이름
+        </MemoItem>
+        <MemoItem name="upperMenu" value={upperMenu} onChange={onChange}>
+          상위 메뉴
+        </MemoItem>
+        <MemoItem name="menuDepth" value={menuDepth} onChange={onChange}>
+          메뉴 깊이
         </MemoItem>
         <MemoItem name="url" value={url} onChange={onChange}>
           메뉴 URL

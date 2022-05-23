@@ -15,6 +15,16 @@
   border-radius: 2px;
 }
 
+.menu-over {
+  font-weight: 800;
+  background-color: gray;
+}
+
+.menu-over-first {
+  font-weight: 800;
+  background-color: rgb(143, 57, 57);
+}
+
 .menu-item {
   flex-basis: 15%;
 }

@@ -1,10 +1,10 @@
 export const defaultCssValue = (val, defaultValue) => {
   if (val == null) {
     return defaultValue;
-  } else if (isNaN(val)) {
-    return val;
-  } else {
+  } else if (typeof val === "number") {
     return val + "px";
+  } else {
+    return val;
   }
 };
 
