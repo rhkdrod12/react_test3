@@ -9,7 +9,20 @@ const Menu = () => {
   // customHook에서 state를 만들어서 반환시키기 때문에 state가 변화하면 이 화면도 자동적으로 갱신 될 것임
   const [menus, setMenus] = useGetFetch("/menu/get", {
     param: { menuType: "HEADER" },
+    callbackFunc: (data) => {
+      console.log(data);
+      data.forEach((item) => {
+        const id = item.menuId;
+        data.forEach((target) => {
+          if (target.upperMenu && target.upperMenu == id) {
+            item.childMenu.push(target);
+          }
+        });
+      });
+    },
   });
+
+  console.log(menus);
 
   useEffect(() => {
     console.log("SSE 실행");
@@ -19,6 +32,11 @@ const Menu = () => {
       console.log(jsonData);
       if (jsonData.type === "HEADER")
         setMenus((item) => {
+          item
+            .filter((target) => target.menuId == jsonData.upperMenu)
+            .forEach((target) => {
+              target.childMenu.push(target);
+            });
           return [...item, jsonData];
         });
     };
@@ -28,7 +46,7 @@ const Menu = () => {
   // const menuItemStyle = menuStyle["menu-item"];
 
   return (
-    <div className={menuContentStyle}>
+    <div className={menuContentStyle} style={{ justifyContent: "center" }}>
       {/* {Array.isArray(menus)
         ? menus.map((item, index) => {
             return <MenuItem key={index} Number={index} name={item.name} url={item.url} className={menuItemStyle}></MenuItem>;

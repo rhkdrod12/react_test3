@@ -3,6 +3,11 @@ import styled from "styled-components";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider";
 import menuStyle from "../../CssModule/Menu.module.css";
+import "./DepthMenu.css";
+import { getRect } from "../../utils/commonUtils";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
 
 export const DepthMenu = ({ menuList }) => {
   console.log("받은 메뉴!");
@@ -10,9 +15,11 @@ export const DepthMenu = ({ menuList }) => {
   return (
     <MenuContainer>
       {menuList
-        ? menuList.map((item, idx) => {
-            return <MenuButton key={idx} data={item} Top={45}></MenuButton>;
-          })
+        ? menuList
+            .filter((item) => item.menuDepth == 0)
+            .map((item, idx) => {
+              return <MenuButton key={idx} data={item} Top={45}></MenuButton>;
+            })
         : null}
     </MenuContainer>
   );
@@ -23,7 +30,8 @@ const MenuContainer = styled.div`
   position: relative;
   ${"" /* border: 1px solid rgba(224, 224, 224, 1); */}
   background: rgba(250, 250, 250, 1);
-  ${"" /* border-radius: 2px; */}
+  border-bottom: 1px solid rgba(224, 224, 224, 1);
+  ${"" /* border-radius: 2px; */};
 `;
 
 const MenuContext = createMutilContext(["depth"]);
@@ -47,164 +55,112 @@ const MenuButton = ({ data, Top }) => {
   //   } // -> 컴포넌트가 target을 포함하고 있지않으면 외부 이벤트로 판단하여 화면을 닫는 이벤트를 넣으면 됨
   // });
   const onMouseOver = useCallback((event) => {
-    if (!isOpen) setIsOpen(!isOpen);
+    !isOpen && setIsOpen(!isOpen);
   }, []);
 
   const onMouseLeave = (target) => {
-    // if (isOpen) setIsOpen(false);
+    isOpen && setIsOpen(false);
   };
+
+  const subMenuList = isOpen && subMenu ? <DownSubMenuContainer menuList={data.childMenu} upperRef={ref} depth={1}></DownSubMenuContainer> : null;
 
   return (
     <React.Fragment>
       <ContextProvider ContextStore={MenuContext} Data={{ depth: [depth, setDepth] }}>
-        <StyleMenuButton onClick={onClick} onMouseOver={onMouseOver} ref={ref} onMouseLeave={onMouseLeave} isOpen={isOpen}>
-          <StyleMenuName className={isOpen ? menuStyle["menu-over-first"] : null}>{data.name}</StyleMenuName>
-          {isOpen && subMenu ? <DownSubMenuContainer menuList={data.childMenu} parentRef={ref} offsetY={0}></DownSubMenuContainer> : null}
-        </StyleMenuButton>
+        <div ref={ref} onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className="menu-container main-menu">
+          <div className={`menu-name main-menu-name ${isOpen ? "main-menu-over" : null}`}>
+            {data.name}
+            <StyleDiv inStyle={{ marginTop: 5, width: "50%", height: 5, background: "black" }}></StyleDiv>
+          </div>
+          {subMenuList}
+        </div>
       </ContextProvider>
     </React.Fragment>
   );
 };
 
-const StyleMenuName = styled.div`
-  height: 25 px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid;
-`;
-
-const StyleMenuButton = styled.div`
-  display: inline-flex;
-  cursor: pointer;
-  position: relative;
-`;
-
-const DownSubMenuContainer = ({ menuList, parentRef, offsetY = 0 }) => {
-  const clientTop = parentRef.current.clientTop;
-  const clientHeight = parentRef.current.clientHeight;
-  const offSetY = clientHeight - clientTop + offsetY;
-  const maxWidth = window.screen.width;
-
-  const clientLeft = parentRef.current.clientLeft;
-  const clientWidth = parentRef.current.clientWidth;
-  const offSetX = clientWidth - clientLeft;
-
+const DownSubMenuContainer = ({ menuList, upperRef, depth = 0 }) => {
   return (
-    <StyleDiv inStyle={{ top: 0, left: 0, position: "absolute", background: "transparent" }}>
-      <StyleDownSubMenuContainer Top={offSetY}>
-        {menuList.map((menu, idx) => {
-          return <DownSubMenuButton key={idx} data={menu} idx={menuList.length - idx}></DownSubMenuButton>;
-        })}
-      </StyleDownSubMenuContainer>
+    <StyleDiv inStyle={getRect(upperRef, "left", "bottom")} className="sub-down-menu-container">
+      {menuList
+        .filter((menu) => menu.menuDepth == depth)
+        .map((menu, idx) => (
+          <DownSubMenuButton key={idx} data={menu} depth={depth}></DownSubMenuButton>
+        ))}
     </StyleDiv>
   );
 };
 
-const StyleDownSubMenuContainer = styled.div`
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  left: 0;
-  top: ${({ Top }) => `${Top}px;`};
-  border: 1px solid rgba(224, 224, 224, 1);
-  box-shadow: 1px 1px 1px 1px rgba(224, 224, 224, 1);
-  background: rgba(250, 250, 250, 1);
-  border-radius: 2px;
-  width: max-content;
-`;
-
-const DownSubMenuButton = ({ data, idx }) => {
+const DownSubMenuButton = ({ data, idx, depth }) => {
   const ref = useRef();
   const onClick = (e) => {
     e.stopPropagation();
     console.log(data);
   };
-  const [depth, setDepth] = useContext(MenuContext.depth);
   const [isOpen, setIsOpen] = useState(false);
-  const isChild = data.childMenu && data.childMenu.length > 0;
+  const subMenu = data.childMenu && data.childMenu.length > 0;
 
   const onMouseOver = useCallback((event) => {
-    if (!isOpen && isChild) {
-      setIsOpen(!isOpen);
-    }
+    !isOpen && setIsOpen(!isOpen);
   }, []);
 
   const onMouseLeave = (target) => {
-    if (isOpen) setIsOpen(false);
+    isOpen && setIsOpen(false);
   };
+
+  const subMenuList = isOpen && subMenu ? <SideSubMenuContainer menuList={data.childMenu} upperRef={ref} depth={depth + 1}></SideSubMenuContainer> : null;
 
   return (
     <React.Fragment>
-      <StyleMenuButton onClick={onClick} onMouseOver={onMouseOver} ref={ref} onMouseLeave={onMouseLeave}>
-        <StyleMenuName className={isOpen ? menuStyle["menu-over"] : null}>
-          {data.name} {isChild ? ">" : ""}
-        </StyleMenuName>
-        {isOpen && isChild ? <SideSubMenuContainer menuList={data.childMenu} parentRef={ref} offsetY={-2} idx={idx}></SideSubMenuContainer> : null}
-      </StyleMenuButton>
+      <div className={`menu-container`} ref={ref} onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
+        <div className={`menu-name sub-menu-name ${isOpen ? "menu-over" : ""}`}>
+          {data.name} {subMenu ? <ChevronRightIcon fontSize="small" color="disabled" /> : ""}
+        </div>
+        {subMenuList}
+      </div>
     </React.Fragment>
   );
 };
 
-const SideSubMenuContainer = ({ menuList, parentRef, offsetY = 0, idx }) => {
-  const clientLeft = parentRef.current.clientLeft;
-  const clientWidth = parentRef.current.clientWidth;
-  const offSet = clientWidth - clientLeft + offsetY;
-
+const SideSubMenuContainer = ({ menuList, upperRef, depth = 0 }) => {
   return (
-    <StyleDiv inStyle={{ top: 0, left: 0, position: "absolute", background: "transparent", height: `${idx * 100}%`, width: `${clientWidth + 20}px` }}>
-      <StyleSideSubMenuContainer Left={offSet}>
-        {menuList.map((menu, menuIdx) => {
-          return <SideSubMenuButton key={menuIdx} idx={menuList.length - menuIdx} data={menu}></SideSubMenuButton>;
+    <StyleDiv inStyle={getRect(upperRef, "right", "top")} className={"sub-side-menu-container"}>
+      {menuList
+        .filter((menu) => menu.menuDepth == depth)
+        .map((menu, menuIdx) => {
+          return <SideSubMenuButton key={menuIdx} data={menu} depth={depth}></SideSubMenuButton>;
         })}
-      </StyleSideSubMenuContainer>
     </StyleDiv>
   );
 };
 
-const StyleSideSubMenuContainer = styled.div`
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  top: 0;
-  border: 1px solid rgba(224, 224, 224, 1);
-  box-shadow: 1px 1px 1px 1px rgba(224, 224, 224, 1);
-  background: rgba(250, 250, 250, 1);
-  border-radius: 2px;
-  left: ${({ Left }) => `${Left}px;`};
-`;
-
-const SideSubMenuButton = ({ data, idx }) => {
-  const [menuList, setMenuList] = useState();
+const SideSubMenuButton = ({ data, depth }) => {
   const ref = useRef();
-  const isChild = data.childMenu && data.childMenu.length > 0;
+  const subMenu = data.childMenu && data.childMenu.length > 0;
   const [isOpen, setIsOpen] = useState(false);
-  const [depth, setDepth] = useContext(MenuContext.depth);
 
   const onClick = (e) => {
     e.stopPropagation();
     console.log(data);
   };
   const onMouseOver = useCallback((event) => {
-    if (!isOpen && isChild) {
-      setIsOpen(!isOpen);
-    }
+    !isOpen && setIsOpen(!isOpen);
   }, []);
 
   const onMouseLeave = (target) => {
-    if (isOpen) setIsOpen(false);
+    isOpen && setIsOpen(false);
   };
 
-  console.log(`idx: ${idx}`);
+  const subMenuList = isOpen && subMenu ? <SideSubMenuContainer menuList={data.childMenu} upperRef={ref} depth={depth + 1}></SideSubMenuContainer> : null;
 
   return (
     <React.Fragment>
-      <StyleMenuButton onClick={onClick} onMouseOver={onMouseOver} ref={ref} onMouseLeave={onMouseLeave}>
-        <StyleMenuName className={isOpen ? menuStyle["menu-over"] : null}>
-          {data.name} {isChild ? ">" : ""}
-        </StyleMenuName>
-        {isOpen && isChild ? <SideSubMenuContainer menuList={data.childMenu} parentRef={ref} offsetY={-2} idx={idx}></SideSubMenuContainer> : null}
-      </StyleMenuButton>
+      <div className={`menu-container`} ref={ref} onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
+        <div className={`menu-name sub-menu-name ${isOpen ? "menu-over" : ""}`}>
+          {data.name} {subMenu ? <ChevronRightIcon fontSize="small" color="disabled" /> : ""}
+        </div>
+        {subMenuList}
+      </div>
     </React.Fragment>
   );
 };

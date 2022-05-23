@@ -4,7 +4,7 @@ import queryString from "query-string";
 
 const defaultUrl = "http://localhost:8080";
 
-export function useGetFetch(url, { stateType = [], param }) {
+export function useGetFetch(url, { stateType = [], param, callbackFunc }) {
   const [responseData, setResponseData] = useState(stateType);
   url = defaultUrl + url;
   useEffect(() => {
@@ -18,6 +18,11 @@ export function useGetFetch(url, { stateType = [], param }) {
         let {
           data: { message },
         } = res;
+
+        if (typeof callbackFunc === "function") {
+          callbackFunc(message);
+        }
+
         setResponseData(message);
       })
       .catch(({ message, code }) => {
