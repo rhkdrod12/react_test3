@@ -13,9 +13,9 @@ import "./CssModule/GlobalStyle.css";
 function App() {
   return (
     <div>
-      <Menu></Menu>
-      {/* <MuiHeader></MuiHeader>
-      <Header></Header> */}
+      {/* <Menu></Menu> */}
+      {/* <MuiHeader></MuiHeader> */}
+      <Header></Header>
       <InsertMenu></InsertMenu>
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}

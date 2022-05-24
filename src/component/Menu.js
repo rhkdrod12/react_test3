@@ -22,8 +22,6 @@ const Menu = () => {
     },
   });
 
-  console.log(menus);
-
   useEffect(() => {
     console.log("SSE 실행");
     const source = new EventSource("http://localhost:8080/menu/sse");
@@ -42,11 +40,10 @@ const Menu = () => {
     };
   }, []);
 
-  // const menuContentStyle = menuStyle["menu-content"];
-  // const menuItemStyle = menuStyle["menu-item"];
+  const menuContentStyle = menuStyle["menu-content"];
 
   return (
-    <div className={menuContentStyle} style={{ justifyContent: "center" }}>
+    <div className={menuContentStyle}>
       {/* {Array.isArray(menus)
         ? menus.map((item, index) => {
             return <MenuItem key={index} Number={index} name={item.name} url={item.url} className={menuItemStyle}></MenuItem>;

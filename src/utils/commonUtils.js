@@ -37,7 +37,7 @@ export const calmelToSnake = (val) => {
   return result;
 };
 
-export const getRect = (parentRef, positionX, positionY) => {
+export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY = 0 } = {}) => {
   const dom = parentRef.current;
 
   // const winWidth = window.screen.width;
@@ -51,10 +51,9 @@ export const getRect = (parentRef, positionX, positionY) => {
   // const clientWidth = dom.clientWidth;
   // const offSetXCal = clientWidth - clientLeft;
 
-  const { x, y, width, height } = dom.getBoundingClientRect();
-  console.log(dom.getBoundingClientRect());
-  let resultX = positionX.toUpperCase() == "RIGHT" ? width : 0;
-  let resultY = positionY.toUpperCase() == "BOTTOM" ? height : 0;
+  const { width, height } = dom.getBoundingClientRect();
+  let resultX = positionX.toUpperCase() === "RIGHT" ? width - offsetX : 0 - offsetX;
+  let resultY = positionY.toUpperCase() === "BOTTOM" ? height - offsetY : 0 - offsetY;
 
-  return { top: resultY, left: resultX };
+  return { top: resultY, left: resultX, width: width, height: height };
 };

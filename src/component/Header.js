@@ -21,7 +21,7 @@ const Header = () => {
       {/* 왼쪽 항목*/}
       <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 150, textAlign: "left", display: "flex" }}>
         <MenuListIcon></MenuListIcon>
-        <StyleDiv className={HeaderStyle["header-title"]}>QLife</StyleDiv>
+        <StyleDiv className={HeaderStyle["header-title"]}>TEST</StyleDiv>
       </StyleDiv>
       {/* 메뉴항목 */}
       <Menu></Menu>
@@ -38,7 +38,7 @@ const Header = () => {
     <header className={HeaderStyle["header-wrap"]}>
       <MenuListIcon color="primary"></MenuListIcon>
       <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left" }} className={HeaderStyle["header-title"]}>
-        QLife
+        TEST
       </StyleDiv>
     </header>
   );
