@@ -2,10 +2,11 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
 import { DepthMenu } from "./TestComp/DepthMenu";
+import HeaderMenu from "./TestComp/CategoryMenu";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
-const Menu = () => {
+const Menu = ({ height }) => {
   // customHook에서 state를 만들어서 반환시키기 때문에 state가 변화하면 이 화면도 자동적으로 갱신 될 것임
   const [menus, setMenus] = useGetFetch("/menu/get", {
     param: { menuType: "HEADER" },
@@ -49,7 +50,8 @@ const Menu = () => {
             return <MenuItem key={index} Number={index} name={item.name} url={item.url} className={menuItemStyle}></MenuItem>;
           })
         : null} */}
-      {Array.isArray(menus) ? <DepthMenu menuList={menus}></DepthMenu> : null}
+      {/* {Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null} */}
+      {Array.isArray(menus) ? <HeaderMenu menuList={menus} height={height}></HeaderMenu> : null}
     </div>
   );
 };
@@ -101,7 +103,7 @@ const InputBox = () => {
   };
 
   const [menuItem, setMenuItem] = useState(menuData);
-  const { type, name, url, upperMenu, menuDepth, menuOrder } = menuItem;
+  const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
   const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
 
   const onChange = useCallback(({ target: { value, name } }) => {
@@ -128,6 +130,9 @@ const InputBox = () => {
         </MemoItem>
         <MemoItem name="upperMenu" value={upperMenu} onChange={onChange}>
           상위 메뉴
+        </MemoItem>
+        <MemoItem name="category" value={category} onChange={onChange}>
+          메뉴 범주
         </MemoItem>
         <MemoItem name="menuDepth" value={menuDepth} onChange={onChange}>
           메뉴 깊이

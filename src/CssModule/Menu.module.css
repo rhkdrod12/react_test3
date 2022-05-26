@@ -2,7 +2,7 @@
   display: grid;
   grid-auto-flow: column;
   justify-content: start;
-  width: 80%;
+  width: 100%;
 }
 
 .menu-content a {
@@ -35,8 +35,9 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffe53f67;
-  height: 50px;
+  /* background-color: #5f8ae7; */
+  height: 60px;
+  border-bottom: 1px solid rgb(185, 185, 185);
 }
 
 .header-title {

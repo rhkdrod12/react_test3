@@ -1,3 +1,62 @@
 * {
   box-sizing: border-box;
 }
+
+.container {
+  display: inline-flex;
+  flex-direction: column;
+  border: 1px solid rgb(195, 190, 202);
+  position: relative;
+  align-items: center;
+}
+.name {
+  padding: 10px;
+}
+
+.bar {
+  position: absolute;
+  bottom: 0px;
+  height: 5px;
+  width: 80%;
+  border-radius: 20px;
+  background: transparent;
+}
+
+
+
+@keyframes hideBar {
+  from {
+    opacity: 1;
+    background: rgb(195, 190, 202);
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 0;
+    background: white;
+    transform: translateY(0);
+  }
+}
+
+@keyframes showBar {
+  from {
+    opacity: 0;
+    background: white;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    background: rgb(195, 190, 202);
+    transform: translateY(-5px);
+  }
+}
+@-webkit-keyframes showBar {
+  /* Safari and Chrome */
+  from {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+}

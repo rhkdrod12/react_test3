@@ -5,25 +5,16 @@ import "./DepthMenu.css";
 import { getRect } from "../../utils/commonUtils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-export const DepthMenu = ({ menuList }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const onMouseOver = useCallback((event) => !isOpen && setIsOpen((val) => !val), [isOpen]);
-  const onMouseLeave = useCallback((event) => isOpen && setIsOpen(false), [isOpen]);
-
-  const event = { onMouseOver, onMouseLeave };
-
+export const DepthMenu = ({ menuList, height = 40 }) => {
   return (
-    <MenuContainer>
+    <MenuContainer inStyle={{ height }}>
       {menuList
         ? menuList
             .filter((item) => item.menuDepth == 0)
             .map((item, idx) => {
               return (
                 <MenuButton key={idx} data={item} depth={0}>
-                  <div className={`main-menu-name ${isOepn ? "on" : ""}`} {...event}>
-                    <div>{item.name}</div>
-                    <div className={`main-menu-bar`} />
-                  </div>
+                  <MainMenuBtn data={item} height={height}></MainMenuBtn>
                 </MenuButton>
               );
             })
@@ -32,11 +23,20 @@ export const DepthMenu = ({ menuList }) => {
   );
 };
 
-const MenuContainer = styled.div`
+const MenuContainer = styled(StyleDiv)`
   display: inline-flex;
   position: relative;
-  background: rgba(250, 250, 250, 1);
+  background: #5f8ae7;
 `;
+
+const MainMenuBtn = ({ data, isOpen, height = 40 }) => {
+  return (
+    <StyleDiv inStyle={{ height }} className={`main-menu-container ${isOpen ? "main-menu-over" : ""}`}>
+      <div className={`main-menu-name`}>{data.name}</div>
+      <div className={`main-menu-bar`} />
+    </StyleDiv>
+  );
+};
 
 const MenuButton = ({ children, data, depth = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +45,7 @@ const MenuButton = ({ children, data, depth = 0 }) => {
 
   const onClick = useCallback(
     (event) => {
-      // event.stopPropagation();
+      event.stopPropagation();
       console.log(data);
     },
     [isOpen]
@@ -58,11 +58,11 @@ const MenuButton = ({ children, data, depth = 0 }) => {
     1: ["left", "bottom"],
   };
 
-  console.log(children);
   return (
     <React.Fragment>
       <div ref={ref} onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className="menu-content main-menu">
-        {children}
+        {/* 자식에게 props 추가하여 전달! */}
+        {React.cloneElement(children, { isOpen })}
         {isOpen && subMenu ? <SubMenuContent menuList={data.childMenu} upperRef={ref} depth={depth + 1} depthDirection={depthDirection} /> : null}
       </div>
     </React.Fragment>

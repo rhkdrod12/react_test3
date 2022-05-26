@@ -9,6 +9,7 @@ import Menu, { InsertMenu } from "./Component/Menu";
 import MyGrid, { TstGrid } from "./Component/MyGrid2";
 import { DepthMenu } from "./Component/TestComp/DepthMenu";
 import "./CssModule/GlobalStyle.css";
+import React, { useCallback, useRef, useState } from "react";
 
 function App() {
   return (
@@ -22,8 +23,34 @@ function App() {
       {/* <MuiDataGrid></MuiDataGrid>
       <TstGrid></TstGrid> */}
       {/* <DynamicProp></DynamicProp> */}
+      {/* <Ani></Ani> */}
     </div>
   );
 }
+
+// const Ani = () => {
+//   const [show, setShow] = useState(false);
+//   const [className, setClass] = useState("");
+//   const ref = useRef();
+//   const onMouseOver = () => {
+//     setClass("on");
+//     setShow((val) => true);
+//     // setTimeout(() => setClass(""), 2000);
+//   };
+
+//   const onMouseLeave = () => {
+//     console.log(ref);
+//     setClass("off");
+//     setShow((val) => false);
+//     // setTimeout(() => setClass(""), 2000);
+//   };
+
+//   return (
+//     <div onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className="container">
+//       <div className="name">여기 ㅇㅇ</div>
+//       <div className={`bar ${show ? "on" : "off"}`} ref={ref}></div>
+//     </div>
+//   );
+// };
 
 export default App;

@@ -5,11 +5,13 @@ import { createContext, useContext } from "react";
  **/
 export const createMutilContext = (keys) => {
   const MutilStore = {};
-
-  for (const key in keys) {
-    const name = keys[key];
-    const context = createContext(name);
-    MutilStore[name] = context;
+  if (Array.isArray(keys)) {
+    for (const key in keys) {
+      const name = keys[key];
+      MutilStore[name] = createContext(name);
+    }
+  } else {
+    MutilStore[keys] = createContext(keys);
   }
 
   return MutilStore;

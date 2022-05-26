@@ -6,7 +6,7 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
 import styled from "styled-components";
-import { StyleDiv } from "./StyleComp/StyleComp";
+import { StyleDiv, StyleHeader } from "./StyleComp/StyleComp";
 import { useMediaQuery } from "react-responsive";
 
 const Header = () => {
@@ -15,25 +15,20 @@ const Header = () => {
   // 재랜더링이 들어가기 때문에 안좋을 수도.. Media로 처리하는게 맞을지도..
   // 재랜더링이 들어가면 하위 화면에 통신하는 애들이 있으면.. 문제가 생길텐데.
   const isWidth = useMediaQuery({ minWidth: 1000 });
+  const height = 40;
 
   return isWidth ? (
-    <header className={HeaderStyle["header-wrap"]}>
+    <Headers inStyle={{ height }} className={HeaderStyle["header-wrap"]}>
       {/* 왼쪽 항목*/}
-      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 150, textAlign: "left", display: "flex" }}>
+      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left", display: "flex" }}>
         <MenuListIcon></MenuListIcon>
         <StyleDiv className={HeaderStyle["header-title"]}>TEST</StyleDiv>
       </StyleDiv>
       {/* 메뉴항목 */}
-      <Menu></Menu>
+      <Menu height={height}></Menu>
       {/* 오른쪽 항목 */}
-      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 45, display: "flex", justifyContent: "center" }}>
-        <StyleFocusDiv>
-          <StyleDiv inStyle={{ width: 40, height: 40, display: "flex", justifyContent: "center", alignItems: "center", ...ss }}>
-            <PersonOutlineIcon></PersonOutlineIcon>
-          </StyleDiv>
-        </StyleFocusDiv>
-      </StyleDiv>
-    </header>
+      <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 100, display: "flex", justifyContent: "center" }}></StyleDiv>
+    </Headers>
   ) : (
     <header className={HeaderStyle["header-wrap"]}>
       <MenuListIcon color="primary"></MenuListIcon>
@@ -43,6 +38,8 @@ const Header = () => {
     </header>
   );
 };
+
+const Headers = styled(StyleHeader)``;
 
 const MenuListIcon = () => {
   return (
