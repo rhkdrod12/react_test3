@@ -13,8 +13,7 @@ import defaultCssValue from "../../utils/commonUtils";
  * 미리 생성시킬 개수 : offsetCnt(defualt 1)
  * @returns
  */
-const ScrollBox = ({ comp, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1, scrollWidth = 10, scrollDisplay = true } = {} }) => {
-  console.log("render scroll");
+const ScrollBox = ({ children, options: { itemHeight = 50, visibleCount = 5, offsetCnt = 1, scrollWidth = 10, scrollDisplay = true } = {} }) => {
   // 스크롤 이벤트 감지 훅 : 스크롤이 이동되면 현재의 스크롤 위치를 반환한다., ref는 스크롤를 감지할 영역
   const [scrollTop, ref] = useScroll();
   // 표기해야할 아이템 총개수

@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, memo, useCallback, useContext, useEffect, useMemo, useState, useTransition } from "react";
 import "./DefaultCss.css";
 import gridStyle from "../CssModule/gridStyle.module.css";
 import styled from "styled-components";
 import TextField from "@mui/material/TextField";
 import ScrollBox from "./BasicComponent/ScrollBox";
-import { defaultCssValue, makeCssObject } from "../utils/commonUtils";
+import { defaultCssValue, makeCssObject, makeEvent } from "../utils/commonUtils";
 import { ContextProvider, createMutilContext } from "./BasicComponent/ContextProvider";
+import { StyleDiv } from "./StyleComp/StyleComp";
 
 const Btn = ({ rowData, columnInfo }) => {
   var { name, ...attr } = columnInfo;
@@ -81,9 +82,17 @@ export const TstGrid = () => {
  * 3.
  */
 // 현재 컴포넌트 하위로 사용할 전역 컨텍스트 선언
-const ContextStore = createMutilContext(["GridInfo", "RowData"]);
-const MyGrid = ({ GridInfo = {}, RowData = [], Style }) => {
-  const contextData = { GridInfo, RowData };
+const ContextStore = createMutilContext(["GridInfo", "RowData", "setRowData", "setGridInfo"]);
+
+export const MyGrid = ({ GridInfo: gridInfo = {}, RowData: rowData = [], Style }) => {
+  console.log("render MyGrid");
+  const [RowData, setRowData] = useState(rowData);
+  const [GridInfo, setGridInfo] = useState(gridInfo);
+  const contextData = { GridInfo, setGridInfo, RowData, setRowData };
+
+  // rowData가 초기생성시 값이 없을 수 있기 때문에
+  useEffect(() => setRowData(rowData), [rowData]);
+  useEffect(() => setGridInfo(gridInfo), [gridInfo]);
   return (
     <ContextProvider ContextStore={ContextStore} Data={contextData}>
       <DefaultContainer></DefaultContainer>
@@ -100,6 +109,7 @@ const DefaultContainer = () => {
   const GridInfo = useContext(ContextStore.GridInfo);
   const RowData = useContext(ContextStore.RowData);
 
+  console.log("redner DefaultContainer");
   setDefaultOption(GridInfo);
 
   return (
@@ -114,7 +124,7 @@ const DefaultContainer = () => {
 
 const GridHeaderContainer = ({ GridInfo }) => {
   const columnInfo = GridInfo.columnInfo;
-  console.log(columnInfo);
+  console.log("redner GridHeaderContainer");
   return (
     <StyleContainer className={gridStyle["grid-header-container"]}>
       {GridInfo.columnInfo.map((column, idx) => (
@@ -146,31 +156,30 @@ const ColumnHeaderCoulmn = ({ headerName, width, ...options }) => {
 const GridDataContainer = ({ columnInfo, rowData }) => {
   const options = {
     visibleCount: 5,
+    identity: "menuId",
   };
 
-  const [selected, setSelected] = useState(-1);
+  let [selected, setSelected] = useState(-1);
+  const onSelected = useCallback((index) => setSelected(index != null ? index : -1));
 
-  const onSelected = (index) => {
-    setSelected(index != null ? index : -1);
-  };
+  // rowParams: rowComponent에 전달할 param
+  const rowParams = { columns: columnInfo, selected, onSelected };
 
   console.log("render GridDataContainer");
-  return (
-    <ScrollBox itemCount={rowData.length} options={options}>
-      {rowData ? rowData.map((coulmnData, idx) => <GridDataRow key={idx} index={idx} columns={columnInfo} data={coulmnData} onSelected={onSelected} selected={selected}></GridDataRow>) : null}
-    </ScrollBox>
-  );
+  console.log(rowData);
+  return <ScrollBox rowData={rowData} rowComponent={GridDataRow} rowParams={rowParams} options={options} />;
 };
 
-const GridDataRow = ({ index, columns, data, gridInlineStyle, onSelected, selected, onEvent }) => {
-  console.log(`render GridDataRow${index} selected ${selected}`);
+const GridDataRow = ({ identity, data, columns, gridInlineStyle, onSelected, selected }) => {
+  console.log(`render GridDataRow${identity} selected ${selected}`);
 
-  const onClick = () => {
-    if (selected != index) onSelected(index);
+  const onClick = (event) => {
+    if (selected != identity) onSelected(identity);
   };
 
+  return null;
   return (
-    <StyleGridContainer onClick={onClick} aria-rowindex={index} className={`${gridStyle["grid-data-row"]} ${selected == index ? gridStyle["grid-data-row-selected"] : ""}`} {...gridInlineStyle}>
+    <StyleGridContainer onClick={onClick} aria-rowindex={identity} className={`${gridStyle["grid-data-row"]} ${selected == identity ? gridStyle["grid-data-row-selected"] : ""}`} {...gridInlineStyle}>
       {columns
         ? columns.map((columnInfo, idx) => (
             <GridDataColumnContainer key={idx} width={columnInfo.width}>
@@ -198,10 +207,12 @@ const GridDataColumnContainer = ({ children, width }) => {
 //  * @returns
 //  */
 const GridDataColumn = ({ columnInfo, value, rowData }) => {
-  const { field, type, editable, disabled = false, onChange, readOnly, Component } = columnInfo;
-  let comp;
+  const { field, type, editable, disabled = false, onChange, readOnly, Component, event } = columnInfo;
+
+  const setRowData = useContext(ContextStore["setRowData"]);
   const styleObj = { height: columnInfo.height };
 
+  let comp = value;
   switch (type) {
     case "input":
       comp = <StyleInput></StyleInput>;
@@ -214,10 +225,11 @@ const GridDataColumn = ({ columnInfo, value, rowData }) => {
       break;
   }
 
-  console.log(columnInfo);
+  const [component, setComponent] = useState(comp);
+
   return (
-    <StyleContainer inStyle={styleObj} className={gridStyle["grid-data-column"]}>
-      {comp}
+    <StyleContainer inStyle={styleObj} className={gridStyle["grid-data-column"]} {...makeEvent(event, { columnInfo, rowData, value, columnInfo, setComponent, setRowData, orgComponent: comp })}>
+      {component}
     </StyleContainer>
   );
 };

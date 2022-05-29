@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
-import { DepthMenu } from "./TestComp/DepthMenu";
-import HeaderMenu from "./TestComp/CategoryMenu";
+import { DepthMenu } from "./BasicComponent/DepthMenu";
+import HeaderMenu from "./BasicComponent/CategoryMenu";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -95,6 +95,7 @@ const InputBox = () => {
   const menuData = {
     menuId: "",
     type: "",
+    category: "",
     name: "",
     url: "",
     upperMenu: "",

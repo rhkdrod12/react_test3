@@ -8,3 +8,11 @@ export const StyleDiv = styled.div`
 export const StyleHeader = styled.header`
   ${({ inStyle }) => makeCssObject(inStyle)}
 `;
+
+export const StyleLi = styled.li`
+  ${({ inStyle }) => makeCssObject(inStyle)}
+`;
+
+export const StyleUl = styled.ul`
+  ${({ inStyle }) => makeCssObject(inStyle)}
+`;

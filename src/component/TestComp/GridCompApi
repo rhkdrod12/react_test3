@@ -1,0 +1,44 @@
+// 헤더에 적용시킬 param
+HeaderInfo = {
+  // 컬럼 식별자
+  field: "",
+  // 헤더 이름
+  headerName: "",
+  // 컬럼 길이
+  width: "250px",
+  // 컬럼 높이
+  height: "24px",
+  // 헤더 컬럼에 적용시킬 사용자 이벤트
+  userEvent: {},
+};
+
+// 로우 전체에 적용시킬 param
+RowInfo = {
+  // 로우 높이
+  height: "24px",
+  // 읽기전용 여부
+  readOnly: false,
+  // 비활성화 여부
+  disable: false,
+  // 로우에 적용시킬 사용자 이벤트
+  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo를 param으로 넣음
+  userEvent: {},
+};
+
+// 컬럼 전체에 적용시킬 param
+ColumnInfo = {
+  // 컬럼 식별자
+  field: "",
+  // 기본값
+  defaultValue: "",
+  // 읽기전용 여부
+  readOnly: false,
+  // 비활성화 여부
+  disable: false,
+  // 컬럼에 적용시킬 사용자 이벤트
+  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo, columnData, ColumnInfo를 param으로 넣음
+  userEvent: {},
+  // -> 헤더에서 적용되어야하므로 해당 없음
+  // 헤더에 선언되어있으면 헤더값을 가져오는 것으로 함
+  width: "250px",
+};

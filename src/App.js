@@ -7,9 +7,11 @@ import Menu, { InsertMenu } from "./Component/Menu";
 // import MuiDataGrid from "./Component/MuiDataGrid";
 // import MuiSelect from "./Component/MuiSelect";
 import MyGrid, { TstGrid } from "./Component/MyGrid2";
-import { DepthMenu } from "./Component/TestComp/DepthMenu";
+import { DepthMenu } from "./Component/BasicComponent/DepthMenu";
 import "./CssModule/GlobalStyle.css";
 import React, { useCallback, useRef, useState } from "react";
+import MenuGrid from "./Component/TestComp/MenuGrid";
+import { StyleDiv } from "./Component/StyleComp/StyleComp";
 
 function App() {
   return (
@@ -17,7 +19,11 @@ function App() {
       {/* <Menu></Menu> */}
       {/* <MuiHeader></MuiHeader> */}
       <Header></Header>
-      <InsertMenu></InsertMenu>
+      <StyleDiv inStyle={{ display: "grid", "grid-template-columns": "30% 70%" }}>
+        <InsertMenu></InsertMenu>
+        <MenuGrid></MenuGrid>
+      </StyleDiv>
+
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}
       {/* <MuiDataGrid></MuiDataGrid>

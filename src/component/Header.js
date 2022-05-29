@@ -14,7 +14,8 @@ const Header = () => {
   // useMediaQuery => 화면의 크기가 변동을 감지할 수 있는 훅
   // 재랜더링이 들어가기 때문에 안좋을 수도.. Media로 처리하는게 맞을지도..
   // 재랜더링이 들어가면 하위 화면에 통신하는 애들이 있으면.. 문제가 생길텐데.
-  const isWidth = useMediaQuery({ minWidth: 1000 });
+  // const isWidth = useMediaQuery({ minWidth: 1000 });
+  const isWidth = true;
   const height = 40;
 
   return isWidth ? (
@@ -22,7 +23,7 @@ const Header = () => {
       {/* 왼쪽 항목*/}
       <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left", display: "flex" }}>
         <MenuListIcon></MenuListIcon>
-        <StyleDiv className={HeaderStyle["header-title"]}>TEST</StyleDiv>
+        <StyleDiv className={HeaderStyle["header-title"]}>QLife</StyleDiv>
       </StyleDiv>
       {/* 메뉴항목 */}
       <Menu height={height}></Menu>
@@ -33,7 +34,7 @@ const Header = () => {
     <header className={HeaderStyle["header-wrap"]}>
       <MenuListIcon color="primary"></MenuListIcon>
       <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left" }} className={HeaderStyle["header-title"]}>
-        TEST
+        QLife
       </StyleDiv>
     </header>
   );

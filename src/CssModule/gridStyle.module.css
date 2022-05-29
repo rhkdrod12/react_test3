@@ -64,9 +64,9 @@
   height: 250px;
 }
 
-.grid-data-row:hover {
+/* .grid-data-row:hover {
   background-color: rgb(235, 235, 235);
-}
+} */
 
 /* .grid-data-row:focus {
   background-color: rgb(17, 57, 97);
@@ -76,20 +76,19 @@
   display: flex;
   flex-direction: row;
   height: 50px;
-  align-content: center;
+  /* align-content: center; */
   border-bottom: 1px solid rgba(224, 224, 224, 1);
   color: rgba(0, 0, 0, 0.87);
   font-weight: 400;
   align-content: stretch;
-  tabindex: -1;
 }
 
 .grid-data-row-selected {
   background-color: rgb(241, 248, 255);
 }
-.grid-data-row:hover {
+/* .grid-data-row:hover {
   background-color: rgb(188, 224, 224);
-}
+} */
 .grid-data-row-selected {
   background-color: rgb(228, 249, 252);
 }
