@@ -19,10 +19,10 @@ function App() {
       {/* <Menu></Menu> */}
       {/* <MuiHeader></MuiHeader> */}
       <Header></Header>
-      <StyleDiv inStyle={{ display: "grid", "grid-template-columns": "30% 70%" }}>
+      <StyleDiv inStyle={{ display: "grid", "grid-template-columns": "minmax(504px, 30%) 100%" }}>
         <InsertMenu></InsertMenu>
-        <MenuGrid></MenuGrid>
       </StyleDiv>
+      <MenuGrid></MenuGrid>
 
       {/* <MemoTest></MemoTest>
       <MuiSelect></MuiSelect> */}

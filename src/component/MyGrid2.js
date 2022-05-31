@@ -3,7 +3,7 @@ import "./DefaultCss.css";
 import gridStyle from "../CssModule/gridStyle.module.css";
 import styled from "styled-components";
 import TextField from "@mui/material/TextField";
-import ScrollBox from "./BasicComponent/ScrollBox";
+import useScrollBox from "./BasicComponent/ScrollBox";
 import { defaultCssValue, makeCssObject, makeEvent } from "../utils/commonUtils";
 import { ContextProvider, createMutilContext } from "./BasicComponent/ContextProvider";
 import { StyleDiv } from "./StyleComp/StyleComp";
@@ -167,7 +167,7 @@ const GridDataContainer = ({ columnInfo, rowData }) => {
 
   console.log("render GridDataContainer");
   console.log(rowData);
-  return <ScrollBox rowData={rowData} rowComponent={GridDataRow} rowParams={rowParams} options={options} />;
+  return <useScrollBox rowData={rowData} rowComponent={GridDataRow} rowParams={rowParams} options={options} />;
 };
 
 const GridDataRow = ({ identity, data, columns, gridInlineStyle, onSelected, selected }) => {

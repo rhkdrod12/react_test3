@@ -15,9 +15,17 @@ const MenuGrid = () => {
     { field: "menuOrder", headerName: "메뉴순서", width: 300 },
   ];
 
-  // const ColumnInfo = [{ field: "menuId" }, { field: "type" }, { field: "category" }, { field: "name" }, { field: "upperMenu" }, { field: "menuDepth" }, { field: "menuOrder" }];
+  const ColumnInfo = [
+    { field: "menuId", textAlign: "center", verticalAlign: "top" },
+    { field: "type", textAlign: "center", verticalAlign: "bottom" },
+    { field: "category", textAlign: "center" },
+    { field: "name", textAlign: "center" },
+    { field: "upperMenu", textAlign: "center" },
+    { field: "menuDepth", textAlign: "right" },
+    { field: "menuOrder", textAlign: "right" },
+  ];
   // 컬럼 설정
-  const ColumnInfo = HeaderInfo.map(({ field }) => ({ field }));
+  // const ColumnInfo = HeaderInfo.map(({ field }) => ({ field }));
 
   const [menus] = useGetFetch("/menu/get", { param: { menuType: "HEADER" } });
   return <GridComp GridInfo={{ HeaderInfo, ColumnInfo }} RowData={menus}></GridComp>;
