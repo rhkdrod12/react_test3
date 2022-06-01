@@ -1,4 +1,49 @@
-// 헤더에 적용시킬 param
+//**************************************************************************//
+GridInfo = {
+  /**************************
+   * 그리드 전체에 적용할 setup
+   * ........
+   * 여기에
+   ***************************/
+  column: [{}, { ...value, css: {} }], //<- 해당값은 headerinfo, dataInfo에 둘다 적용되도록
+  HeaderInfo: {},
+  DataInfo: {},
+  FooterInfo: {},
+};
+
+//css 적용은 헤당 row와 column에 직접적으로 css에 적는 것으로 처리
+HeaderInfo = {
+  /**************************
+   * 헤더 전체에 적용할 setup
+   * ........
+   ***************************/
+  // 헤더 로우에 적용할 setup
+  HeaderRow: { ...value, css: {} },
+  // 헤더 컬럼에 적용할 setup
+  HeaderColumn: [{}, { ...value, css: {} }],
+};
+
+DataInfo = {
+  /**************************
+   * 데이터 전체에 적용할 setup
+   * ........
+   ***************************/
+  // 데이터 로우에 적용할 setup
+  DataRow: { ...value, css: {} },
+  // 데이터 컬럼에 적용할 setup
+  DataColumn: [{}, { ...value, css: {} }],
+};
+
+// 위와 동일
+FooterInfo;
+FooterRow;
+FooterColumn;
+
+// 그리드를 만들 데이터
+Data = [];
+
+//**************************************************************************//
+// 헤더에 적용시킬 setup
 HeaderInfo = {
   // 컬럼 식별자
   field: "",
@@ -12,7 +57,7 @@ HeaderInfo = {
   userEvent: {},
 };
 
-// 로우 전체에 적용시킬 param
+// 로우 전체에 적용시킬 setup
 RowInfo = {
   // 로우 높이
   height: "24px",
@@ -21,11 +66,11 @@ RowInfo = {
   // 비활성화 여부
   disable: false,
   // 로우에 적용시킬 사용자 이벤트
-  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo를 param으로 넣음
+  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo를 setup으로 넣음
   userEvent: {},
 };
 
-// 컬럼 전체에 적용시킬 param
+// 컬럼 전체에 적용시킬 setup
 ColumnInfo = {
   // 컬럼 식별자
   field: "",
@@ -36,7 +81,7 @@ ColumnInfo = {
   // 비활성화 여부
   disable: false,
   // 컬럼에 적용시킬 사용자 이벤트
-  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo, columnData, ColumnInfo를 param으로 넣음
+  //-> 해당 이벤트에는 rowIdx, rowData, RowInfo, columnData, ColumnInfo를 setup으로 넣음
   userEvent: {},
   // 헤더에 선언되어있으면 헤더값을 가져오는 것으로 함
   width: "250px",
