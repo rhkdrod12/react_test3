@@ -8,6 +8,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import styled from "styled-components";
 import { StyleDiv, StyleHeader } from "./StyleComp/StyleComp";
 import { useMediaQuery } from "react-responsive";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const ss = { "border-radius": "100%", background: "white" };
@@ -17,13 +18,16 @@ const Header = () => {
   // const isWidth = useMediaQuery({ minWidth: 1000 });
   const isWidth = true;
   const height = 40;
+  const navi = useNavigate();
 
   return isWidth ? (
     <Headers inStyle={{ height }} className={HeaderStyle["header-wrap"]}>
       {/* 왼쪽 항목*/}
       <StyleDiv inStyle={{ padding: "0px 10px 0px 10px", width: 200, textAlign: "left", display: "flex" }}>
         <MenuListIcon></MenuListIcon>
-        <StyleDiv className={HeaderStyle["header-title"]}>QLife</StyleDiv>
+        <StyleDiv inStyle={{ cursor: "pointer" }} className={HeaderStyle["header-title"]} onClick={() => navi("/")}>
+          TESTING
+        </StyleDiv>
       </StyleDiv>
       {/* 메뉴항목 */}
       <Menu height={height}></Menu>

@@ -12,51 +12,52 @@ import "./CssModule/GlobalStyle.css";
 import React, { useCallback, useRef, useState } from "react";
 import MenuGrid from "./Component/TestComp/MenuGrid";
 import { StyleDiv } from "./Component/StyleComp/StyleComp";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
 function App() {
   return (
     <div>
-      {/* <Menu></Menu> */}
-      {/* <MuiHeader></MuiHeader> */}
-      <Header></Header>
-      <StyleDiv inStyle={{ display: "grid", "grid-template-columns": "minmax(504px, 30%) 100%" }}>
-        <InsertMenu></InsertMenu>
-      </StyleDiv>
-      <MenuGrid></MenuGrid>
-
-      {/* <MemoTest></MemoTest>
-      <MuiSelect></MuiSelect> */}
-      {/* <MuiDataGrid></MuiDataGrid>
-      <TstGrid></TstGrid> */}
-      {/* <DynamicProp></DynamicProp> */}
-      {/* <Ani></Ani> */}
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Main />}></Route>
+          <Route path="/insertMenu" element={<InsertMenu />}></Route>
+          <Route path="/test">
+            <Route path="" element={<MenuGrid />}></Route>
+            <Route path="test1" element={<Test />}></Route>
+          </Route>
+          <Route path="*" element={<UnKnown />}></Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
 
-// const Ani = () => {
-//   const [show, setShow] = useState(false);
-//   const [className, setClass] = useState("");
-//   const ref = useRef();
-//   const onMouseOver = () => {
-//     setClass("on");
-//     setShow((val) => true);
-//     // setTimeout(() => setClass(""), 2000);
-//   };
+const UnKnown = () => {
+  return (
+    <StyleDiv inStyle={{ display: "flex", "justify-content": "center " }}>
+      <StyleDiv inStyle={{ margin: 30, display: "inline-block", fontSize: "40px" }}>Not Found Page</StyleDiv>
+    </StyleDiv>
+  );
+};
 
-//   const onMouseLeave = () => {
-//     console.log(ref);
-//     setClass("off");
-//     setShow((val) => false);
-//     // setTimeout(() => setClass(""), 2000);
-//   };
+const Main = () => {
+  const navi = useNavigate();
 
-//   return (
-//     <div onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className="container">
-//       <div className="name">여기 ㅇㅇ</div>
-//       <div className={`bar ${show ? "on" : "off"}`} ref={ref}></div>
-//     </div>
-//   );
-// };
+  const onClick = () => {
+    navi("/insertMenu");
+  };
+
+  return (
+    <div>
+      메인페이지
+      <button onClick={onClick}>메뉴삽입!</button>
+    </div>
+  );
+};
+
+const Test = () => {
+  return <div>테스트</div>;
+};
 
 export default App;
