@@ -23,13 +23,15 @@ export const defaultCssValue = (val, defaultValue) => {
 export const makeCssObject = (cssObj, notSnake) => {
   let result = "";
   for (const key in cssObj) {
-    var data = cssObj[key];
-    var calmelKey = !notSnake ? calmelToSnake(key) : key;
+    const data = cssObj[key];
+    const calmelKey = !notSnake ? calmelToSnake(key) : key;
 
-    if (data instanceof Object) {
-      result += `${calmelKey} {${(makeCssObject(data), notSnake)}}; `;
-    } else {
-      result += `${calmelKey} : ${defaultCssValue(data)}; `;
+    if (data) {
+      if (data instanceof Object) {
+        result += `${calmelKey} {${(makeCssObject(data), notSnake)}}; `;
+      } else {
+        result += `${calmelKey} : ${defaultCssValue(data)}; `;
+      }
     }
   }
   return result;
@@ -83,8 +85,6 @@ export const getHeight = () => {};
 export const makeEvent = (events, params) => {
   if (events) {
     const result = {};
-    const keys = Object.keys(events);
-
     for (const key in events) {
       const func = events[key];
       result[key] = (e) => func(e, params);
@@ -92,6 +92,39 @@ export const makeEvent = (events, params) => {
     return result;
   }
   return null;
+};
+
+/**
+ * fieldId가 서로 같은 객체를 찾아 target에 copy 객체 값을 복사
+ * @param {*} fieldId
+ * @param {*} targetArr
+ * @param {*} copyArr
+ * @returns
+ */
+export const copyObjectBykey = (fieldId, targetArr, copyArr) => {
+  if (fieldId && Array.isArray(targetArr) && Array.isArray(copyArr) && copyArr.length > 0) {
+    const result = [];
+    for (let i = 0; i < targetArr.length; i++) {
+      let flag = false;
+      let copyObject;
+      const targetObject = targetArr[i];
+
+      for (let j = 0; j < copyArr.length; j++) {
+        if (targetObject[fieldId] == copyArr[j][fieldId]) {
+          flag = true;
+          copyObject = copyArr[j];
+        }
+      }
+
+      if (flag) {
+        result.push({ ...targetObject, ...copyObject });
+      } else {
+        result.push({ ...targetObject });
+      }
+    }
+    return result;
+  }
+  return targetArr;
 };
 
 /**
@@ -129,18 +162,37 @@ export const findFieldAndSetObjectValue = (findValueObj, setValueObj, objArr) =>
 /**
  * 입력받은 값을 flex 정렬에 맞는 값으로 변환
  */
-export const makeDisplayAlign = (val, type = "flex") => {
-  if (type == "flex") {
-    switch (val) {
-      case "center":
-      case "middle":
-        return "center";
-      case "right":
-      case "bottom":
-        return "flex-end";
-      case "top":
-      default:
-        return "flex-start";
+export const makeFlexAlign = (val, type = "flex") => {
+  if (val) {
+    if (type == "flex") {
+      switch (val) {
+        case "center":
+        case "middle":
+          return "center";
+        case "right":
+        case "bottom":
+          return "flex-end";
+        case "top":
+        case "left":
+          return "flex-start";
+      }
     }
   }
+};
+
+/**
+ * 입력받은 값을 flex 정렬에 맞는 값으로 변환
+ */
+export const makeDisplayFlexAlign = ({ verticalAlign, textAlign }, type = "flex") => {
+  const result = {};
+  if (type == "flex") {
+    if (verticalAlign) {
+      result.alignItems = makeFlexAlign(verticalAlign, type);
+    }
+
+    if (textAlign) {
+      result.justifyContent = makeFlexAlign(textAlign, type);
+    }
+  }
+  return result;
 };

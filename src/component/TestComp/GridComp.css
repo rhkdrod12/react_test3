@@ -1,20 +1,30 @@
 .grid-root {
   width: 100%;
   height: 100%;
-  
+}
+
+/* 그리드 컬럼에 모두 적용할 기본 css */
+.grid-column {
+  /* width: 100%; */
+  height: 100%;
+  padding: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .grid-header {
   display: flex;
-
   border-bottom: 1px solid #101010;
+  z-index: 3;
+  position: relative;
+  background: white;
 }
 
 .grid-header-column {
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  position: relative;
 }
 
 .grid-header-column-svg {
@@ -22,4 +32,7 @@
   top: 10px;
   right: 0;
   color: #101010;
+}
+
+.grid-data-column {
 }
