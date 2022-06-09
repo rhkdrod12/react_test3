@@ -83,10 +83,69 @@ const Main = () => {
     navi("/insertMenu");
   };
 
+  const data = [];
+
+  let i;
+  for (i = 0; i < 5; i++) {
+    data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
+  }
+
+  for (i = 5; i < 10; i++) {
+    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 0 });
+  }
+
+  for (i = 10; i < 15; i++) {
+    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
+  }
+
+  data.forEach((parent) => {
+    parent.childCodes = data.filter((child) => parent.code === child.upperCode);
+  });
+
+  console.log(data);
   return (
     <div>
       메인페이지
       <button onClick={onClick}>메뉴삽입!</button>
+      <div>
+        <CodeBox data={data} depth={0} />
+      </div>
+    </div>
+  );
+};
+
+const CodeBox = ({ data, depth }) => {
+  return (
+    <div style={{ position: "relative" }}>
+      <button style={{ display: "inline-block", width: 20 }}>+</button>
+      <CodeBoxDepth data={data} depth={0}></CodeBoxDepth>
+    </div>
+  );
+};
+
+const CodeBoxDepth = ({ data, depth = 0 }) => {
+  const depthData = data.filter((item) => item.depth === depth);
+
+  const childTest = depth == 0 ? data.filter((item) => item.uperCode === 1) : null;
+
+  return (
+    <div style={{ left: depth == 0 ? 25 : "110%" }} className="code-box-depth">
+      <div className="code-box-container">
+        <ul className="code-box-scroll">
+          {depthData.map((item, idx) => {
+            return (
+              <React.Fragment key={idx}>
+                <li style={{ position: "relative", padding: "10px" }}>
+                  <div style={{ display: "inline-block" }}>item1 {item.childCodes.length > 0 ? ">" : ""}</div>
+                </li>
+              </React.Fragment>
+            );
+          })}
+        </ul>
+        <div>{childTest ? <CodeBoxDepth data={childTest} depth={1}></CodeBoxDepth> : null}</div>
+      </div>
+
+      {/* <div>{child.length > 0 ? <AutoComplateDepth depthData={[]} depth={depth + 1} data={data}></AutoComplateDepth> : null}</div> */}
     </div>
   );
 };

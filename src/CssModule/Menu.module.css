@@ -3,6 +3,8 @@
   grid-auto-flow: column;
   justify-content: start;
   width: 100%;
+  position: relative;
+  z-index: 99;
 }
 
 .menu-content a {

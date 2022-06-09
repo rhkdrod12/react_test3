@@ -50,7 +50,7 @@ const MenuButton = ({ children, data, depth = 0 }) => {
     },
     [isOpen]
   );
-  const onMouseOver = useCallback((event) => !isOpen && setIsOpen((val) => !val), [isOpen]);
+  const onMouseOver = useCallback((event) => !isOpen && setIsOpen(true), [isOpen]);
   const onMouseLeave = useCallback((event) => isOpen && setIsOpen(false), [isOpen]);
 
   /** default direction: ["right", "top"] */

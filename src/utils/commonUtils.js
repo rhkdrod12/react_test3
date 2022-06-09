@@ -66,7 +66,7 @@ export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY 
   const dom = parentRef.current;
 
   const { width, height } = dom.getBoundingClientRect();
-  let resultX = positionX.toUpperCase() === "RIGHT" ? width - offsetX : 0 - offsetX;
+  let resultX = positionX.toUpperCase() === "RIGHT" ? "100%" : 0 - offsetX;
   let resultY = positionY.toUpperCase() === "BOTTOM" ? height - offsetY : 0 - offsetY;
 
   return { top: resultY, left: resultX, width: width, height: height };

@@ -51,7 +51,7 @@ const Menu = ({ height }) => {
           })
         : null} */}
       {/* {Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null} */}
-      {Array.isArray(menus) ? <HeaderMenu menuList={menus} height={height}></HeaderMenu> : null}
+      {Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null}
     </div>
   );
 };

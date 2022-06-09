@@ -102,3 +102,31 @@
     opacity: 0;
   }
 }
+
+.code-box-container {
+  position: relative;
+  top: 5px;
+  border: 1px solid #101010;
+  width: max-content;
+  min-width: 120px;
+  background: white;
+  padding: 3px;
+  /* padding-bottom: 10px; */
+  box-shadow: 0 0 9px 2px rgb(0 0 0 / 20%);
+  border-radius: 3px;
+}
+
+.code-box-scroll {
+  overflow-y: auto;
+  height: 200px;
+}
+
+.code-box-depth {
+  position: absolute;
+  top: 0px;
+  left: 110%;
+}
+
+ul {
+  list-style: none;
+}
