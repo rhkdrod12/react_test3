@@ -142,7 +142,8 @@ const CodeBoxDepth = ({ data, depth = 0, rect = {} }) => {
 
   const onClick = useCallback(
     (idx) => (event) => {
-      setChild(depthData[idx].childCodes);
+      console.log(`ids: ${idx}`);
+      setChild((item) => depthData[idx].childCodes);
       setChildRect(() => {
         const itemRect = itemRefs.current[idx].getBoundingClientRect();
         const compRect = compRef.current.getBoundingClientRect();
@@ -158,6 +159,7 @@ const CodeBoxDepth = ({ data, depth = 0, rect = {} }) => {
   );
 
   console.log(`depth: ${depth}`);
+  console.log(depthData);
   console.log(child);
   console.log(childRect);
   console.log(compRef.current);
@@ -166,7 +168,7 @@ const CodeBoxDepth = ({ data, depth = 0, rect = {} }) => {
     return () => {
       console.log(depth + "파괴");
       setDepthData((item) => []);
-      setChild((item) => []);
+      setChild(null);
     };
   }, []);
 
