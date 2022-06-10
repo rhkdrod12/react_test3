@@ -97,6 +97,13 @@ const Main = () => {
   for (i = 10; i < 15; i++) {
     data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
   }
+  for (i = 16; i < 20; i++) {
+    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 4 });
+  }
+
+  for (i = 21; i < 25; i++) {
+    data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
+  }
 
   data.forEach((parent) => {
     parent.childCodes = data.filter((child) => parent.code === child.upperCode);
@@ -107,6 +114,7 @@ const Main = () => {
     <div>
       메인페이지
       <button onClick={onClick}>메뉴삽입!</button>
+      <hr style={{ paddingBottom: 10 }}></hr>
       <div>
         <CodeBox data={data} depth={0} />
       </div>
@@ -118,34 +126,67 @@ const CodeBox = ({ data, depth }) => {
   return (
     <div style={{ position: "relative" }}>
       <button style={{ display: "inline-block", width: 20 }}>+</button>
-      <CodeBoxDepth data={data} depth={0}></CodeBoxDepth>
+      <CodeBoxDepth data={data} depth={0} rect={{ left: 25, top: 77 }}></CodeBoxDepth>
     </div>
   );
 };
 
-const CodeBoxDepth = ({ data, depth = 0 }) => {
-  const depthData = data.filter((item) => item.depth === depth);
+const CodeBoxDepth = ({ data, depth = 0, rect = {} }) => {
+  // 현재 depth의 표기 아이템
+  const [depthData, setDepthData] = useState(data.filter((item) => item.depth === depth));
+  const [child, setChild] = useState();
+  const [childRect, setChildRect] = useState();
 
-  const childTest = depth == 0 ? data.filter((item) => item.uperCode === 1) : null;
+  const compRef = useRef();
+  const itemRefs = useRef([]);
+
+  const onClick = useCallback(
+    (idx) => (event) => {
+      setChild(depthData[idx].childCodes);
+      setChildRect(() => {
+        const itemRect = itemRefs.current[idx].getBoundingClientRect();
+        const compRect = compRef.current.getBoundingClientRect();
+        const winRect = { width: window.innerWidth, height: window.innerHeight };
+
+        const top = compRect.top > itemRect.top ? compRect.top : itemRect.top;
+        const left = compRect.left + compRect.width + 5;
+
+        return { top, left };
+      });
+    },
+    [data]
+  );
+
+  console.log(`depth: ${depth}`);
+  console.log(child);
+  console.log(childRect);
+  console.log(compRef.current);
+
+  useEffect(() => {
+    return () => {
+      console.log(depth + "파괴");
+      setDepthData((item) => []);
+      setChild((item) => []);
+    };
+  }, []);
 
   return (
-    <div style={{ left: depth == 0 ? 25 : "110%" }} className="code-box-depth">
-      <div className="code-box-container">
+    <div style={rect} className="code-box-depth">
+      <div className="code-box-container" ref={compRef}>
         <ul className="code-box-scroll">
           {depthData.map((item, idx) => {
             return (
               <React.Fragment key={idx}>
-                <li style={{ position: "relative", padding: "10px" }}>
-                  <div style={{ display: "inline-block" }}>item1 {item.childCodes.length > 0 ? ">" : ""}</div>
+                <li className="code-box-content" ref={(el) => (itemRefs.current[idx] = el)} onClick={onClick(idx)} style={{ position: "relative", padding: "10px" }}>
+                  <div>{item.codeName}</div>
+                  <div>{item.childCodes.length > 0 ? ">" : ""}</div>
                 </li>
               </React.Fragment>
             );
           })}
         </ul>
-        <div>{childTest ? <CodeBoxDepth data={childTest} depth={1}></CodeBoxDepth> : null}</div>
+        {child && child.length > 0 ? <CodeBoxDepth data={child} depth={depth + 1} rect={childRect}></CodeBoxDepth> : ""}
       </div>
-
-      {/* <div>{child.length > 0 ? <AutoComplateDepth depthData={[]} depth={depth + 1} data={data}></AutoComplateDepth> : null}</div> */}
     </div>
   );
 };
