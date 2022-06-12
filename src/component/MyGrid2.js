@@ -5,7 +5,7 @@ import styled from "styled-components";
 import TextField from "@mui/material/TextField";
 import useScrollBox from "./BasicComponent/ScrollBox";
 import { defaultCssValue, makeCssObject, makeEvent } from "../utils/commonUtils";
-import { ContextProvider, createMutilContext } from "./BasicComponent/ContextProvider";
+import { ContextProvider, createMutilContext } from "./BasicComponent/ContextProvider/ContextProvider";
 import { StyleDiv } from "./StyleComp/StyleComp";
 
 const Btn = ({ rowData, columnInfo }) => {

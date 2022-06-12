@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import React, { useState, memo, useEffect, useContext } from "react";
 import { ScrollVirtualYBox, useScrollYData } from "../../Hook/useScroll";
 import { copyObjectBykey, defaultCssValue, findFieldAndSetObjectValue, makeDisplayFlexAlign, makeFlexAlign } from "../../utils/commonUtils";
-import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider";
+import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider/ContextProvider";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "./GridComp.css";
 

@@ -107,23 +107,20 @@
   position: relative;
   border: 1px solid #101010;
   width: max-content;
-  min-width: 120px;
+  min-width: 80px;
   background: white;
   padding: 3px;
-  /* padding-bottom: 10px; */
   box-shadow: 0 0 9px 2px rgb(0 0 0 / 20%);
   border-radius: 5px;
 }
 
 .code-box-scroll {
   overflow-y: auto;
-  height: 200px;
+  max-height: 200px;
 }
 
 .code-box-depth {
   position: fixed;
-  top: 0px;
-  left: 105%;
 }
 
 .code-box-content {
@@ -131,6 +128,68 @@
   flex-direction: row;
   justify-content: space-between;
   cursor: pointer;
+  padding: 5px;
+}
+.code-box-childArea {
+  position: fixed;
+  height: auto;
+}
+
+.hide {
+  opacity: 0;
+}
+
+.on {
+  opacity: 1;
+  /* transform: scaleY(1); */
+  /* transition: all 1s ease; */
+  animation: itemFadeIn 0.1s ease-in-out 0s 1 normal forwards;
+}
+
+.off {
+  opacity: 0;
+  /* transform: scaleY(0.5);
+  transition: all 1s ease; */
+  animation: itemFadeOut 0.1s ease-in-out 0s 1 normal forwards;
+}
+
+@keyframes itemFadeIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0) translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+@keyframes itemFadeOut {
+  from {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0) translateY(-50%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 ul {

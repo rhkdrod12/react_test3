@@ -1,0 +1,72 @@
+.code-box-container {
+  position: relative;
+  border: 1px solid #101010;
+  width: max-content;
+  min-width: 80px;
+  background: white;
+  padding: 3px;
+  box-shadow: 0 0 9px 2px rgb(0 0 0 / 20%);
+  border-radius: 3px;
+}
+
+.transition {
+  transition: all 0.2s ease !important;
+}
+.code-box-scroll {
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.code-box-depth {
+  position: fixed;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.code-box-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 5px;
+  position: relative;
+  color: #3f3f3f;
+}
+.code-box-childArea {
+  position: fixed;
+  height: auto;
+}
+
+.on {
+  opacity: 1;
+  animation: itemFadeIn 0.1s ease-in-out 0s 1 normal forwards;
+}
+
+.off {
+  opacity: 0;
+  animation: itemFadeOut 0.1s ease-in-out 0s 1 normal forwards;
+}
+
+@keyframes itemFadeIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0) translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+@keyframes itemFadeOut {
+  from {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0) translateY(-50%);
+  }
+}

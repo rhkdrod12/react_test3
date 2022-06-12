@@ -14,5 +14,9 @@ export const StyleLi = styled.li`
 `;
 
 export const StyleUl = styled.ul`
-  ${({ inStyle }) => makeCssObject(inStyle)}
+  list-style: none;
+  width: max-content;
+  overflow-y: auto;
+  height: 200px;
+  ${({ inStyle }) => makeCssObject(inStyle)};
 `;

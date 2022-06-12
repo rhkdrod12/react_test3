@@ -26,7 +26,7 @@ export const makeCssObject = (cssObj, notSnake) => {
     const data = cssObj[key];
     const calmelKey = !notSnake ? calmelToSnake(key) : key;
 
-    if (data) {
+    if (data != null && data !== "") {
       if (data instanceof Object) {
         result += `${calmelKey} {${(makeCssObject(data), notSnake)}}; `;
       } else {
@@ -72,6 +72,75 @@ export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY 
   let resultY = positionY.toUpperCase() === "BOTTOM" ? height - offsetY : 0 - offsetY;
 
   return { top: resultY, left: resultX, width: width, height: height };
+};
+
+export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
+  const compRect = compRef.current.getBoundingClientRect();
+  const parentRect = parentRef.current.getBoundingClientRect();
+
+  let top;
+  let left;
+
+  // right인 경우에는 해당 바운더리 밖으로 넘기지는 않을 것임
+  if (positionX.toUpperCase() === "RIGHT") {
+    left = compRect.right - parentRect.left + offsetX;
+  } else {
+    left = compRect.left - parentRect.left + offsetX;
+  }
+
+  if (positionY.toUpperCase() === "BOTTOM") {
+    top = compRect.bottom - parentRect.top + offsetY;
+  } else {
+    top = compRect.top - parentRect.top + offsetY;
+  }
+
+  return { top, left };
+};
+
+export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
+  const compRect = compRef.current.getBoundingClientRect();
+
+  let top;
+  let left;
+
+  // right인 경우에는 해당 바운더리 밖으로 넘기지는 않을 것임
+  if (positionX.toUpperCase() === "RIGHT") {
+    left = compRect.right + offsetX;
+  } else {
+    left = compRect.left + offsetX;
+  }
+
+  if (positionY.toUpperCase() === "BOTTOM") {
+    top = compRect.bottom + offsetY;
+  } else {
+    top = compRect.top + offsetY;
+  }
+
+  return { top, left };
+};
+
+export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
+  const itemRect = itemRef.hasOwnProperty("current") ? itemRef.current.getBoundingClientRect() : itemRef.getBoundingClientRect();
+  const compRect = compRef.current.getBoundingClientRect();
+  const winRect = { width: window.innerWidth, height: window.innerHeight };
+
+  let top;
+  let left;
+
+  // right인 경우에는 해당 바운더리 밖으로 넘기지는 않을 것임
+  if (positionX.toUpperCase() === "RIGHT") {
+    left = compRect.right < itemRect.right + offsetX ? compRect.right : itemRect.right + offsetX;
+  } else {
+    left = compRect.left > itemRect.left + offsetX ? compRect.left : itemRect.left + offsetX;
+  }
+
+  if (positionY.toUpperCase() === "BOTTOM") {
+    top = compRect.bottom < itemRect.bottom + offsetY ? compRect.bottom : itemRect.bottom + offsetY;
+  } else {
+    top = compRect.top > itemRect.top + offsetY ? compRect.top : itemRect.top + offsetY;
+  }
+
+  return { top, left };
 };
 
 export const getHeight = () => {};

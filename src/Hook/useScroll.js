@@ -129,4 +129,24 @@ const StyleScrollDiv = styled.div`
 `;
 //==================================================================================
 
+export const useDoubleClick = (oneFunc, doubleFunc) => {
+  let clickCnt = 0;
+  let timer;
+
+  return (event) => {
+    event.stopPropagation();
+    clickCnt++;
+    if (clickCnt == 1) {
+      timer = setTimeout(() => {
+        clickCnt = 0;
+        oneFunc();
+      }, 140);
+    } else {
+      clearTimeout(timer);
+      clickCnt = 0;
+      doubleFunc();
+    }
+  };
+};
+
 export default useScroll;
