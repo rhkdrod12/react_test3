@@ -184,7 +184,7 @@ const CodeBoxContent = ({ data, show, index, setSelectIndex, parentRef, depth })
   return (
     <li className="code-box-content" ref={compRef} onClick={onDoubleClick}>
       <div style={{ paddingRight: 20 }}>{data.codeName}</div>
-      <ChevronRightIcon className="transition" fontSize="small" color="disabled" sx={{ color: "#3f3f3f", opacity: `${data.childCodes.length ? 1 : 0}`, ...rotate }} />
+      <ChevronRightIcon className="transition code-svg" fontSize="small" color="disabled" sx={{ opacity: `${data.childCodes.length ? 1 : 0}`, ...rotate }} />
       {show && data.childCodes && data.childCodes.length > 0 ? <CodeBoxWarpper {...param}></CodeBoxWarpper> : null}
     </li>
   );

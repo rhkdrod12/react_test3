@@ -1,4 +1,4 @@
-import { CssBaseline, FormControl, Input, InputAdornment, InputLabel, TextField } from "@mui/material";
+import { CssBaseline, FormControl, Input, InputAdornment, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
 import DynamicProp from "./Component/DynamicProp";
 import Header from "./Component/Header";
 import MemoTest from "./Component/MemoTest";
@@ -152,26 +152,39 @@ const CodeBoxInput = () => {
   };
   console.log("render input");
   return (
-    <div style={{ display: "inline-flex", alignItems: "center" }}>
-      <CodeBox data={codeData()} depth={0} event={event} />
-      <TextField
-        InputProps={{
-          readOnly: true,
-        }}
-        id="code"
-        label="inputCode"
-        placeholder="우측버튼을 클릭"
-        variant="outlined"
-        value={value}
-        onChange={onChange}
-        size="small"
-      ></TextField>
-
-      <FormControl variant="standard">
-        <InputLabel htmlFor="input-with-icon-adornment">주용도 코드</InputLabel>
-        <Input id="input-with-icon-adornment" />
-      </FormControl>
-    </div>
+    <React.Fragment>
+      <Paper>
+        <div style={{ display: "inline-flex", alignItems: "center" }}>
+          <CodeBox data={codeData()} depth={0} event={event} />
+          <TextField
+            InputProps={{
+              readOnly: true,
+            }}
+            id="code"
+            label="inputCode"
+            placeholder="우측버튼을 클릭"
+            variant="outlined"
+            value={value}
+            onChange={onChange}
+            size="small"
+          ></TextField>
+        </div>
+        <br></br>
+        <FormControl variant="standard" margin="normal" required>
+          <InputLabel shrink htmlFor="input-with-icon-adornment">
+            주용도 코드
+          </InputLabel>
+          <Input required id="input-with-icon-adornment" value={value} onChange={onChange} endAdornment={<CodeBox data={codeData()} depth={0} event={event} />} />
+        </FormControl>
+        <br></br>
+        <FormControl margin="normal">
+          <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+            주용도 코드
+          </InputLabel>
+          <OutlinedInput shrink id="component-outlined" label="주용도 코드" value={value} onChange={onChange} endAdornment={<CodeBox data={codeData()} depth={0} event={event} />} />
+        </FormControl>
+      </Paper>
+    </React.Fragment>
   );
 };
 

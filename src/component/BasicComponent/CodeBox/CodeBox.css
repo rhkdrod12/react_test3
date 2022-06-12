@@ -1,12 +1,16 @@
 .code-box-container {
   position: relative;
-  border: 1px solid #101010;
+  border: 1px solid #a4a4a4;
   width: max-content;
   min-width: 80px;
   background: white;
   padding: 3px;
   box-shadow: 0 0 9px 2px rgb(0 0 0 / 20%);
   border-radius: 3px;
+}
+
+.code-svg {
+  color: #5e5e5e !important;
 }
 
 .transition {
@@ -19,7 +23,6 @@
 
 .code-box-depth {
   position: fixed;
-
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -33,7 +36,7 @@
   cursor: pointer;
   padding: 5px;
   position: relative;
-  color: #3f3f3f;
+  color: #5e5e5e;
 }
 .code-box-childArea {
   position: fixed;
