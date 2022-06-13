@@ -3,6 +3,10 @@ import { postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
 import HeaderMenu from "./BasicComponent/CategoryMenu";
+import CodeBox from "./BasicComponent/CodeBox/CodeBox";
+import { Alert, AlertTitle, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
+import { green, red } from "@mui/material/colors";
+import CloseIcon from "@mui/icons-material/Close";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -118,38 +122,245 @@ const InputBox = () => {
     });
   };
 
+  const [alertFlag, setAlertFlag] = useState(false);
+  const onSubmit = (isResult, data) => {
+    if (isResult) {
+      setAlertFlag(1);
+    } else {
+      setAlertFlag(2);
+    }
+  };
+
+  console.log(menuItem);
+
   return (
-    <div className={menuInputContainer}>
-      <div className={itemTitle}>메뉴 삽입</div>
+    <Paper className={menuInputContainer}>
+      <Paper elevation={0} className={itemTitle} sx={{ padding: "10px" }}>
+        메뉴 삽입
+      </Paper>
 
-      <div className={itemContainer}>
-        <MemoItem name="type" value={type} onChange={onChange}>
-          메뉴 타입
-        </MemoItem>
-        <MemoItem name="name" value={name} onChange={onChange}>
-          메뉴 이름
-        </MemoItem>
-        <MemoItem name="upperMenu" value={upperMenu} onChange={onChange}>
-          상위 메뉴
-        </MemoItem>
-        <MemoItem name="category" value={category} onChange={onChange}>
-          메뉴 범주
-        </MemoItem>
-        <MemoItem name="menuDepth" value={menuDepth} onChange={onChange}>
-          메뉴 깊이
-        </MemoItem>
-        <MemoItem name="url" value={url} onChange={onChange}>
-          메뉴 URL
-        </MemoItem>
-        <MemoItem name="menuOrder" value={menuOrder} onChange={onChange}>
-          메뉴 순서
-        </MemoItem>
+      <AlertComponent
+        open={alertFlag > 0}
+        state={alertFlag}
+        message={{ sucess: "전송 성공", error: "전송 실패" }}
+        closeCallback={() => {
+          setAlertFlag(0);
+        }}
+      >
+        {/* <div className={itemContainer}> */}
+        <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
+          <CodeBoxInput name="type" value={type} label="메뉴 타입" onChange={onChange}></CodeBoxInput>
+          <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
+          <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput>
+          <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
+          <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
+          <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
+          <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange}></MenuInput>
+        </Paper>
+      </AlertComponent>
+      <div style={{ marginTop: 20 }}>
+        <SendPostButton name="메뉴 추가" url="/menu/insertSee" data={[menuItem]} callback={onSubmit}></SendPostButton>
       </div>
+    </Paper>
+  );
+};
 
-      <button className="" onClick={onClick}>
-        추가
-      </button>
-    </div>
+const AlertComponent = ({ children, open, state, message, closeCallback }) => {
+  const [isOpen, setOpen] = useState(open);
+
+  useEffect(() => setOpen(open), [open]);
+
+  let showState;
+
+  useEffect(() => {
+    if (state == 1) {
+      showState = "success";
+    } else if (state == 2) {
+      showState = "error";
+    } else {
+      showState = "warning";
+    }
+  }, [open]);
+
+  return (
+    <React.Fragment>
+      <Collapse in={isOpen}>
+        <Alert
+          variant="filled"
+          severity={showState}
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpen(false);
+                if (typeof closeCallback === "function") closeCallback();
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+        >
+          {message.state}
+          This is an error alert — check it out!
+        </Alert>
+      </Collapse>
+      {children}
+    </React.Fragment>
+  );
+};
+
+const SendPostButton = ({ name, url, data, callback }) => {
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(0);
+  // const [failure, setFailure] = React.useState(false);
+
+  const timer = React.useRef();
+
+  const buttonSx = {
+    width: "100%",
+    ...(success == 1 && {
+      bgcolor: green[500],
+      "&:hover": {
+        bgcolor: green[700],
+      },
+    }),
+    ...(success == 2 && {
+      bgcolor: red[500],
+      "&:hover": {
+        bgcolor: red[700],
+      },
+    }),
+  };
+
+  const successFuc = (data) => {
+    console.log("실행 결과값:");
+    console.log(data);
+    setSuccess(1);
+    setLoading(false);
+    if (typeof callback === "function") callback(true, data);
+  };
+
+  const failureFuc = (err) => {
+    setSuccess(2);
+    setLoading(false);
+    if (typeof callback === "function") callback(false, err);
+  };
+
+  const handleButtonClick = () => {
+    if (!loading) {
+      setSuccess(0);
+      setLoading(true);
+
+      postFetch(url, data)
+        .then((data) => {
+          successFuc(data);
+        })
+        .catch((err) => {
+          failureFuc(err);
+        });
+    }
+  };
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+      <Box sx={{ position: "relative", width: "100%" }}>
+        <Button variant="contained" sx={buttonSx} disabled={loading} onClick={handleButtonClick}>
+          {name}
+        </Button>
+        {loading && (
+          <CircularProgress
+            size={24}
+            sx={{
+              color: green[500],
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              marginTop: "-12px",
+              marginLeft: "-12px",
+            }}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
+  const event = {
+    onDblclick: (data, index, depth) => {
+      // setValue(data.codeName);
+      onChange({ target: { name, value: data.codeName } });
+    },
+  };
+
+  const option = {
+    depthDirection: {
+      0: { positionX: "RIGHT", positionY: "BOTTOM", offsetX: "", offsetY: "" },
+    },
+  };
+
+  let data = [];
+
+  let i;
+  for (i = 0; i < 20; i++) {
+    data.push({ codeName: `메뉴${i}`, code: i, depth: 0, upperCode: "" });
+  }
+
+  // for (i = 0; i < 5; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
+  // }
+
+  // for (i = 5; i < 10; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 0 });
+  // }
+
+  // for (i = 10; i < 15; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
+  // }
+  // for (i = 16; i < 20; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 4 });
+  // }
+
+  // for (i = 21; i < 25; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
+  // }
+  // // for (i = 25; i < 30; i++) {
+  // //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
+  // // }
+  // // for (i = 30; i < 35; i++) {
+  // //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 26 });
+  // // }
+
+  data.forEach((parent) => {
+    parent.childCodes = data.filter((child) => parent.code === child.upperCode);
+  });
+
+  data = data.filter((child) => child.depth === 0);
+
+  codeData = data;
+
+  const codeBox = <CodeBox data={codeData} depth={0} event={event} option={option} />;
+
+  return (
+    <FormControl margin="dense" size="Normal" required>
+      <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+        {label}
+      </InputLabel>
+      <OutlinedInput readOnly id="component-outlined" name={name} label={label} value={value} onChange={onChange} endAdornment={codeBox} />
+    </FormControl>
+  );
+};
+
+const MenuInput = ({ children, label, name, value, setValue, onChange }) => {
+  return (
+    <FormControl margin="dense" size="Normal" required>
+      <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+        {label}
+      </InputLabel>
+      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={onChange} />
+    </FormControl>
   );
 };
 

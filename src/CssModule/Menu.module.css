@@ -55,12 +55,12 @@
   grid-auto-flow: row;
   border: 2px solid rgb(195, 190, 202);
   border-radius: 3px;
-  width: fit-content;
+  width: 500px;
   height: fit-content;
   padding: 15px;
   margin: 10px;
 }
-.menu-input-container button {
+/* .menu-input-container button {
   margin-top: 10px;
   justify-self: end;
   width: 80px;
@@ -69,7 +69,7 @@
   border-radius: 3px;
   border: 1px solid rgb(195, 190, 202);
   color: rgb(255, 255, 255);
-}
+} */
 
 .item-Title {
   color: rgb(75, 72, 72);
@@ -79,14 +79,15 @@
   text-align: left;
   border-bottom: 1px solid rgb(195, 190, 202);
   margin-bottom: 5px;
-  padding-bottom: 5px;
+  /* padding-bottom: 5px; */
+  padding: 10px;
 }
 
 .item-Container {
   display: grid;
   grid-auto-flow: row;
   height: fit-content;
-  padding: 5px;
+  padding: 20px;
   margin: 10px 0px 10px 0px;
   width: 450px;
   border: 1px solid rgb(195, 190, 202);

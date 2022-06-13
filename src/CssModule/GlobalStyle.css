@@ -103,38 +103,6 @@
   }
 }
 
-.code-box-container {
-  position: relative;
-  border: 1px solid #101010;
-  width: max-content;
-  min-width: 80px;
-  background: white;
-  padding: 3px;
-  box-shadow: 0 0 9px 2px rgb(0 0 0 / 20%);
-  border-radius: 5px;
-}
-
-.code-box-scroll {
-  overflow-y: auto;
-  max-height: 200px;
-}
-
-.code-box-depth {
-  position: fixed;
-}
-
-.code-box-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  cursor: pointer;
-  padding: 5px;
-}
-.code-box-childArea {
-  position: fixed;
-  height: auto;
-}
-
 .hide {
   opacity: 0;
 }

@@ -10,15 +10,23 @@ import { useMemo } from "react";
 // css
 import "./CodeBox.css";
 
-const contextStore = createMutilContext(["event"]);
-const CodeBox = ({ data, depth, event }) => {
-  console.log(event);
+const contextStore = createMutilContext(["event", "option"]);
+const CodeBox = ({ data, depth, event, option = {} }) => {
   return (
-    <ContextProvider ContextStore={contextStore} Data={{ event }}>
+    <ContextProvider ContextStore={contextStore} Data={{ event, option }}>
       <CodeBoxContainer data={data} depth={depth}></CodeBoxContainer>
     </ContextProvider>
   );
 };
+
+/**
+ * [option]
+ * 1. depthDirect [object]
+ *  - depth에 따라 표기 위치 변경하기 위한 옵션
+ *    key를 depth 깊이, value: {positionX: "RIGHT", positionY: "TOP"} 형태로 사용
+ *
+ *
+ */
 
 const CodeBoxContainer = memo(({ data, depth }) => {
   const ref = useRef();
@@ -60,7 +68,7 @@ const CodeBoxContainer = memo(({ data, depth }) => {
     []
   );
 
-  const rectDirect = { positionX: "LEFT", positionY: "BOTTOM" };
+  const rectDirect = { positionX: "LEFT", positionY: "BOTTOM", offsetX: 5 };
 
   return (
     <div style={{ display: "inline-block", position: "relative" }}>
@@ -76,12 +84,15 @@ const CodeBoxContainer = memo(({ data, depth }) => {
 
 const CodeBoxWarpper = memo(
   React.forwardRef(({ data, depth, visible, animationEnd, rectDirect, parentRef }, ref) => {
+    const { depthDirection } = useContext(contextStore["option"]);
+    // 옵션에 걸려있으면 옵션 우선시
+    rectDirect = depthDirection && depthDirection[depth] ? depthDirection[depth] : rectDirect;
+
     // ref 위치에서 현재 comp를 표기할 위치를 계산
-    const rect = parentRef ? getCommRefRect(ref, parentRef, rectDirect, { offsetX: -25, offsetY: -8 }) : getCompRect(ref, rectDirect, { offsetX: 5 });
+    const rect = parentRef ? getCommRefRect(ref, parentRef, rectDirect) : getCompRect(ref, rectDirect);
     const pRef = useRef();
     const [selectIndex, setSelectIndex] = useState(-1);
 
-    // console.log(`render CodeBoxContainer ${visible} ${data[0].depth} %o %o`, rect, data);
     return (
       data && (
         <StyleDiv ref={pRef} inStyle={{ zIndex: `${depth + 5}`, ...rect }} className={`code-box-depth ${visible ? "on" : "off"}`} onAnimationEnd={animationEnd}>
@@ -166,7 +177,7 @@ const CodeBoxContent = ({ data, show, index, setSelectIndex, parentRef, depth })
   });
 
   // 생성 방향
-  const rectDirect = { positionX: "RIGHT", positionY: "BOTTOM" };
+  const rectDirect = { positionX: "RIGHT", positionY: "BOTTOM", offsetX: -25, offsetY: -8 };
 
   //하위 컴포넌트에 보낼 파라미터
   const param = {

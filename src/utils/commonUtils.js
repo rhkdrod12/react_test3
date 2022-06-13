@@ -74,7 +74,7 @@ export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY 
   return { top: resultY, left: resultX, width: width, height: height };
 };
 
-export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
+export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
   const compRect = compRef.current.getBoundingClientRect();
   const parentRect = parentRef.current.getBoundingClientRect();
 
@@ -94,15 +94,15 @@ export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positi
     top = compRect.top - parentRect.top + offsetY;
   }
 
-  return { top, left };
+  return { top: parseFloat(top), left: parseFloat(left) };
 };
 
-export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
+export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
   const compRect = compRef.current.getBoundingClientRect();
 
   let top;
   let left;
-
+  // debugger;
   // right인 경우에는 해당 바운더리 밖으로 넘기지는 않을 것임
   if (positionX.toUpperCase() === "RIGHT") {
     left = compRect.right + offsetX;
@@ -116,7 +116,7 @@ export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM"
     top = compRect.top + offsetY;
   }
 
-  return { top, left };
+  return { top: parseFloat(top), left: parseFloat(left) };
 };
 
 export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {

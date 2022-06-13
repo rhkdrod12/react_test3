@@ -129,9 +129,10 @@ const Main = () => {
       메인페이지
       <button onClick={onClick}>메뉴삽입!</button>
       <hr style={{ paddingBottom: 10 }}></hr>
-      <div style={{ padding: 10 }}>
+      {/* <div style={{ padding: 10 }}>
         <CodeBoxInput></CodeBoxInput>
-      </div>
+      </div> */}
+      <InsertMenu></InsertMenu>
     </div>
   );
 };
@@ -151,6 +152,16 @@ const CodeBoxInput = () => {
     setValue(value);
   };
   console.log("render input");
+
+  // 그래도 나름 열심히 만들었음!
+  const option = {
+    depthDirection: {
+      0: { positionX: "RIGHT", positionY: "BOTTOM", offsetX: "", offsetY: "" },
+    },
+  };
+
+  const codeBox = <CodeBox data={codeData()} depth={0} event={event} option={option} />;
+
   return (
     <React.Fragment>
       <Paper>
@@ -172,16 +183,16 @@ const CodeBoxInput = () => {
         <br></br>
         <FormControl variant="standard" margin="normal" required>
           <InputLabel shrink htmlFor="input-with-icon-adornment">
-            주용도 코드
+            코드
           </InputLabel>
           <Input required id="input-with-icon-adornment" value={value} onChange={onChange} endAdornment={<CodeBox data={codeData()} depth={0} event={event} />} />
         </FormControl>
         <br></br>
-        <FormControl margin="normal">
+        <FormControl margin="normal" size="small" required>
           <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
-            주용도 코드
+            코드
           </InputLabel>
-          <OutlinedInput shrink id="component-outlined" label="주용도 코드" value={value} onChange={onChange} endAdornment={<CodeBox data={codeData()} depth={0} event={event} />} />
+          <OutlinedInput readOnly id="component-outlined" label="코드" value={value} onChange={onChange} endAdornment={codeBox} />
         </FormControl>
       </Paper>
     </React.Fragment>
@@ -206,30 +217,34 @@ const codeData = () => {
   let data = [];
 
   let i;
-  for (i = 0; i < 5; i++) {
-    data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
+  for (i = 0; i < 20; i++) {
+    data.push({ codeName: `메뉴${i}`, code: i, depth: 0, upperCode: "" });
   }
 
-  for (i = 5; i < 10; i++) {
-    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 0 });
-  }
-
-  for (i = 10; i < 15; i++) {
-    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
-  }
-  for (i = 16; i < 20; i++) {
-    data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 4 });
-  }
-
-  for (i = 21; i < 25; i++) {
-    data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
-  }
-  // for (i = 25; i < 30; i++) {
+  // for (i = 0; i < 5; i++) {
   //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
   // }
-  // for (i = 30; i < 35; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 26 });
+
+  // for (i = 5; i < 10; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 0 });
   // }
+
+  // for (i = 10; i < 15; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
+  // }
+  // for (i = 16; i < 20; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 4 });
+  // }
+
+  // for (i = 21; i < 25; i++) {
+  //   data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
+  // }
+  // // for (i = 25; i < 30; i++) {
+  // //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
+  // // }
+  // // for (i = 30; i < 35; i++) {
+  // //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 26 });
+  // // }
 
   data.forEach((parent) => {
     parent.childCodes = data.filter((child) => parent.code === child.upperCode);
