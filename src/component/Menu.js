@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { postFetch, useGetFetch } from "../Hook/useFetch";
+import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
 import HeaderMenu from "./BasicComponent/CategoryMenu";
@@ -111,8 +111,10 @@ const InputBox = () => {
   const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
   const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
 
-  const onChange = useCallback(({ target: { value, name } }) => {
-    setMenuItem((item) => ({ ...item, [name]: value }));
+  const onChange = useCallback((val) => {
+    console.log(val);
+    // debugger;
+    setMenuItem((item) => ({ ...item, [val.name]: val.value.codeName }));
   }, []);
 
   const onClick = (e) => {
@@ -122,42 +124,47 @@ const InputBox = () => {
     });
   };
 
-  const [alertFlag, setAlertFlag] = useState(false);
+  const [state, setState] = useState("");
   const onSubmit = (isResult, data) => {
-    if (isResult) {
-      setAlertFlag(1);
-    } else {
-      setAlertFlag(2);
-    }
+    setState(isResult);
   };
 
   console.log(menuItem);
+
+  const [typeCode, setTYpeCode] = useState();
+
+  useEffect(() => {
+    getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
+      console.log("실행 결과값:");
+      console.log(data);
+      setTYpeCode(data);
+    });
+  }, []);
 
   return (
     <Paper className={menuInputContainer}>
       <Paper elevation={0} className={itemTitle} sx={{ padding: "10px" }}>
         메뉴 삽입
       </Paper>
-
       <AlertComponent
-        open={alertFlag > 0}
-        state={alertFlag}
-        message={{ sucess: "전송 성공", error: "전송 실패" }}
+        open={state != ""}
+        state={state}
+        message={{ success: "전송 성공", error: "전송 실패" }}
         closeCallback={(state) => {
-          setAlertFlag(state);
+          setState("");
         }}
-      >
-        {/* <div className={itemContainer}> */}
-        <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
-          <CodeBoxInput name="type" value={type} label="메뉴 타입" onChange={onChange}></CodeBoxInput>
-          <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
-          <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput>
-          <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
-          <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
-          <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
-          <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange}></MenuInput>
-        </Paper>
-      </AlertComponent>
+      />
+      {/* <div className={itemContainer}> */}
+      <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
+        <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
+        <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
+        <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput>
+        <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
+        <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
+        <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
+        <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange}></MenuInput>
+      </Paper>
+
       <div style={{ marginTop: 20 }}>
         <SendPostButton name="메뉴 추가" url="/menu/insertSee" data={[menuItem]} callback={onSubmit}></SendPostButton>
       </div>
@@ -165,26 +172,19 @@ const InputBox = () => {
   );
 };
 
-const AlertComponent = ({ children, open, state, message, closeCallback }) => {
-  const [isOpen, setOpen] = useState(open);
-  useEffect(() => setOpen(open), [open]);
+const AlertComponent = ({ children, open: Open, state: State, message, closeCallback }) => {
+  const [open, setOpen] = useState(Open);
+  const [state, setState] = useState(() => State);
 
-  let showState = useMemo(() => {
-    if (state == 1) {
-      return "success";
-    } else if (state == 2) {
-      return "error";
-    } else {
-      return "warning";
-    }
-  }, [state]);
+  useEffect(() => setOpen(Open), [Open]);
+  useEffect(() => setState(State), [State]);
 
   return (
     <React.Fragment>
-      <Collapse in={isOpen}>
+      <Collapse in={open}>
         <Alert
           variant="filled"
-          severity={showState}
+          severity={state == "" ? "success" : state}
           action={
             <IconButton
               aria-label="close"
@@ -199,10 +199,10 @@ const AlertComponent = ({ children, open, state, message, closeCallback }) => {
             </IconButton>
           }
         >
-          {message[showState]}
-          This is an error alert — check it out!
+          {message[state]}
         </Alert>
       </Collapse>
+
       {children}
     </React.Fragment>
   );
@@ -236,13 +236,13 @@ const SendPostButton = ({ name, url, data, callback }) => {
     console.log(data);
     setSuccess(1);
     setLoading(false);
-    if (typeof callback === "function") callback(true, data);
+    if (typeof callback === "function") callback("success", data);
   };
 
   const failureFuc = (err) => {
     setSuccess(2);
     setLoading(false);
-    if (typeof callback === "function") callback(false, err);
+    if (typeof callback === "function") callback("error", err);
   };
 
   const handleButtonClick = () => {
@@ -288,7 +288,8 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
   const event = {
     onDblclick: (data, index, depth) => {
       // setValue(data.codeName);
-      onChange({ target: { name, value: data.codeName } });
+      console.log(data);
+      onChange({ name, value: data });
     },
   };
 
@@ -297,46 +298,6 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
       0: { positionX: "RIGHT", positionY: "BOTTOM", offsetX: "", offsetY: "" },
     },
   };
-
-  let data = [];
-
-  let i;
-  for (i = 0; i < 20; i++) {
-    data.push({ codeName: `메뉴${i}`, code: i, depth: 0, upperCode: "" });
-  }
-
-  // for (i = 0; i < 5; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
-  // }
-
-  // for (i = 5; i < 10; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 0 });
-  // }
-
-  // for (i = 10; i < 15; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 1 });
-  // }
-  // for (i = 16; i < 20; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 4 });
-  // }
-
-  // for (i = 21; i < 25; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
-  // }
-  // // for (i = 25; i < 30; i++) {
-  // //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
-  // // }
-  // // for (i = 30; i < 35; i++) {
-  // //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 26 });
-  // // }
-
-  data.forEach((parent) => {
-    parent.childCodes = data.filter((child) => parent.code === child.upperCode);
-  });
-
-  data = data.filter((child) => child.depth === 0);
-
-  codeData = data;
 
   const codeBox = <CodeBox data={codeData} depth={0} event={event} option={option} />;
 
@@ -356,7 +317,7 @@ const MenuInput = ({ children, label, name, value, setValue, onChange }) => {
       <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
-      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={onChange} />
+      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={(event) => onChange({ name: name, value: event.target.value }, event)} />
     </FormControl>
   );
 };

@@ -13,9 +13,13 @@ import "./CodeBox.css";
 const contextStore = createMutilContext(["event", "option"]);
 const CodeBox = ({ data, depth, event, option = {} }) => {
   return (
-    <ContextProvider ContextStore={contextStore} Data={{ event, option }}>
-      <CodeBoxContainer data={data} depth={depth}></CodeBoxContainer>
-    </ContextProvider>
+    <React.Fragment>
+      {data ? (
+        <ContextProvider ContextStore={contextStore} Data={{ event, option }}>
+          <CodeBoxContainer data={data} depth={depth}></CodeBoxContainer>
+        </ContextProvider>
+      ) : null}
+    </React.Fragment>
   );
 };
 
@@ -191,12 +195,12 @@ const CodeBoxContent = ({ data, show, index, setSelectIndex, parentRef, depth })
   };
 
   const rotate = show ? { transform: "rotate(90deg)" } : {};
-
+  const isChild = data.childCodes && data.childCodes.length > 0;
   return (
     <li className="code-box-content" ref={compRef} onClick={onDoubleClick}>
       <div style={{ paddingRight: 20 }}>{data.codeName}</div>
-      <ChevronRightIcon className="transition code-svg" fontSize="small" color="disabled" sx={{ opacity: `${data.childCodes.length ? 1 : 0}`, ...rotate }} />
-      {show && data.childCodes && data.childCodes.length > 0 ? <CodeBoxWarpper {...param}></CodeBoxWarpper> : null}
+      <ChevronRightIcon className="transition code-svg" fontSize="small" color="disabled" sx={{ opacity: `${isChild ? 1 : 0}`, ...rotate }} />
+      {show && isChild ? <CodeBoxWarpper {...param}></CodeBoxWarpper> : null}
     </li>
   );
 };

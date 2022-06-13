@@ -53,6 +53,31 @@ export function usePostFetch(url, data, stateType = []) {
   return [responseData, setResponseData];
 }
 
+export function getFetch(url, param, callback) {
+  url = defaultUrl + url;
+
+  if (param && param instanceof Object) {
+    url += "?" + queryString.stringify(param);
+  }
+
+  return new Promise((resolve, reject) => {
+    axios
+      .get(url)
+      .then((res) => {
+        let {
+          data: { message },
+        } = res;
+        resolve(message, res);
+      })
+      .catch((e) => {
+        const { message, code } = e;
+        console.log(e);
+        console.log(`Messgae: ${message}\nCode: ${code}`);
+        reject();
+      });
+  });
+}
+
 export function postFetch(url, data, callback) {
   url = defaultUrl + url;
   return new Promise((resolve, reject) => {
