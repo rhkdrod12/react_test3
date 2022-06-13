@@ -143,8 +143,8 @@ const InputBox = () => {
         open={alertFlag > 0}
         state={alertFlag}
         message={{ sucess: "전송 성공", error: "전송 실패" }}
-        closeCallback={() => {
-          setAlertFlag(0);
+        closeCallback={(state) => {
+          setAlertFlag(state);
         }}
       >
         {/* <div className={itemContainer}> */}
@@ -167,20 +167,17 @@ const InputBox = () => {
 
 const AlertComponent = ({ children, open, state, message, closeCallback }) => {
   const [isOpen, setOpen] = useState(open);
-
   useEffect(() => setOpen(open), [open]);
 
-  let showState;
-
-  useEffect(() => {
+  let showState = useMemo(() => {
     if (state == 1) {
-      showState = "success";
+      return "success";
     } else if (state == 2) {
-      showState = "error";
+      return "error";
     } else {
-      showState = "warning";
+      return "warning";
     }
-  }, [open]);
+  }, [state]);
 
   return (
     <React.Fragment>
@@ -195,14 +192,14 @@ const AlertComponent = ({ children, open, state, message, closeCallback }) => {
               size="small"
               onClick={() => {
                 setOpen(false);
-                if (typeof closeCallback === "function") closeCallback();
+                if (typeof closeCallback === "function") closeCallback(state);
               }}
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
           }
         >
-          {message.state}
+          {message[showState]}
           This is an error alert — check it out!
         </Alert>
       </Collapse>
