@@ -114,7 +114,7 @@ const InputBox = () => {
   const onChange = useCallback((val) => {
     console.log(val);
     // debugger;
-    setMenuItem((item) => ({ ...item, [val.name]: val.value.codeName }));
+    setMenuItem((item) => ({ ...item, [val.name]: val.value }));
   }, []);
 
   const onClick = (e) => {
@@ -162,7 +162,7 @@ const InputBox = () => {
         <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
         <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
         <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
-        <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange}></MenuInput>
+        <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange} allowChar={/^[0-9]*$/}></MenuInput>
       </Paper>
 
       <div style={{ marginTop: 20 }}>
@@ -285,11 +285,14 @@ const SendPostButton = ({ name, url, data, callback }) => {
 };
 
 const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
+  // 으흠~ 이런식으로 표현하면 되겠구만..
+  const [code, setCode] = useState("");
   const event = {
     onDblclick: (data, index, depth) => {
       // setValue(data.codeName);
       console.log(data);
-      onChange({ name, value: data });
+      setCode(data.codeName);
+      onChange({ name, value: data.code });
     },
   };
 
@@ -306,18 +309,27 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
       <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
-      <OutlinedInput readOnly id="component-outlined" name={name} label={label} value={value} onChange={onChange} endAdornment={codeBox} />
+      <OutlinedInput readOnly id="component-outlined" name={name} label={label} value={code} onChange={onChange} endAdornment={codeBox} />
     </FormControl>
   );
 };
 
-const MenuInput = ({ children, label, name, value, setValue, onChange }) => {
+const MenuInput = ({ label, name, value, allowChar, onChange }) => {
+  const eventObj = (event) => {
+    let val = event.target.value;
+    if (RegExp(allowChar).test(val)) {
+      return onChange({ name: name, value: val }, event);
+    } else {
+      return null;
+    }
+  };
+
   return (
     <FormControl margin="dense" size="Normal" required>
       <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
-      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={(event) => onChange({ name: name, value: event.target.value }, event)} />
+      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={eventObj} />
     </FormControl>
   );
 };

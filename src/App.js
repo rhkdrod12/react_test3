@@ -24,7 +24,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 function App() {
   return (
     <BrowserRouter>
-      {/* <Header /> */}
+      <Header />
       <Transition />
     </BrowserRouter>
   );

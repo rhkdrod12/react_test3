@@ -14,11 +14,9 @@ const contextStore = createMutilContext(["event", "option"]);
 const CodeBox = ({ data, depth, event, option = {} }) => {
   return (
     <React.Fragment>
-      {data ? (
-        <ContextProvider ContextStore={contextStore} Data={{ event, option }}>
-          <CodeBoxContainer data={data} depth={depth}></CodeBoxContainer>
-        </ContextProvider>
-      ) : null}
+      <ContextProvider ContextStore={contextStore} Data={{ event, option }}>
+        <CodeBoxContainer data={data} depth={depth}></CodeBoxContainer>
+      </ContextProvider>
     </React.Fragment>
   );
 };
@@ -80,11 +78,19 @@ const CodeBoxContainer = memo(({ data, depth }) => {
         {/* <button ref={ref} onClick={onClick(isOpen)} style={{ display: "inline-block", width: 20 }}> */}
         <LibraryAddIcon ref={ref} onClick={onClick(isOpen)} sx={{ transform: "scale(0.7)", color: "#3f3f3f", cursor: "pointer" }}></LibraryAddIcon>
         {/* </button> */}
-        {isOpen && data && data.length > 0 ? <CodeBoxWarpper data={data} depth={depth} ref={ref} rectDirect={rectDirect} visible={visible} animationEnd={onAnimationEnd}></CodeBoxWarpper> : null}
+        {isOpen ? <CodeBoxWarpper data={data} depth={depth} ref={ref} rectDirect={rectDirect} visible={visible} animationEnd={onAnimationEnd}></CodeBoxWarpper> : null}
       </div>
     </div>
   );
 });
+
+const NotData = ({ rect }) => {
+  return (
+    <StyleDiv inStyle={{ zIndex: "10", ...rect }} className={`code-box-depth`}>
+      <div className="code-box-container">데이터 없음</div>
+    </StyleDiv>
+  );
+};
 
 const CodeBoxWarpper = memo(
   React.forwardRef(({ data, depth, visible, animationEnd, rectDirect, parentRef }, ref) => {
@@ -97,27 +103,31 @@ const CodeBoxWarpper = memo(
     const pRef = useRef();
     const [selectIndex, setSelectIndex] = useState(-1);
 
-    return (
-      data && (
-        <StyleDiv ref={pRef} inStyle={{ zIndex: `${depth + 5}`, ...rect }} className={`code-box-depth ${visible ? "on" : "off"}`} onAnimationEnd={animationEnd}>
-          <div className="code-box-container">
-            <ul className="code-box-scroll">
-              {data.map((item, index) => {
-                //하위 컴포넌트에 보낼 파라미터
-                const param = {
-                  data: item,
-                  index,
-                  setSelectIndex,
-                  parentRef: pRef,
-                  show: index == selectIndex,
-                  depth,
-                };
-                return <CodeBoxContent key={index} {...param}></CodeBoxContent>;
-              })}
-            </ul>
-          </div>
+    return data ? (
+      <StyleDiv ref={pRef} inStyle={{ zIndex: `${depth + 5}`, ...rect }} className={`code-box-depth ${visible ? "on" : "off"}`} onAnimationEnd={animationEnd}>
+        <div className="code-box-container">
+          <ul className="code-box-scroll">
+            {data.map((item, index) => {
+              //하위 컴포넌트에 보낼 파라미터
+              const param = {
+                data: item,
+                index,
+                setSelectIndex,
+                parentRef: pRef,
+                show: index == selectIndex,
+                depth,
+              };
+              return <CodeBoxContent key={index} {...param}></CodeBoxContent>;
+            })}
+          </ul>
+        </div>
+      </StyleDiv>
+    ) : (
+      <StyleDiv ref={pRef} inStyle={{ zIndex: `${depth + 5}`, ...rect }} className={`code-box-depth ${visible ? "on" : "off"}`} onAnimationEnd={animationEnd}>
+        <StyleDiv inStyle={{ padding: "10px 20px 10px 20px" }} className="code-box-container">
+          데이터 없음
         </StyleDiv>
-      )
+      </StyleDiv>
     );
   })
 );
