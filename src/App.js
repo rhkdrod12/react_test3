@@ -20,12 +20,14 @@ import { useMemo } from "react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CodeBox from "./Component/BasicComponent/CodeBox/CodeBox";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import BottomNavibar from "./Component/TestComp/BottomNavibar";
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
       <Transition />
+      <BottomNavibar></BottomNavibar>
     </BrowserRouter>
   );
 }
@@ -34,7 +36,9 @@ const Transition = () => {
   return (
     <TransitionRouter>
       <Route path="/" element={<Main />}></Route>
-      <Route path="/insertMenu" element={<InsertMenu />}></Route>
+      <Route path="/menu/*">
+        <Route path="insertMenu" element={<InsertMenu />}></Route>
+      </Route>
       <Route path="/test/*" element={<TestNavi />}></Route>
       <Route path="*" element={<UnKnownPage />}></Route>
     </TransitionRouter>
@@ -86,7 +90,7 @@ const Main = () => {
   const navi = useNavigate();
 
   const onClick = () => {
-    navi("/insertMenu");
+    navi("/menu/insertMenu");
   };
 
   let data = [];
@@ -132,7 +136,7 @@ const Main = () => {
       {/* <div style={{ padding: 10 }}>
         <CodeBoxInput></CodeBoxInput>
       </div> */}
-      <InsertMenu></InsertMenu>
+      {/* <InsertMenu></InsertMenu> */}
     </div>
   );
 };
@@ -182,14 +186,12 @@ const CodeBoxInput = () => {
         </div>
         <br></br>
         <FormControl variant="standard" margin="normal" required>
-          <InputLabel shrink htmlFor="input-with-icon-adornment">
-            코드
-          </InputLabel>
+          <InputLabel htmlFor="input-with-icon-adornment">코드</InputLabel>
           <Input required id="input-with-icon-adornment" value={value} onChange={onChange} endAdornment={<CodeBox data={codeData()} depth={0} event={event} />} />
         </FormControl>
         <br></br>
         <FormControl margin="normal" size="small" required>
-          <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+          <InputLabel htmlFor="component-outlined" sx={{ background: "white" }}>
             코드
           </InputLabel>
           <OutlinedInput readOnly id="component-outlined" label="코드" value={value} onChange={onChange} endAdornment={codeBox} />

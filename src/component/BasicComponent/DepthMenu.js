@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import "./DepthMenu.css";
 import { getRect } from "../../utils/commonUtils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useNavigate } from "react-router";
 
 export const DepthMenu = ({ menuList, height = 40 }) => {
   return (
@@ -46,7 +47,7 @@ const MenuButton = ({ children, data, depth = 0 }) => {
   const onClick = useCallback(
     (event) => {
       event.stopPropagation();
-      console.log(data);
+      console.log("%o 이동 ", data);
     },
     [isOpen]
   );
@@ -89,11 +90,13 @@ const SubMenuButton = ({ data, depth, minWidth, depthDirection }) => {
   const ref = useRef();
   const subMenu = data.childMenu && data.childMenu.length > 0;
 
+  const navi = useNavigate();
   const onClick = useCallback(
     (event) => {
       event.stopPropagation();
-      console.log(data);
+      console.log(data.url + " 이동 ");
       console.log(ref);
+      navi(data.url);
     },
     [isOpen]
   );

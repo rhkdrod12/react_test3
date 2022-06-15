@@ -72,7 +72,7 @@ const MenuItem = ({ name, Number, url, className }) => {
 export const InsertMenu = () => {
   return (
     <div>
-      <div>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <InputBox></InputBox>
       </div>
     </div>
@@ -112,8 +112,6 @@ const InputBox = () => {
   const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
 
   const onChange = useCallback((val) => {
-    console.log(val);
-    // debugger;
     setMenuItem((item) => ({ ...item, [val.name]: val.value }));
   }, []);
 
@@ -132,14 +130,31 @@ const InputBox = () => {
   console.log(menuItem);
 
   const [typeCode, setTYpeCode] = useState();
+  const [menuList, setMenuList] = useState();
 
   useEffect(() => {
     getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
-      console.log("실행 결과값:");
+      console.log("코드 실행 결과값:");
       console.log(data);
       setTYpeCode(data);
     });
   }, []);
+
+  useEffect(() => {
+    console.log("메뉴 아이템 %o", menuItem);
+    if (menuItem.type) {
+      getFetch("/menu/get3", { menuType: "MT001" }).then((data, res) => {
+        console.log("메뉴 실행 결과값:");
+        console.log(data);
+        setMenuList(data);
+      });
+    }
+  }, [menuItem]);
+
+  const beforeChange = (data) => {
+    console.log("여기 ㅠefore %o", data);
+    setMenuItem((item) => ({ ...item, menuDepth: data.codeDepth + 1 }));
+  };
 
   return (
     <Paper className={menuInputContainer}>
@@ -158,7 +173,8 @@ const InputBox = () => {
       <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
         <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
         <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
-        <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput>
+        <CodeBoxInput name="upperMenu" value={upperMenu} display={"label"} label="상위 메뉴" onChange={onChange} codeData={menuList} beforeChange={beforeChange}></CodeBoxInput>
+        {/* <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput> */}
         <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
         <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
         <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
@@ -284,7 +300,7 @@ const SendPostButton = ({ name, url, data, callback }) => {
   );
 };
 
-const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
+const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, beforeChange }) => {
   // 으흠~ 이런식으로 표현하면 되겠구만..
   const [code, setCode] = useState("");
   const event = {
@@ -292,6 +308,7 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
       // setValue(data.codeName);
       console.log(data);
       setCode(data.codeName);
+      beforeChange?.(data);
       onChange({ name, value: data.code });
     },
   };
@@ -306,7 +323,7 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData }) => {
 
   return (
     <FormControl margin="dense" size="Normal" required>
-      <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+      <InputLabel htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
       <OutlinedInput readOnly id="component-outlined" name={name} label={label} value={code} onChange={onChange} endAdornment={codeBox} />
@@ -326,7 +343,7 @@ const MenuInput = ({ label, name, value, allowChar, onChange }) => {
 
   return (
     <FormControl margin="dense" size="Normal" required>
-      <InputLabel shrink htmlFor="component-outlined" sx={{ background: "white" }}>
+      <InputLabel htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
       <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={eventObj} />
