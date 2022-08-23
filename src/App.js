@@ -27,7 +27,6 @@ function App() {
     <BrowserRouter>
       <Header />
       <Transition />
-      <BottomNavibar></BottomNavibar>
     </BrowserRouter>
   );
 }
@@ -114,12 +113,6 @@ const Main = () => {
   for (i = 21; i < 25; i++) {
     data.push({ codeName: `item${i}`, code: i, depth: 2, upperCode: 9 });
   }
-  // for (i = 25; i < 30; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 0, upperCode: "" });
-  // }
-  // for (i = 30; i < 35; i++) {
-  //   data.push({ codeName: `item${i}`, code: i, depth: 1, upperCode: 26 });
-  // }
 
   data.forEach((parent) => {
     parent.childCodes = data.filter((child) => parent.code === child.upperCode);
@@ -136,7 +129,14 @@ const Main = () => {
       {/* <div style={{ padding: 10 }}>
         <CodeBoxInput></CodeBoxInput>
       </div> */}
-      {/* <InsertMenu></InsertMenu> */}
+      <div style={{ width: 420 }}>
+        <div>
+          <InsertMenu></InsertMenu>
+        </div>
+        <div style={{ height: "110px", display: "flex", alignItems: "flex-end", margin: "0 10px" }}>
+          <BottomNavibar></BottomNavibar>
+        </div>
+      </div>
     </div>
   );
 };

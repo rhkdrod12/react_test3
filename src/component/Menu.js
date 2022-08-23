@@ -170,20 +170,22 @@ const InputBox = () => {
         }}
       />
       {/* <div className={itemContainer}> */}
-      <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
-        <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
-        <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
-        <CodeBoxInput name="upperMenu" value={upperMenu} display={"label"} label="상위 메뉴" onChange={onChange} codeData={menuList} beforeChange={beforeChange}></CodeBoxInput>
-        {/* <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput> */}
-        <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
-        <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
-        <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
-        <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange} allowChar={/^[0-9]*$/}></MenuInput>
-      </Paper>
+      <form>
+        <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
+          <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
+          <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
+          <CodeBoxInput name="upperMenu" value={upperMenu} display={"label"} label="상위 메뉴" onChange={onChange} codeData={menuList} beforeChange={beforeChange}></CodeBoxInput>
+          {/* <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput> */}
+          <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
+          <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
+          <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
+          <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange} allowChar={/^[0-9]*$/}></MenuInput>
+        </Paper>
 
-      <div style={{ marginTop: 20 }}>
-        <SendPostButton name="메뉴 추가" url="/menu/insertSee" data={[menuItem]} callback={onSubmit}></SendPostButton>
-      </div>
+        <div style={{ marginTop: 20 }}>
+          <SendPostButton name="메뉴 추가" url="/menu/insertSee" data={[menuItem]} callback={onSubmit}></SendPostButton>
+        </div>
+      </form>
     </Paper>
   );
 };
@@ -279,7 +281,7 @@ const SendPostButton = ({ name, url, data, callback }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <Box sx={{ position: "relative", width: "100%" }}>
-        <Button variant="contained" sx={buttonSx} disabled={loading} onClick={handleButtonClick}>
+        <Button variant="contained" sx={buttonSx} disabled={loading} onSubmit={handleButtonClick}>
           {name}
         </Button>
         {loading && (

@@ -15,175 +15,219 @@
     }
     :root {
       --brg: #222327;
+      --headerHeight: 40px;
     }
 
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      width: 100vw;
+      height: 100vh;
       background-color: var(--brg);
+    }
+    header {
+      height: 40px;
+    }
+
+    .navigation-wrap {
+      position: relative;
+      width: 150px;
+      height: calc(100% - var(--headerHeight));
     }
 
     .navigation {
+      --back: #fff;
+      --hover: rgb(51, 139, 197);
+      --hoverBack: rgb(88, 93, 107);
       position: relative;
-      width: 400px;
-      height: 70px;
-      background-color: #fff;
+      background-color: var(--back);
       display: flex;
+      flex-direction: row;
+      height: 100%;
       justify-content: center;
       align-items: center;
-      border-radius: 10px;
+    }
+    .navigation-right-bar {
+      position: absolute;
+      right: 0;
+      height: 100%;
+      width: 15px;
+      display: flex;
+      align-items: center;
+      background-color: var(--hoverBack);
+    }
+
+    .navigation-right-bar ion-icon {
+      cursor: pointer;
+      transition: 0.5s;
+    }
+    .active ion-icon {
+      transform: rotate(180deg);
     }
 
     .navigation ul {
+      position: relative;
       display: flex;
-      width: 350px;
+      flex-direction: column;
+      list-style: none;
+      width: 100%;
+      height: 80%;
+      gap: 10%;
+      padding: 15px 0px 15px 10px;
     }
     .navigation ul li {
       position: relative;
-      list-style: none;
-      width: 70px;
-      height: 70px;
+      width: 100%;
+      padding: 20px 10px 20px 10px;
+      cursor: pointer;
       z-index: 1;
     }
-    .navigation ul li a {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .navigation ul li::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      content: "";
       width: 100%;
-      text-align: center;
-      flex-direction: column;
-      font-weight: 500;
+      height: 100%;
+      z-index: -1;
+      background-color: var(--hoverBack);
+      border-bottom-left-radius: 15px;
+      border-top-left-radius: 15px;
+      pointer-events: none;
+      transform: scale(0, 1);
+      transform-origin: right;
+      transition: 0.5s;
     }
-    .navigation ul li a .icon {
+    .navigation ul li:hover::before {
+      transform: scale(1, 1);
+      transition: 0.5s;
+    }
+    .navigation ul li:hover a {
+      color: #fff;
+      transition: 0.5s;
+    }
+    .navigation a {
       position: relative;
-      display: block;
-      line-height: 75px;
-      font-size: 1.5em;
-      color: var(--brg);
+      text-decoration: none;
+      color: #222327;
+      font-weight: 600;
+      letter-spacing: 0.5px;
       transition: 0.5s;
     }
-
-    .navigation ul li.active a .icon {
-      transform: translateY(-35px);
-    }
-
-    .navigation ul li a .text {
+    .navigation li b:nth-child(1) {
       position: absolute;
-      color: var(--brg);
-      font-weight: 400;
-      font-size: 0.75em;
-      letter-spacing: 0.5em;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: 0.5s;
+      width: 15px;
+      height: 15px;
+      right: 15px;
+      top: -15px;
+      background-color: var(--hoverBack);
     }
-    .navigation ul li.active a .text {
-      opacity: 1;
-      transform: translateY(10px);
-    }
-
-    .indicator {
+    .navigation li b:nth-child(1)::before {
       position: absolute;
-      top: -50%;
-      width: 70px;
-      height: 70px;
-      background-color: #29fd53;
-      border-radius: 50%;
-      border: 6px solid var(--brg);
-      transition: 0.5s;
-    }
-
-    .indicator::before {
       content: "";
+      width: 15px;
+      height: 15px;
+      right: 0px;
+      top: 0px;
+      background-color: var(--back);
+      transition: 0.5s;
+    }
+    .navigation li:hover b:nth-child(1)::before {
+      border-bottom-right-radius: 100%;
+      transition: 0.5s;
+    }
+    .navigation li b:nth-child(2) {
       position: absolute;
-      top: 50%;
-      left: -23px;
-      width: 22px;
-      height: 24px;
-      background-color: transparent;
+      width: 15px;
+      height: 15px;
+      right: 15px;
+      bottom: -15px;
+      background-color: var(--hoverBack);
+    }
+    .navigation li b:nth-child(2)::before {
+      position: absolute;
+      content: "";
+      width: 15px;
+      height: 15px;
+      right: 0px;
+      top: 0px;
+      background-color: var(--back);
+      transition: 0.5s;
+    }
+    .navigation li:hover b:nth-child(2)::before {
       border-top-right-radius: 100%;
-      box-shadow: 0 -10px 0 0 var(--brg);
-    }
-
-    .indicator::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: -23px;
-      width: 22px;
-      height: 24px;
-      background-color: transparent;
-      border-top-left-radius: 100%;
-      box-shadow: 0 -10px 0 0 var(--brg);
-    }
-
-    .navigation ul li.active:nth-child(1).active ~ .indicator {
-      transform: translateX(calc(70px * 0));
-    }
-    .navigation ul li.active:nth-child(2).active ~ .indicator {
-      transform: translateX(calc(70px * 1));
-    }
-    .navigation ul li.active:nth-child(3).active ~ .indicator {
-      transform: translateX(calc(70px * 2));
-    }
-    .navigation ul li.active:nth-child(4).active ~ .indicator {
-      transform: translateX(calc(70px * 3));
-    }
-    .navigation ul li.active:nth-child(5).active ~ .indicator {
-      transform: translateX(calc(70px * 4));
+      transition: 0.5s;
     }
   </style>
 
   <body>
-    <div class="navigation">
-      <ul>
-        <li class="list active">
-          <a href="#">
-            <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
-            <span class="text">Home</span>
-          </a>
-        </li>
-        <li class="list">
-          <a href="#">
-            <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
-            <span class="text">Profile</span>
-          </a>
-        </li>
-        <li class="list">
-          <a href="#">
-            <span class="icon"><ion-icon name="chatbubble-ellipses-outline"></ion-icon></span>
-            <span class="text">Message</span>
-          </a>
-        </li>
-        <li class="list">
-          <a href="#">
-            <span class="icon"><ion-icon name="camera-outline"></ion-icon></span>
-            <span class="text">Photos</span>
-          </a>
-        </li>
-        <li class="list">
-          <a href="#">
-            <span class="icon"><ion-icon name="settings-outline"></ion-icon></span>
-            <span class="text">Setting</span>
-          </a>
-        </li>
-        <div class="indicator"></div>
-      </ul>
-    </div>
+    <header>
+      <div style="height: var(--headerHeight); color: #fff">You</div>
+    </header>
+    <content>
+      <div class="navigation-wrap">
+        <div class="navigation">
+          <ul>
+            <li class="list">
+              <b></b>
+              <b></b>
+              <a href="#">
+                <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
+                <span class="text">Home</span>
+              </a>
+            </li>
+            <li class="list">
+              <b></b>
+              <b></b>
+              <a href="#">
+                <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
+                <span class="text">Profile</span>
+              </a>
+            </li>
+            <li class="list">
+              <b></b>
+              <b></b>
+              <a href="#">
+                <span class="icon"><ion-icon name="chatbubble-ellipses-outline"></ion-icon></span>
+                <span class="text">Message</span>
+              </a>
+            </li>
+            <li class="list">
+              <b></b>
+              <b></b>
+              <a href="#">
+                <span class="icon"><ion-icon name="camera-outline"></ion-icon></span>
+                <span class="text">Photos</span>
+              </a>
+            </li>
+            <li class="list">
+              <b></b>
+              <b></b>
+              <a href="#">
+                <span class="icon"><ion-icon name="settings-outline"></ion-icon></span>
+                <span class="text">Setting</span>
+              </a>
+            </li>
+          </ul>
+          <b class="navigation-right-bar">
+            <ion-icon name="caret-forward-outline" style="color: #fff"></ion-icon>
+          </b>
+        </div>
+      </div>
+    </content>
   </body>
 
   <script>
     function activeIndecator() {
-      const list = document.querySelectorAll(".list");
-      list.forEach((item) => item.classList.remove("active"));
-      this.classList.add("active");
+      debugger;
+      const dom = document.querySelector(".navigation-right-bar");
+      if (dom.classList.contains("active")) {
+        dom.classList.add("active");
+      } else {
+        dom.classList.remove("active");
+      }
     }
 
-    const list = document.querySelectorAll(".list");
-    list.forEach((item) => item.addEventListener("click", activeIndecator));
+    const list = document.querySelector(".navigation-right-bar");
+    list.addEventListener("click", activeIndecator);
   </script>
 
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>

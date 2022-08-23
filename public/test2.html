@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
+    <script src="https://cdn.skypack.dev/axios-observable/axiosObservable.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --brg: #222327;
+        --headerHeight: 40px;
+      }
+
+      body {
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--brg);
+        display: flex;
+      }
+
+      .test-area {
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .button-wrap {
+        position: relative;
+        padding: 10px 20px;
+        border: 1px solid white;
+        background: linear-gradient(270deg, #a4adb4, #fd672c);
+        /* transition: 0.5s; */
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 2px;
+        box-shadow: 0px 0px 5px 4px #fd672c;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .button-wrap:active {
+        box-shadow: 0px 0px 5px 2px #fd672c;
+        transform: translateY(4px);
+      }
+      .button-wrap:hover {
+      }
+      .button-wrap::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        content: "";
+        background: linear-gradient(90deg, #4688c5, #00dfd8);
+        transition-property: transform;
+        transition-duration: 0.5s;
+        transform: scaleY(0);
+        transform-origin: top;
+        animation: test2 0.5s;
+      }
+      .button-wrap:hover::before {
+        transition-property: transform;
+        transition-duration: 0.5s;
+        transform: scaleY(1);
+        transform-origin: bottom;
+        animation: test 0.5s;
+        box-shadow: 0px 0px 5px 4px #014c92;
+      }
+
+      @keyframes test2 {
+        0% {
+          border-bottom-left-radius: 0%;
+          border-bottom-right-radius: 0%;
+        }
+        50% {
+          border-bottom-left-radius: 100%;
+          border-bottom-right-radius: 100%;
+        }
+        100% {
+          border-bottom-left-radius: 0%;
+          border-bottom-right-radius: 0%;
+        }
+      }
+      @keyframes test {
+        0% {
+          border-top-left-radius: 0%;
+          border-top-right-radius: 0%;
+        }
+        50% {
+          border-top-left-radius: 100%;
+          border-top-right-radius: 100%;
+        }
+        100% {
+          border-top-left-radius: 0%;
+          border-top-right-radius: 0%;
+        }
+      }
+
+      .button-wrap:hover div {
+        color: white;
+        transition: 0.5s;
+      }
+
+      .button-wrap div {
+        color: rgb(70, 68, 68);
+        text-decoration: none;
+        width: 100%;
+        height: 100%;
+        transition: 0.5s;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="upload-btn" class="test-area">
+      <a class="button-wrap">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <div>파일 업로드</div>
+      </a>
+    </div>
+
+    <div class="test-area">
+      <a id="file-btn" class="button-wrap">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <div>파일 추가</div>
+      </a>
+    </div>
+
+    <div>
+      <div style="color: #fff; font-weight: 800; font-size: 1.2em">파일 리스트</div>
+      <ul style="color: #fff" id="file-list"></ul>
+    </div>
+    <input style="display: none" type="file" name="uploadFile" id="uploadFile" multiple />
+  </body>
+  <script>
+    //http://localhost:8080/api/download?fileName=test.txt"
+    const fileDom = document.getElementById("uploadFile");
+    const eventDom = document.getElementById("file-btn");
+    const fileListDom = document.getElementById("file-list");
+
+    const formData = new FormData();
+    const transData = [];
+
+    const param = {};
+
+    const addItem = function (content) {
+      let name = content.name + "";
+      let size = content.size;
+      let fileName = name.substring(0, name.lastIndexOf("."));
+      let fileExt = name.substring(name.lastIndexOf(".") + 1);
+      const listCount = fileListDom.childElementCount;
+
+      const fileInfo = {
+        fileIndex: listCount,
+        fileFullName: name,
+        fileName: fileName,
+        fileExt: fileExt,
+        fileType: content.type,
+        fileByte: content.size,
+        file: content,
+      };
+
+      const file = content;
+
+      const liDom = document.createElement("li");
+
+      liDom.setAttribute("data-index", listCount);
+
+      transData.push(fileInfo);
+
+      liDom.innerHTML = name;
+      fileListDom.appendChild(liDom);
+    };
+
+    const text = rxjs.fromEvent(eventDom, "click").subscribe((event) => {
+      fileDom.click();
+    });
+
+    rxjs.fromEvent(fileDom, "change").subscribe((event) => {
+      console.log("파일 변경 이벤트 실행됨, %o", event);
+      const files = event.target.files;
+      for (var file of files) {
+        addItem(file);
+      }
+    });
+
+    const url = "http://localhost:8080/api/upload2";
+    rxjs.fromEvent(document.getElementById("upload-btn"), "click").subscribe(() => {
+      rxjs
+        .from(transData)
+        .pipe(
+          rxjs.concatMap((item) => {
+            const formData = new FormData();
+            // formData.append("fileInfo", { fileName: item.fileName });
+            makeFormData(formData, item);
+            debugger;
+            const option = {
+              createXHR: () => new XMLHttpRequest(),
+              url: url, // 파일 다운로드 요청 URL
+              method: "POST", // 혹은 'POST'
+              headers: {
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "multipart/form-data",
+                // "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
+                // "Access-Control-Allow-Headers": "content-type",
+                // "Access-Control-Allow-Method": "POST",
+              },
+              crossDomain: true,
+              withCredentials: false,
+              body: formData,
+              onUploadProgress: (progress) => {
+                console.log(progress);
+              },
+            };
+
+            return rxjs.ajax.ajax(option).pipe(rxjs.pluck("response"), rxjs.retry(1));
+          }),
+          rxjs.toArray()
+        )
+        .subscribe(
+          (next) => {
+            console.log("다음~~ %o", next);
+          },
+          (error) => {
+            console.log("에러@@ %o", error);
+          },
+          (complete) => {
+            console.log("완료~!! %o", complete);
+          }
+        );
+
+      return;
+    });
+
+    const makeFormData = function (formData, arg) {
+      for (const key in arg) {
+        formData.append(key, arg[key]);
+      }
+      return formData;
+    };
+
+    // document.getElementById("upload-btn").addEventListener("click", (event) => {
+    //   const formData = new FormData();
+    //   makeFormData(formData, transData[0]);
+
+    //   debugger;
+    //   const option = {
+    //     url: url, // 파일 다운로드 요청 URL
+    //     method: "POST", // 혹은 'POST'
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //     data: formData,
+    //     onUploadProgress: (progress) => {},
+    //   };
+
+    //   axios(option)
+    //     .then((response) => {
+    //       debugger;
+    //     })
+    //     .catch((e) => {
+    //       const { message, code } = e;
+    //       console.log(e);
+    //       console.log(`Messgae: ${message}\nCode: ${code}`);
+    //     });
+    // });
+  </script>
+</html>
