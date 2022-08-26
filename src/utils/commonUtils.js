@@ -1,3 +1,5 @@
+import axios from "axios";
+
 /**
  * 입력받은 css값에 숫자형태이면 px를 붙이는 용도
  * @param {*} val
@@ -264,4 +266,40 @@ export const makeDisplayFlexAlign = ({ verticalAlign, textAlign }, type = "flex"
     }
   }
   return result;
+};
+
+/**
+ * fileTransYn : 0 -> 전송대기
+ * fileTransYn : 1 -> 전송중
+ * fileTransYn : 2 -> 전송완료
+ * fileTransYn : 3 -> 전송실패
+ */
+/**
+ * 입력받은 파일을 서버의 FILE용 DTO에 맞는 형태로 변환
+ *
+ *
+ * @param {*} file inputbox의 file type
+ * @returns 서버 DTO 구조의 Object
+ */
+export const makeFileInfo = function (file, excludeFile) {
+  let name = file.name + "";
+  let fileName = name.substring(0, name.lastIndexOf("."));
+  let fileExt = name.substring(name.lastIndexOf(".") + 1);
+
+  const fileInfo = {
+    fileFullName: name,
+    fileName: fileName,
+    fileExt: fileExt,
+    fileType: file.type,
+    fileByte: file.size,
+    fileTransYn: 0,
+    fileTransPer: 0,
+  };
+
+  if (!excludeFile) {
+    fileInfo.file = file;
+    fileInfo.axiosSource = axios.CancelToken.source();
+  }
+
+  return fileInfo;
 };

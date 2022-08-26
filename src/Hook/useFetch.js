@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Observable } from "rxjs";
 import { useEffect, useState } from "react";
 import queryString from "query-string";
 
@@ -124,6 +125,74 @@ export function fileDownload(url, param) {
       });
   });
 }
+
+/**
+ * URL에 BODY에 데이터를 포함하여 POST요청을 한다.
+ * @param {String} url
+ * @param {Object} data
+ */
+export function rxJsPost(url, data) {
+  url = defaultUrl + url;
+  return new Observable((observer) => {
+    axios
+      .post(url, data)
+      .then((res) => {
+        let {
+          data: { message },
+        } = res;
+        observer.next(res);
+        observer.complete();
+      })
+      .catch((e) => {
+        observer.error(e);
+      });
+  });
+}
+
+/**
+ * 해당 URL로 파일 객체를 전송한다.
+ * @param {String} url
+ * @param {Object} fileInfo
+ * @param {function} onUploadProgress
+ * @returns
+ */
+export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
+  url = defaultUrl + url;
+  // 객체를 fromData 형태로 가공
+  const formData = makeFormData(fileInfo, ["axiosSource"]);
+
+  fileInfo.axiosSource = fileInfo.axiosSource ??= axios.CancelToken.source();
+
+  const option = {
+    url: url, // 파일 다운로드 요청 URL
+    method: "POST", // 혹은 'POST'
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    data: formData,
+    cancelToken: fileInfo.axiosSource.token,
+    onUploadProgress: onUploadProgress,
+  };
+
+  return new Observable((observer) => {
+    axios(option)
+      .then((response) => {
+        observer.next(response.data);
+        observer.complete();
+      })
+      .catch((e) => {
+        observer.error(e);
+      });
+  });
+}
+
+const makeFormData = function (arg, exclude = []) {
+  const formData = new FormData();
+  for (const key in arg) {
+    if (!exclude.includes(key)) formData.append(key, arg[key]);
+  }
+  return formData;
+};
 
 export function fileUpload(url, param) {
   url = defaultUrl + url;

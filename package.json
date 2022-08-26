@@ -15,6 +15,7 @@
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
+    "axios-observable": "^1.5.0",
     "dom-to-image": "^2.6.0",
     "jquery": "^3.6.0",
     "query-string": "^7.1.1",

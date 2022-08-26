@@ -1,0 +1,24 @@
+.btn-wrapper {
+  display: inline-block;
+  padding: 8px;
+  margin: 0px 5px;
+  background-color: #fff;
+  color: black;
+  cursor: pointer;
+  border-radius: 2px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* box-shadow: 0px 0px 5px 4px #cacaca; */
+}
+
+.btn-wrapper:active {
+  /* box-shadow: 0px 0px 5px 2px #cecece; */
+  transform: translateY(3px);
+}
+
+.progress-bar {
+  transition: all 1s ease-in;
+}

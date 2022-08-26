@@ -7,7 +7,6 @@
     <title>Document</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
-    <script src="https://cdn.skypack.dev/axios-observable/axiosObservable.js"></script>
 
     <style>
       * {
@@ -16,7 +15,7 @@
         padding: 0;
       }
       :root {
-        --brg: #222327;
+        --brg: #dadeee;
         --headerHeight: 40px;
       }
 
@@ -203,36 +202,48 @@
       }
     });
 
-    const url = "http://localhost:8080/api/upload2";
+    let axiosSource = axios.CancelToken.source();
+    const rxAxios = function (option) {
+      return rxjs.Observable.create((observer) => {
+        option.cancelToken = axiosSource.token;
+
+        try {
+          axios(option)
+            .then((response) => {
+              observer.next(response);
+              observer.complete();
+            })
+            .catch((e) => {
+              observer.error(e);
+            });
+        } catch (e) {
+          observer.error(e);
+        }
+      });
+    };
+
+    const url = "http://localhost:8080/api/upload";
     rxjs.fromEvent(document.getElementById("upload-btn"), "click").subscribe(() => {
       rxjs
         .from(transData)
         .pipe(
-          rxjs.concatMap((item) => {
+          rxjs.mergeMap((item) => {
             const formData = new FormData();
-            // formData.append("fileInfo", { fileName: item.fileName });
             makeFormData(formData, item);
-            debugger;
+
             const option = {
-              createXHR: () => new XMLHttpRequest(),
               url: url, // 파일 다운로드 요청 URL
               method: "POST", // 혹은 'POST'
               headers: {
-                Accept: "application/json, text/plain, */*",
                 "Content-Type": "multipart/form-data",
-                // "Access-Control-Allow-Origin": "http://127.0.0.1:5500",
-                // "Access-Control-Allow-Headers": "content-type",
-                // "Access-Control-Allow-Method": "POST",
               },
-              crossDomain: true,
-              withCredentials: false,
-              body: formData,
+              data: formData,
               onUploadProgress: (progress) => {
-                console.log(progress);
+                console.log("진행중~ %o %s", progress, Math.round((progress.loaded * 100) / progress.total));
               },
             };
 
-            return rxjs.ajax.ajax(option).pipe(rxjs.pluck("response"), rxjs.retry(1));
+            return rxAxios(option).pipe(rxjs.retry(1));
           }),
           rxjs.toArray()
         )
@@ -245,6 +256,7 @@
           },
           (complete) => {
             console.log("완료~!! %o", complete);
+            debugger;
           }
         );
 
