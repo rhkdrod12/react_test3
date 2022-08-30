@@ -30,7 +30,7 @@ export const makeCssObject = (cssObj, notSnake) => {
 
     if (data != null && data !== "") {
       if (data instanceof Object) {
-        result += `${calmelKey} {${(makeCssObject(data), notSnake)}}; `;
+        result += `${calmelKey} {${makeCssObject(data, notSnake)}}; `;
       } else {
         result += `${calmelKey} : ${defaultCssValue(data)}; `;
       }
@@ -41,8 +41,8 @@ export const makeCssObject = (cssObj, notSnake) => {
 
 /**
  * 입력받은 camel형태의 문자를 snake형태로 바꿈
- * @param {*} val
- * @returns
+ * @param {*} val 카멜형태의 문자
+ * @returns 스네이크 형태의 문자
  */
 export const calmelToSnake = (val) => {
   let result = "";
@@ -75,7 +75,13 @@ export const getRect = (parentRef, positionX, positionY, { offsetX = 0, offsetY 
 
   return { top: resultY, left: resultX, width: width, height: height };
 };
-
+/**
+ * @declare
+ * @param {*} compRef
+ * @param {*} parentRef
+ * @param {*} param2
+ * @returns
+ */
 export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
   const compRect = compRef.current.getBoundingClientRect();
   const parentRect = parentRef.current.getBoundingClientRect();
@@ -99,6 +105,12 @@ export const getCommRefRect = (compRef, parentRef, { positionX = "RIGHT", positi
   return { top: parseFloat(top), left: parseFloat(left) };
 };
 
+/**
+ * 해당 객체의 위치값을 연산하여 위치값을 반환
+ * @param {*} compRef
+ * @param {*} param1
+ * @returns
+ */
 export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM", offsetX = 0, offsetY = 0 } = {}) => {
   const compRect = compRef.current.getBoundingClientRect();
 
@@ -120,7 +132,14 @@ export const getCompRect = (compRef, { positionX = "RIGHT", positionY = "BOTTOM"
 
   return { top: parseFloat(top), left: parseFloat(left) };
 };
-
+/**
+ * 부모 객체 안의 자식객체의 위치를 입력한 인수에 맞추어 계산하여 위치값을 반환
+ * @param {*} compRef 부모 컴포넌트
+ * @param {*} itemRef 위치를 지정할 자식 컴포넌트
+ * @param {*} param2 포지션 객체(ex: { positionX = "RIGHT", positionY = "BOTTOM" })
+ * @param {*} param3 위치 보정용 객체(ex: { offsetX = 0, offsetY = 0 })
+ * @returns {object} {top: 111, left: 111} 형태로 반환
+ */
 export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY = "BOTTOM" } = {}, { offsetX = 0, offsetY = 0 } = {}) => {
   const itemRect = itemRef.hasOwnProperty("current") ? itemRef.current.getBoundingClientRect() : itemRef.getBoundingClientRect();
   const compRect = compRef.current.getBoundingClientRect();
@@ -150,19 +169,19 @@ export const getHeight = () => {};
 /**
  * 이벤트들을 받아 params을 추가시킴
  * @param {*} events
- * @param {*} params
+ * @param {*} newParams
  * @returns
  */
-export const makeEvent = (events, params) => {
+export const makeEvent = (events, newParams) => {
   if (events) {
     const result = {};
     for (const key in events) {
       const func = events[key];
-      result[key] = (e) => func(e, params);
+      result[key] = (e, params) => func(e, { ...params, ...newParams });
     }
     return result;
   }
-  return null;
+  return {};
 };
 
 /**
@@ -303,3 +322,24 @@ export const makeFileInfo = function (file, excludeFile) {
 
   return fileInfo;
 };
+/**
+ * byte값을 최대 용량에 맞게 변환(GB까지)
+ * @param {*} bytes
+ * @returns
+ */
+export function formatSizeUnits(bytes) {
+  if (bytes >= 1073741824) {
+    bytes = (bytes / 1073741824).toFixed(2) + " GB";
+  } else if (bytes >= 1048576) {
+    bytes = (bytes / 1048576).toFixed(2) + " MB";
+  } else if (bytes >= 1024) {
+    bytes = (bytes / 1024).toFixed(2) + " KB";
+  } else if (bytes > 1) {
+    bytes = bytes + " bytes";
+  } else if (bytes == 1) {
+    bytes = bytes + " byte";
+  } else {
+    bytes = "0 bytes";
+  }
+  return bytes;
+}

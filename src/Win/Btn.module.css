@@ -1,16 +1,16 @@
 .btn-wrapper {
   display: inline-block;
-  padding: 8px;
+  padding: 1px 5px;
   margin: 0px 5px;
   background-color: #fff;
-  color: black;
+  color: rgb(35, 49, 53);
   cursor: pointer;
   border-radius: 2px;
+  box-shadow: 0px 0px 2px rgb(159, 159, 159);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
   /* box-shadow: 0px 0px 5px 4px #cacaca; */
 }
 
