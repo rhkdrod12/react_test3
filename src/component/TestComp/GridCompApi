@@ -2,10 +2,22 @@
 GridInfo = {
   /**************************
    * 그리드 전체에 적용할 setup
-   * ........
-   * 여기에
+   * header, data, footer에 모두 적용됨
+   * Row에 event를 적용하는 경우 기본적으로
+   * 컬럼을 감싸고 있는 div에 각각 개별적으로 적용함
+   *
+   * event:
+   * [이벤트명](event, param)
+   * 매개변수:
+   * event: 발생한 이벤트
+   * param: { id, data: columnData, rowData, setRowData, rowIdx, colIdx, Column, RowColumn, Row, rowAllData, setAllRowData }
+   * 이벤트는 기본적으로 로우에 걸더라도 걸리는 부분은 column쪽(모든 컬럼에)에 걸림,
+   * 따라서 별로로 컬럼에 이벤트를 적용하면 column 이벤트로 변경됨
+   * 컴포넌트에 걸고 싶으면 컴포넌트 자체에 이벤트를 적용시킴 어차피 필요한 파라미터 다 넘기니
+   *
    ***************************/
-  Column: [{}, { ...value, css: {} }], //<- 해당값은 headerinfo, dataInfo에 둘다 적용되도록
+  Row: { ...value, css: {}, event: {} },
+  Column: [{}, { ...value, css: {}, event: {} }], //<- 해당값은 headerinfo, dataInfo에 둘다 적용되도록
   HeaderInfo: {},
   DataInfo: {},
   FooterInfo: {},
@@ -18,9 +30,9 @@ HeaderInfo = {
    * ........
    ***************************/
   // 헤더 로우에 적용할 setup
-  HeaderRow: { ...value, css: {} },
+  Row: { ...value, css: {}, event: {} },
   // 헤더 컬럼에 적용할 setup
-  HeaderColumn: [{}, { ...value, css: {} }],
+  Column: [{}, { ...value, css: {}, event: {} }],
 };
 
 DataInfo = {
@@ -29,9 +41,9 @@ DataInfo = {
    * ........
    ***************************/
   // 데이터 로우에 적용할 setup
-  DataRow: { ...value, css: {} },
+  Row: { ...value, css: {}, event: {} },
   // 데이터 컬럼에 적용할 setup
-  DataColumn: [{}, { ...value, css: {} }],
+  Column: [{}, { ...value, css: {}, event: {} }],
 };
 
 // 위와 동일

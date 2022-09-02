@@ -1,4 +1,5 @@
 import axios from "axios";
+import { event } from "jquery";
 
 /**
  * 입력받은 css값에 숫자형태이면 px를 붙이는 용도
@@ -178,6 +179,29 @@ export const makeEvent = (events, newParams) => {
     for (const key in events) {
       const func = events[key];
       result[key] = (e, params) => func(e, { ...params, ...newParams });
+    }
+    return result;
+  }
+  return {};
+};
+
+/**
+ * makeEvent를 통해 만들어진 이벤트를 서로 결합
+ * @param {*} events1
+ * @param {*} events2
+ */
+export const combineEvents = (events1, events2) => {
+  if (events1 && events2) {
+    // 일단 서로 모두다 넣고, 항상 events1부터 먼저 실행되도록 함
+    const result = { ...events2, ...events1 };
+    // event2의 이벤트가 events1에도 있으면 결합시킴
+    for (const key in events1) {
+      if (events2[key]) {
+        result[key] = (e, params) => {
+          events1[key](e, params);
+          events2[key](e, params);
+        };
+      }
     }
     return result;
   }

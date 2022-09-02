@@ -1,20 +1,10 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import btnClass from "./Btn.module.css";
-import { StyleDiv, StyleLi, StyleUl } from "../Component/StyleComp/StyleComp";
-import { useState } from "react";
-import { formatSizeUnits, makeFileInfo } from "../utils/commonUtils";
-import { fileDownload, fileDownload2, fileRxjsUpload, postFetch, rxJsPost, useGetFetch } from "../Hook/useFetch";
-import { catchError, from, map, mergeMap, Observable, of, retry, throwError, toArray } from "rxjs";
-import { filter, tap } from "rxjs/operators";
-import { memo } from "react";
-import axios from "axios";
-import { ReactComponent as Cancel } from "../svg/cancel.svg";
-import { ReactComponent as Delete } from "../svg/delete.svg";
-import { COM_MESSAGE } from "../utils/commonMessage";
-import { FileUpload } from "./FileDownload";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import RadioComp from "../Component/BasicComponent/RadioComp";
-import { MyGrid } from "../Component/MyGrid2";
+import { StyleDiv } from "../Component/StyleComp/StyleComp";
 import GridComp from "../Component/TestComp/GridComp2";
+import { fileDownload2, useGetFetch } from "../Hook/useFetch";
+import { formatSizeUnits } from "../utils/commonUtils";
+import { FileUpload } from "./FileDownload";
 
 const Main = () => {
   const [select, setSelect] = useState("0");
@@ -43,12 +33,12 @@ const FileDownload = () => {
       height: 40,
     },
     Column: [
-      { id: "fileIndex", name: "순서", width: "5%", textAlign: "center" },
+      { id: "fileIndex", name: "번호", width: "5%", textAlign: "center" },
       { id: "fileFullName", name: "파일이름", width: "50%" },
       { id: "fileByte", name: "파일크기", width: "10%" },
       { id: "fileTransPer", name: "진행", width: "10%", textAlign: "center" },
       { id: "fileOther", name: "비고", width: "20%", textAlign: "center" },
-      { id: "check", width: "5%", textAlign: "center", component: CheckBox },
+      { id: "check", width: "5%", textAlign: "center", defaultValue: "0" },
     ],
     HeaderInfo: {
       Row: { css: { backgroundColor: "black", borderBottom: "1px solid white" } },
@@ -56,37 +46,26 @@ const FileDownload = () => {
     },
     DataInfo: {
       Row: {
-        event: {
-          onClick: (event, { data, RowData, setRowAllData, rowIdx }) => {
-            if (!data.fileTransYn) {
-              const progress = (process) => {
-                const percent = ((process.loaded * 100) / data.fileByte).toFixed(2);
-                setRowAllData((itemList) => itemList.map((item) => (item.fileId == data.fileId ? { ...item, fileTransYn: 1, fileTransPer: percent } : item)));
-              };
-              fileDownload2("/api/download", { fileId: data.fileId }, progress)
-                .then((result) => {
-                  const test = RowData;
-                  setRowAllData((itemList) => itemList.map((item) => (item.fileId == data.fileId ? { ...item, fileTransYn: 2 } : item)));
-                })
-                .catch((error) => {
-                  setRowAllData((itemList) => itemList.map((item) => (item.fileId == data.fileId ? { ...item, fileTransYn: 3 } : item)));
-                });
-            }
-          },
-        },
         css: { "&:hover": { backgroundColor: "#6c6cd9" } },
       },
       Column: [
-        { id: "fileFullName", css: { cursor: "pointer" } },
+        {
+          id: "fileFullName",
+          css: { cursor: "pointer" },
+          event: {
+            onClick: fileDownloadEvent,
+          },
+        },
         { id: "fileByte", textAlign: "right", fommater: formatSizeUnits },
         { id: "fileTransYn" },
         { id: "fileTransPer", component: ProgressBarMgm },
+        { id: "check", component: CheckBox, event: { onClick: fileCheckBoxClick } },
       ],
       Scroll: { visibleCount: 10 },
     },
   };
 
-  const [files, setFiles] = useGetFetch("/api/getFileList", { param: { page: 1, limit: 30 } });
+  const [files, setFiles] = useGetFetch("/api/getFileList", { param: { page: 1, pageCount: 100 } });
 
   useEffect(() => {
     files.forEach((item, idx) => (item.fileIndex = idx + 1));
@@ -106,15 +85,35 @@ const FileDownload = () => {
   );
 };
 
-const CheckBox = ({ id, data, rowData, setRowData, Column, rowIdx, colIdx, columnEvent }) => {
+const fileDownloadEvent = (event, { id, rowData, setRowData, rowIdx }) => {
+  if (id != "check" && !rowData.fileTransYn) {
+    const progress = (process) => {
+      const percent = ((process.loaded * 100) / rowData.fileByte).toFixed(2);
+      setRowData(rowIdx, { fileTransYn: 1, fileTransPer: percent });
+    };
+    fileDownload2("/api/download", { fileId: rowData.fileId }, progress)
+      .then((result) => {
+        setRowData(rowIdx, { fileTransYn: 2 });
+      })
+      .catch((error) => {
+        setRowData(rowIdx, { fileTransYn: 3 });
+      });
+  }
+};
+
+const fileCheckBoxClick = (event, { id, data, rowData, setRowData, rowIdx }) => {
+  setRowData(rowIdx, { ...rowData, check: data == null || data == "0" ? "1" : "0" });
+};
+const CheckBox = memo(({ id, data, rowData, setRowData, rowIdx, colIdx, event }) => {
+  // 리액트 기본적
+  console.log("render checkbox %s %s %s %o", data, id, rowIdx, rowData);
   const onChange = (e) => {
     setRowData(rowIdx, { ...rowData, check: e.target.checked ? "1" : "0" });
   };
+  return <input {...event} style={{ width: "100%", height: "100%" }} type="checkbox" name={id} onChange={onChange} checked={data == "1" ? true : false} />;
+});
 
-  return <input type="checkbox" name={id} value="1" onClick={(e) => e.stopPropagation()} onChange={onChange} checked={data == 1 ? true : false} />;
-};
-
-const ProgressBarMgm = memo(({ id, data, rowData, Column, rowIdx, colIdx, columnEvent }) => {
+const ProgressBarMgm = memo(({ id, data, rowData, Column, rowIdx, colIdx, event }) => {
   let comp;
   switch (rowData?.fileTransYn ?? 0) {
     case 0:

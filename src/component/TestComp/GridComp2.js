@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import React, { useState, memo, useEffect, useContext, useMemo } from "react";
+import React, { useState, memo, useEffect, useContext, useMemo, useCallback } from "react";
 import { ScrollVirtualYBox, ScrollYBox, useScrollYData } from "../../Hook/useScroll";
 import { copyObjectBykey, defaultCssValue, findFieldAndSetObjectValue, makeCssObject, makeDisplayFlexAlign, makeEvent, makeFlexAlign } from "../../utils/commonUtils";
 import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider/ContextProvider";
@@ -13,37 +13,50 @@ const GridComp = ({ Data, GridInfo: gridInfo }) => {
   gridInfo = useMemo(() => makeGridParam(gridInfo), [gridInfo]);
 
   const { HeaderInfo, DataInfo, FooterInfo } = gridInfo;
-  const [rowAllData, setRowAllData] = useState(Data);
+  const [rowStateAllData, setRowAllData] = useState(Data);
   const [GridInfo, setGridInfo] = useState(gridInfo);
+  const [rowAllData, setTempRowAllData] = useState([]); // rowAllData는 어차피 더이상 변경감지를 할 필요가 없는 데이터들
 
   // rowData의 경우 데이터를 조회하는 과정에서 먼저 빈배열이 넘어오기 때문에 없을 수 있음
   useEffect(() => setRowAllData(Data), [Data]);
   useEffect(() => setGridInfo(gridInfo), [gridInfo]);
+  useEffect(
+    () =>
+      setTempRowAllData((data) => {
+        data.length = 0;
+        data.push(...rowStateAllData);
+        return data;
+      }),
+    [rowStateAllData]
+  );
 
   // 스크롤 여부
-  const scrollFlag = rowAllData.length > DataInfo.Scroll.visibleCount;
+  const scrollFlag = rowStateAllData.length > DataInfo.Scroll.visibleCount;
   // 스크롤 처리
-  const [scrollData, ref] = useScrollYData(rowAllData, DataInfo.Scroll);
+  const [scrollData, ref] = useScrollYData(rowStateAllData, DataInfo.Scroll);
 
   let { scrollRowData, dataTranslateY } = scrollData;
 
-  console.log("render GridComp %o", scrollData);
+  console.log("render GridComp");
 
-  return (
-    <div className="grid-root">
-      <ContextProvider ContextStore={GridContextStore} Data={{ rowAllData, setRowAllData, GridInfo, setGridInfo }}>
-        <GridHeader HeaderInfo={HeaderInfo} scroll={scrollFlag}></GridHeader>
-        <ScrollYBox scrollData={scrollData} ref={ref}>
-          <div className="grid-data-scrollCotainer" style={{ transform: `translateY(${dataTranslateY}px)` }}>
-            {scrollRowData && scrollRowData.length > 0 ? (
-              <GridBody rowAllData={scrollRowData}></GridBody>
-            ) : (
-              <StyleDiv inStyle={{ width: 150, margin: "10px auto", textAlign: "center" }}>데이터 없음</StyleDiv>
-            )}
-          </div>
-        </ScrollYBox>
-      </ContextProvider>
-    </div>
+  return useMemo(
+    () => (
+      <div className="grid-root">
+        <ContextProvider ContextStore={GridContextStore} Data={{ rowAllData: rowAllData, setRowAllData, GridInfo, setGridInfo }}>
+          <GridHeader HeaderInfo={HeaderInfo} scroll={scrollFlag}></GridHeader>
+          <ScrollYBox scrollData={scrollData} ref={ref}>
+            <div className="grid-data-scrollCotainer" style={{ transform: `translateY(${dataTranslateY}px)` }}>
+              {scrollRowData && scrollRowData.length > 0 ? (
+                <GridBody rowAllData={scrollRowData} startIdx={scrollData.startIdx}></GridBody>
+              ) : (
+                <StyleDiv inStyle={{ width: 150, margin: "10px auto", textAlign: "center" }}>데이터 없음</StyleDiv>
+              )}
+            </div>
+          </ScrollYBox>
+        </ContextProvider>
+      </div>
+    ),
+    [scrollRowData]
   );
 };
 
@@ -70,6 +83,11 @@ const GridHeader = memo(({ HeaderInfo: headerInfo, scroll }) => {
  */
 const GridHeaderColumn = memo(({ column }) => {
   const { id, name, width, verticalAlign, textAlign, css: columnCss, component: Component, event } = column;
+
+  // 현재 문제가 rowAllData가 변경되면 주소값이 변경되어서 여기가 재갱신되고
+  // 그 하위애들도 전부 다 갱신시켜버리는데..
+  // 근데 결국에는 다시 그려지려면 rowAllData가 갱신되어야하는데..
+  // 그래야 스크롤시 변경된 값이 반영이 되는데..
 
   const rowAllData = useContext(GridContextStore.rowAllData);
   const setRowAllData = useContext(GridContextStore.setRowAllData);
@@ -98,64 +116,87 @@ const GridHeaderColumn = memo(({ column }) => {
 /**
  * 그리드 Body부분(데이터 표현 부분)
  */
-const GridBody = memo(({ rowAllData, transform }) => {
+const GridBody = memo(({ rowAllData, transform, startIdx }) => {
+  console.log("render dataBody");
   return (
     <StyleDiv style={{ transform: `translateY(${transform}px)` }} className="grid-body">
-      {rowAllData ? rowAllData.map((row, idx) => <GridBodyRow key={idx} rowData={row} rowIdx={idx}></GridBodyRow>) : null}
+      {rowAllData ? rowAllData.map((row, idx) => <GridBodyRowWrapper key={idx} rowData={row} rowIdx={startIdx + idx}></GridBodyRowWrapper>) : null}
     </StyleDiv>
   );
 });
 
 /**
- * Row 구현 부분
+ * Row 데이터 전달용 wrapper
+ * @param {*} param0
+ * @returns
  */
-const GridBodyRow = memo(({ rowData, rowIdx }) => {
-  const setRowAllData = useContext(GridContextStore.setRowAllData);
+const GridBodyRowWrapper = ({ rowData, rowIdx }) => {
+  const rowAllData = useContext(GridContextStore.rowAllData);
   const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
   const Row = DataInfo.Row;
   const RowColumn = DataInfo.Column;
+  return <GridBodyRow rowData={rowData} rowIdx={rowIdx} rowAllData={rowAllData} Row={Row} RowColumn={RowColumn} />;
+};
 
-  const param = { data: rowData, rowIdx, Row, RowColumn, setRowAllData };
-  const rowEvent = makeEvent(DataInfo.Row.event, param);
+/**
+ * Row 구현부분
+ */
+const GridBodyRow = memo(({ rowData, rowIdx, rowAllData, Row, RowColumn }) => {
+  // 이놈 때문에 발동했구만..
+  console.log("render row %s", rowIdx);
+  // rowData 보관용 - 근데 이정도면 그냥 재 랜더링 시키는게 낫지 않나..?
+  const [rowTempData, rowTempSetData] = useState(rowData);
+  useEffect(() => {
+    rowTempSetData((data) => {
+      Object.assign(data, rowData);
+      return data;
+    });
+  }, [rowData]);
 
   return (
-    <StyleDiv className="grid-row" inStyle={{ display: "flex", borderBottom: "1px solid", height: Row.height, background: Row.background, ...Row.css }} {...rowEvent}>
+    <StyleDiv className="grid-row" inStyle={{ display: "flex", borderBottom: "1px solid", height: Row.height, background: Row.background, ...Row.css }}>
       {RowColumn
         ? RowColumn.map((column, idx) => (
-            <GridBodyColumn key={idx} columnData={rowData[column.id]} rowIdx={rowIdx} colIdx={idx} Column={column} RowColumn={RowColumn} rowData={rowData}></GridBodyColumn>
+            <GridBodyColumn key={idx} columnData={rowData[column.id]} rowIdx={rowIdx} colIdx={idx} Column={column} RowColumn={RowColumn} rowData={rowTempData} rowAllData={rowAllData}></GridBodyColumn>
           ))
         : null}
     </StyleDiv>
   );
 });
 
-const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx, rowData }) => {
+const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx, rowData, rowAllData }) => {
   const { id, width, textAlign, verticalAlign, css: columnCss, fommater, event, component: Component } = Column;
+
+  const setAllRowData = useContext(GridContextStore.setRowAllData);
   const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
   const Row = DataInfo.Row;
   const RowColumn = DataInfo.Column;
-  const rowAllData = useContext(GridContextStore.rowAllData);
-  const setAllRowData = useContext(GridContextStore.setRowAllData);
 
+  console.log("render column %s", id);
+  /**
+   * 로우 인덱스에 해당하는 열을 해당 값으로 바꿈
+   * @param {*} rowIdx
+   * @param {*} rowData
+   */
   const setRowData = (rowIdx, rowData) => {
-    setAllRowData((items) => {
-      debugger;
-      return items.map((item, idx) => (idx === rowIdx ? { ...item, ...rowData } : item));
-    });
+    setAllRowData((items) => items.map((item, idx) => (idx === rowIdx ? { ...item, ...rowData } : item)));
   };
 
-  const param = { id, data: columnData, rowData, setRowData, rowIdx, colIdx, Column, Row, RowColumn, rowAllData, setAllRowData };
+  const param = { id, data: columnData, rowData, setRowData, rowIdx, colIdx, Column, RowColumn, Row, rowAllData, setAllRowData };
   const columnEvent = makeEvent(event, param);
+  const rowEvent = makeEvent(Row.event, param);
 
   let comp;
   if (Component) {
+    param.event = columnEvent;
+    param.rowEvent = rowEvent;
     comp = <Component {...param}>{fommater?.(columnData) || columnData}</Component>;
   } else {
     comp = <div {...columnEvent}>{fommater?.(columnData) || columnData}</div>;
   }
 
   return (
-    <StyleDiv inStyle={{ flexBasis: width, ...makeDisplayFlexAlign({ textAlign, verticalAlign }), ...columnCss }} className="grid-column grid-data-column">
+    <StyleDiv inStyle={{ flexBasis: width, ...makeDisplayFlexAlign({ textAlign, verticalAlign }), ...columnCss }} className="grid-column grid-data-column" {...rowEvent} {...columnEvent}>
       {comp}
     </StyleDiv>
   );
