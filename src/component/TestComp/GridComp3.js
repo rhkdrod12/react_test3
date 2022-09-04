@@ -1,68 +1,96 @@
-import React, { memo, useContext, useEffect, useMemo, useState } from "react";
+import React, { memo, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { ScrollYBox, useScrollYData } from "../../Hook/useScroll";
 import { copyObjectBykey, makeDisplayFlexAlign, makeEvent } from "../../utils/commonUtils";
 import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider/ContextProvider";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "./GridComp.css";
-const GridContextStore = createMutilContext(["rowAllData", "setRowAllData", "GridInfo", "setGridInfo", "selected", "setSelected"]);
-const GridComp = ({ Data, GridInfo: gridInfo }) => {
+import { useGridReducer } from "./GridRowReducer";
+
+export const useGridComponent = (rowAllData, gridInfo) => {
   // 공통설정을 각각의 header, data, footer에 적용
-  useMemo(() => makeGridParam(gridInfo), [gridInfo]);
+  useEffect(() => {
+    makeGridParam(gridInfo);
+  }, [gridInfo]);
   // 기본값 생성
-  useMemo(() => makeDefaultValue(gridInfo.DataInfo, Data), [Data]);
+  useEffect(() => {
+    makeDefaultValue(gridInfo.DataInfo, rowAllData);
+  }, [rowAllData]);
 
-  const { HeaderInfo, DataInfo, FooterInfo } = gridInfo;
-  const [rowStateAllData, setRowAllData] = useState(Data);
-  const [GridInfo, setGridInfo] = useState(gridInfo);
-  const [rowTempAllData, setTempRowAllData] = useState([]); // rowAllData는 어차피 더이상 변경감지를 할 필요가 없는 데이터들
-  const [selected, setSelected] = useState(-1);
+  const rowAction = useGridReducer(rowAllData);
+  const rowState = rowAction.getRowState();
 
-  // rowData의 경우 데이터를 조회하는 과정에서 먼저 빈배열이 넘어오기 때문에 없을 수 있음
-  useEffect(() => setRowAllData(Data), [Data]);
-  useEffect(() => setGridInfo(gridInfo), [gridInfo]);
-  useEffect(
-    () =>
-      setTempRowAllData((data) => {
-        data.length = 0;
-        data.push(...rowStateAllData);
-        return data;
-      }),
-    [rowStateAllData]
-  );
+  const gridComponent = <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />;
 
-  // 스크롤 여부
-  const scrollFlag = rowStateAllData.length > DataInfo.Scroll.visibleCount;
-  // 스크롤 처리
-  const [scrollData, ref] = useScrollYData(rowStateAllData, DataInfo.Scroll);
-  // 스크롤 데이터
-  const { scrollRowData, dataTranslateY } = scrollData;
-  // 컨텍스트 데이터 저장
-  const contextData = { rowAllData: rowTempAllData, setRowAllData, GridInfo, setGridInfo, selected, setSelected };
-
-  console.log("render GridComp");
-  return useMemo(
-    () => (
-      <div className="grid-root">
-        <ContextProvider ContextStore={GridContextStore} Data={contextData}>
-          <GridHeader HeaderInfo={HeaderInfo} scroll={scrollFlag}></GridHeader>
-          <ScrollYBox scrollData={scrollData} ref={ref}>
-            <div className="grid-data-scrollCotainer" style={{ transform: `translateY(${dataTranslateY}px)` }}>
-              {scrollRowData && scrollRowData.length > 0 ? (
-                <GridBody rowAllData={scrollRowData} startIdx={scrollData.startIdx}></GridBody>
-              ) : (
-                <StyleDiv inStyle={{ width: 150, margin: "10px auto", textAlign: "center" }}>데이터 없음</StyleDiv>
-              )}
-            </div>
-          </ScrollYBox>
-        </ContextProvider>
-      </div>
-    ),
-    [scrollRowData]
-  );
+  return { rowState, rowAction, gridComponent };
 };
 
+const GridContextStore = createMutilContext(["rowState", "rowAction", "GridInfo"]);
+const GridComp = ({ rowState, rowAction, gridInfo }) => {
+  const [GridInfo, setGridInfo] = useState(gridInfo);
+  // 컨텍스트 데이터 저장
+  const contextData = { rowState, rowAction, GridInfo };
+  // console.log("render GridComp %o", rowState);
+
+  return (
+    <div className="grid-root">
+      <ContextProvider ContextStore={GridContextStore} Data={contextData}>
+        <GridWrapper rowState={rowState} rowAction={rowAction} GridInfo={GridInfo} />
+      </ContextProvider>
+    </div>
+  );
+};
+// const GridComp = ({ Data: rowAllData, GridInfo: gridInfo }) => {
+//   // 공통설정을 각각의 header, data, footer에 적용
+//   useEffect(() => {
+//     makeGridParam(gridInfo);
+//   }, [gridInfo]);
+//   // 기본값 생성
+//   useEffect(() => {
+//     makeDefaultValue(gridInfo.DataInfo, rowAllData);
+//   }, [rowAllData]);
+
+//   const [GridInfo, setGridInfo] = useState(gridInfo);
+//   const rowAction = useGridReducer(rowAllData);
+//   const rowState = rowAction.getRowState();
+
+//   // 컨텍스트 데이터 저장
+//   const contextData = { rowState, rowAction, GridInfo };
+//   // console.log("render GridComp %o", rowState);
+
+//   return (
+//     <div className="grid-root">
+//       <ContextProvider ContextStore={GridContextStore} Data={contextData}>
+//         <GridWrapper rowState={rowState} rowAction={rowAction} GridInfo={GridInfo} />
+//       </ContextProvider>
+//     </div>
+//   );
+// };
+
+const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
+  const { HeaderInfo, DataInfo, FooterInfo } = GridInfo;
+  // 스크롤 처리
+  const [scrollData, ref] = useScrollYData(rowState.rowAllData, DataInfo.Scroll);
+  // 스크롤 데이터
+  const { scrollRowData, dataTranslateY, scrollDisplay } = scrollData;
+  // console.log("render GridWrapper");
+  return (
+    <React.Fragment>
+      <GridHeader HeaderInfo={HeaderInfo} scroll={scrollDisplay}></GridHeader>
+      <ScrollYBox scrollData={scrollData} ref={ref}>
+        <div className="grid-data-scrollCotainer" style={{ transform: `translateY(${dataTranslateY}px)` }}>
+          {scrollRowData && scrollRowData.length > 0 ? (
+            <GridBody rowAllData={scrollRowData} startIdx={scrollData.startIdx}></GridBody>
+          ) : (
+            <StyleDiv inStyle={{ width: 150, margin: "10px auto", textAlign: "center" }}>데이터 없음</StyleDiv>
+          )}
+        </div>
+      </ScrollYBox>
+    </React.Fragment>
+  );
+});
+
 /**
- * 그리드 헤더의 첫부분
+ *
  */
 const GridHeader = memo(({ HeaderInfo: headerInfo, scroll }) => {
   const headerRow = headerInfo.Row;
@@ -85,16 +113,10 @@ const GridHeader = memo(({ HeaderInfo: headerInfo, scroll }) => {
 const GridHeaderColumn = memo(({ column }) => {
   const { id, name, width, verticalAlign, textAlign, css: columnCss, component: Component, event } = column;
 
-  // 현재 문제가 rowAllData가 변경되면 주소값이 변경되어서 여기가 재갱신되고
-  // 그 하위애들도 전부 다 갱신시켜버리는데..
-  // 근데 결국에는 다시 그려지려면 rowAllData가 갱신되어야하는데..
-  // 그래야 스크롤시 변경된 값이 반영이 되는데..
-
-  const rowAllData = useContext(GridContextStore.rowAllData);
-  const setRowAllData = useContext(GridContextStore.setRowAllData);
+  const rowAction = useContext(GridContextStore.rowAction);
 
   // 컴포넌트 또는 이벤트에 넘길 파라미터
-  const param = { id, name, rowAllData, setRowAllData };
+  const param = { id, name, rowAction };
   // 이벤트에 필요한 파라미터 추가
   const columnEvent = makeEvent(event, param);
 
@@ -118,46 +140,41 @@ const GridHeaderColumn = memo(({ column }) => {
  * 그리드 Body부분(데이터 표현 부분)
  */
 const GridBody = memo(({ rowAllData, transform, startIdx }) => {
-  console.log("render dataBody");
+  // console.log("render dataBody");
   const { css } = useContext(GridContextStore.GridInfo).DataInfo;
+  const [selectIdx, setSelectIdx] = useState(-1);
 
   return (
     <StyleDiv inStyle={{ ...css }} style={{ transform: `translateY(${transform}px)` }} className="grid-body">
-      {rowAllData ? rowAllData.map((row, idx) => <GridBodyRowWrapper key={idx} rowData={row} rowIdx={startIdx + idx}></GridBodyRowWrapper>) : null}
+      {rowAllData ? rowAllData.map((row, idx) => <GridBodyRow key={idx} rowData={row} rowIdx={startIdx + idx} selectIdx={selectIdx} setSelectIdx={setSelectIdx}></GridBodyRow>) : null}
     </StyleDiv>
   );
 });
 
 /**
- * Row 데이터 전달용 wrapper
- * @param {*} param0
- * @returns
- */
-const GridBodyRowWrapper = ({ rowData, rowIdx }) => {
-  const rowAllData = useContext(GridContextStore.rowAllData);
-  const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
-  const Row = DataInfo.Row;
-  const RowColumn = DataInfo.Column;
-  return <GridBodyRow rowData={rowData} rowIdx={rowIdx} rowAllData={rowAllData} Row={Row} RowColumn={RowColumn} />;
-};
-
-/**
  * Row 구현부분
  */
-const GridBodyRow = memo(({ rowData, rowIdx, rowAllData, Row, RowColumn }) => {
+const GridBodyRow = memo(({ rowData, rowIdx, selectIdx, setSelectIdx }) => {
   // 이놈 때문에 발동했구만..
-  console.log("render row %s", rowIdx);
-  // 재랜더링이 안되면서 기존값이 남아있는 상황인데..
-  const select = useContext(GridContextStore.GridInfo).DataInfo.Row.select;
-  const selected = useContext(GridContextStore.selected);
-  const setSelected = useContext(GridContextStore.setSelected);
+  const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
+  const rowAction = useContext(GridContextStore.rowAction);
+
+  const rowAllData = rowAction.getRowAllData();
+  const Row = DataInfo.Row;
+  const RowColumn = DataInfo.Column;
+
+  // console.log("render row %s", rowIdx);
 
   const styleParam = { display: "flex", borderBottom: "1px solid", height: Row.height, background: Row.background, ...Row.css };
 
-  const onClick = () => setSelected((val) => (val == rowIdx ? -1 : rowIdx));
+  const onClick = () => {
+    let idx = selectIdx != rowIdx ? rowIdx : -1;
+    setSelectIdx(idx);
+    rowAction.setSelectedRowIdex(idx);
+  };
 
-  if (selected == rowIdx) {
-    styleParam.backgroundColor = select;
+  if (selectIdx == rowIdx) {
+    styleParam.backgroundColor = Row.select;
   }
 
   return (
@@ -171,25 +188,16 @@ const GridBodyRow = memo(({ rowData, rowIdx, rowAllData, Row, RowColumn }) => {
   );
 });
 
-const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx, rowData, rowAllData }) => {
+const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx }) => {
   const { id, width, textAlign, verticalAlign, css: columnCss, fommater, event, component: Component } = Column;
 
-  const setAllRowData = useContext(GridContextStore.setRowAllData);
+  const rowAction = useContext(GridContextStore.rowAction);
   const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
+
   const Row = DataInfo.Row;
   const RowColumn = DataInfo.Column;
 
-  console.log("render column %s", id);
-  /**
-   * 로우 인덱스에 해당하는 열을 해당 값으로 바꿈
-   * @param {*} rowIdx
-   * @param {*} rowData
-   */
-  const setRowData = (rowIdx, rowData) => {
-    setAllRowData((items) => items.map((item, idx) => (idx === rowIdx ? { ...item, ...rowData } : item)));
-  };
-
-  const param = { id, data: columnData, rowData, setRowData, rowIdx, colIdx, Column, RowColumn, Row, rowAllData, setAllRowData };
+  const param = { id, data: columnData, rowData: rowAction.getRowData(rowIdx), rowIdx, colIdx, rowAction, Column, RowColumn, Row };
   const columnEvent = makeEvent(event, param);
   const rowEvent = makeEvent(Row.event, param);
 

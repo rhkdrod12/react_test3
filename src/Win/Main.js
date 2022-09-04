@@ -1,11 +1,11 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import RadioComp from "../Component/BasicComponent/RadioComp";
 import { StyleDiv } from "../Component/StyleComp/StyleComp";
-import GridComp from "../Component/TestComp/GridComp2";
+import GridComp, { useGridComponent } from "../Component/TestComp/GridComp3";
 import { fileDownload2, useGetFetch } from "../Hook/useFetch";
 import { formatSizeUnits } from "../utils/commonUtils";
 import { FileUpload } from "./FileDownload";
-
+import btnClass from "./Btn.module.css";
 const Main = () => {
   const [select, setSelect] = useState("0");
   const onChange = useCallback((orgVal, newVal) => {
@@ -36,17 +36,28 @@ const FileDownload = () => {
       { id: "fileIndex", name: "번호", width: "5%", textAlign: "center" },
       { id: "fileFullName", name: "파일이름", width: "50%" },
       { id: "fileByte", name: "파일크기", width: "10%" },
-      { id: "fileTransPer", name: "진행", width: "10%", textAlign: "center" },
+      { id: "fileTransPer", name: "진행", width: "10%", textAlign: "center", defaultValue: "0" },
       { id: "fileOther", name: "비고", width: "20%", textAlign: "center" },
       { id: "check", width: "5%", textAlign: "center", defaultValue: "0" },
     ],
     HeaderInfo: {
-      Row: { css: { backgroundColor: "black", borderBottom: "1px solid white" } },
-      Column: [{ id: "fileIndex" }, { id: "fileFullName", textAlign: "center" }, { id: "fileByte", textAlign: "center" }, { id: "fileTransPer", textAlign: "center" }],
+      Row: { css: { backgroundColor: "#f0f0f0", borderBottom: "1px solid black", color: "#000", letterSpacing: "2px" } },
+      Column: [
+        { id: "fileIndex" },
+        { id: "fileFullName", textAlign: "center" },
+        { id: "fileByte", textAlign: "center" },
+        { id: "fileTransPer", textAlign: "center" },
+        { id: "check", component: CheckAllBox, css: { "& .grid-header-column-name": { width: "100%", height: "100%" } } },
+      ],
     },
     DataInfo: {
+      css: {
+        backgroundColor: "#f0f0f0",
+        color: "#000",
+      },
       Row: {
-        css: { "&:hover": { backgroundColor: "#6c6cd9" } },
+        select: "#3060d9",
+        css: { "&:hover": { backgroundColor: "#6060d9" } },
       },
       Column: [
         {
@@ -73,42 +84,88 @@ const FileDownload = () => {
 
   console.log(files);
 
+  const { rowAction, gridComponent } = useGridComponent(files, GridInfo);
+
+  const fileAllDownload = (event) => {
+    const resultData = rowAction
+      .getRowAllData()
+      .filter((val) => val.check == "1")
+      .reduce(
+        (acc, val) => {
+          acc.rowIdx.push(val.fileIndex - 1);
+          acc.fileId.push(val.fileId);
+          acc.fileByte += val.fileByte;
+          return acc;
+        },
+        { rowIdx: [], fileId: [], fileByte: 0 }
+      );
+
+    const progress = (process) => {
+      const percent = ((process.loaded * 100) / resultData.fileByte).toFixed(2);
+      rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 1, fileTransPer: percent });
+    };
+
+    fileDownload2("/api/multiDownload", { fileId: resultData.fileId }, progress)
+      .then((result) => {
+        rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 2, fileTransPer: 100 });
+      })
+      .catch((error) => {
+        rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 3 });
+      });
+  };
+
   return (
     <div>
-      <StyleDiv inStyle={{ padding: 10, minWidth: "820px" }}>
-        <h3>파일 목록</h3>
-        <StyleDiv inStyle={{ width: "100%", height: "460px", border: "1px solid white", padding: 10, background: "#000000", marginTop: 10 }}>
-          <GridComp GridInfo={GridInfo} Data={files}></GridComp>
-        </StyleDiv>
+      <StyleDiv inStyle={{ padding: 10, minWidth: "820px", fontSize: "14px" }}>
+        <h3>파일 목록({`총 파일수: ${files.length}`})</h3>
+        <Button name="파일 다운로드" onClick={fileAllDownload} />
+        <StyleDiv inStyle={{ width: "100%", height: "460px", border: "1px solid white", padding: 10, background: "#f0f0f0", marginTop: 10 }}>{gridComponent}</StyleDiv>
       </StyleDiv>
     </div>
   );
 };
 
-const fileDownloadEvent = (event, { id, rowData, setRowData, rowIdx }) => {
+const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
+  const rowData = rowAction.getRowData(rowIdx);
   if (id != "check" && !rowData.fileTransYn) {
     const progress = (process) => {
       const percent = ((process.loaded * 100) / rowData.fileByte).toFixed(2);
-      setRowData(rowIdx, { fileTransYn: 1, fileTransPer: percent });
+      rowAction.setColumnData(rowIdx, { fileTransYn: 1, fileTransPer: percent });
     };
     fileDownload2("/api/download", { fileId: rowData.fileId }, progress)
       .then((result) => {
-        setRowData(rowIdx, { fileTransYn: 2 });
+        rowAction.setColumnData(rowIdx, { fileTransYn: 2 });
       })
       .catch((error) => {
-        setRowData(rowIdx, { fileTransYn: 3 });
+        rowAction.setColumnData(rowIdx, { fileTransYn: 3 });
       });
   }
 };
 
-const fileCheckBoxClick = (event, { id, data, rowData, setRowData, rowIdx }) => {
-  setRowData(rowIdx, { ...rowData, check: data == null || data == "0" ? "1" : "0" });
+const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
+  const rowData = rowAction.getRowData(rowIdx);
+  rowAction.setColumnData(rowIdx, { check: data == null || data == "0" ? "1" : "0" });
 };
-const CheckBox = memo(({ id, data, rowData, setRowData, rowIdx, colIdx, event }) => {
+
+// 전체선택시
+const CheckAllBox = memo(({ id, data, rowAction }) => {
   // 리액트 기본적
-  console.log("render checkbox %s %s %s %o", data, id, rowIdx, rowData);
+  const [select, setSelect] = useState(false);
+  const onClick = (e) => {
+    setSelect((value) => !value);
+  };
   const onChange = (e) => {
-    setRowData(rowIdx, { ...rowData, check: e.target.checked ? "1" : "0" });
+    const result = rowAction.getRowAllData().map((item) => ({ ...item, check: e.target.checked ? "1" : "0" }));
+    rowAction.setRowAllData(result);
+  };
+  return <input style={{ width: "100%", height: "100%" }} type="checkbox" name={id} onClick={onClick} onChange={onChange} checked={select} />;
+});
+
+const CheckBox = memo(({ id, data, rowData, rowAction, rowIdx, colIdx, event }) => {
+  // 리액트 기본적
+  // console.log("render checkbox %s %s %s %o", data, id, rowIdx, rowData);
+  const onChange = (e) => {
+    rowAction.setColumnData(rowIdx, { check: e.target.checked ? "1" : "0" });
   };
   return <input {...event} style={{ width: "100%", height: "100%" }} type="checkbox" name={id} onChange={onChange} checked={data == "1" ? true : false} />;
 });
@@ -154,12 +211,13 @@ const ProgressBar = memo(({ percent = 0, message, state = "transparent" }) => {
     </StyleDiv>
   );
 });
-
-const HrefComp = ({ children }) => {
+const Button = ({ name, ...attr }) => {
   return (
-    <React.Fragment>
-      <a>{children}</a>
-    </React.Fragment>
+    <div id="upload-btn" className={`${btnClass["btn-wrapper"]}`} {...attr}>
+      <a className="button-wrap">
+        <div>{name}</div>
+      </a>
+    </div>
   );
 };
 

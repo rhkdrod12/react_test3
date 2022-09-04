@@ -21,10 +21,18 @@
   border-bottom: 1px solid #101010;
   z-index: 3;
   position: relative;
-  background: white;
+  background: rgb(211, 209, 207);
 }
 
-.grid-header-column {
+.grid-header-column:not(:last-child) .grid-header-column-name::after {
+  content: "";
+  position: absolute;
+  right: 0px;
+  width: 2px;
+  top: 15%;
+  height: 70%;
+  border-radius: 10px;
+  background: rgb(211, 209, 207);
 }
 
 .grid-header-column-svg {
@@ -34,5 +42,13 @@
   color: #101010;
 }
 
-.grid-data-column {
+.grid-data-column:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  right: 0px;
+  width: 2px;
+  height: 70%;
+  border-radius: 10px;
+  background: rgb(211, 209, 207);
 }

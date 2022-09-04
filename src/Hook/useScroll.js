@@ -53,8 +53,10 @@ export const useScrollYData = (rowData, { visibleCount = 5, itemHeight = 50, off
       const dataTranslateY = -scrollTop % scrollItemHeight;
       // 표현할 데이터
       const scrollRowData = rowData ? rowData.filter((item, idx) => idx >= startIdx && idx < endIdx) : null;
+      // 스크롤 표기 여부
+      const scrollDisplay = rowData.length > visibleCount;
 
-      return { ...data, itemTotalHeight, scrollItemHeight, containerHeight, offsetY, dataTranslateY, scrollTop, startIdx, endIdx, rowData, scrollRowData };
+      return { ...data, itemTotalHeight, scrollItemHeight, containerHeight, offsetY, dataTranslateY, scrollTop, startIdx, endIdx, rowData, scrollRowData, scrollDisplay };
     });
   }, [rowData]);
 
@@ -72,7 +74,10 @@ export const useScrollYData = (rowData, { visibleCount = 5, itemHeight = 50, off
       const dataTranslateY = -scrollTop % data.scrollItemHeight;
       // 표현할 데이터
       const scrollRowData = data.rowData ? data.rowData.filter((item, idx) => idx >= startIdx && idx < endIdx) : null;
-      return { ...data, offsetY, dataTranslateY, scrollTop, startIdx, endIdx, scrollRowData };
+      // 스크롤 표기 여부
+      const scrollDisplay = data.rowData.length > visibleCount;
+
+      return { ...data, offsetY, dataTranslateY, scrollTop, startIdx, endIdx, scrollRowData, scrollDisplay };
     });
   }, []);
 
