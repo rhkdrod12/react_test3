@@ -24,17 +24,39 @@ export function useGetFetch(url, { stateType = [], param, callbackFunc } = {}) {
         if (typeof callbackFunc === "function") {
           callbackFunc(message);
         }
-
         setResponseData(message);
       })
-      .catch(({ message, code }) => {
-        console.log(`Messgae: ${message}\nCode: ${code}`);
+      .catch((error) => {
+        console.log(axiosError(error));
       });
   }, [url]);
 
   return [responseData, setResponseData];
 }
 
+/**
+ * axios 통신시 발생하는 에러메시지 처리
+ * @param {*} error
+ */
+const axiosError = (error) => {
+  if (error.code) {
+    if (error.name == "AxiosError") {
+      if (error.code == "ERR_NETWORK") {
+        return { result: false, ...COM_MESSAGE.ERR_NETWORK };
+      } else if (error.code == "ERR_BAD_RESPONSE") {
+        return error.response.data;
+      } else if (error.code == "ERR_BAD_REQUEST") {
+        return error.response.data;
+      } else {
+        return { result: false, ...COM_MESSAGE.ERR };
+      }
+    } else if (error.name == "CanceledError") {
+      if (error.code == "ERR_CANCELED") {
+        return { result: false, ...COM_MESSAGE.CANCEL_REQUEST };
+      }
+    }
+  }
+};
 export function usePostFetch(url, data, stateType = []) {
   const [responseData, setResponseData] = useState(stateType);
   url = defaultUrl + url;
@@ -47,8 +69,8 @@ export function usePostFetch(url, data, stateType = []) {
         } = res;
         setResponseData(message);
       })
-      .catch(({ message, code }) => {
-        console.log(`Messgae: ${message}\nCode: ${code}`);
+      .catch((error) => {
+        console.log(axiosError(error));
       });
   }, [url]);
 

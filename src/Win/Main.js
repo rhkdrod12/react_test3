@@ -86,6 +86,10 @@ const FileDownload = () => {
 
   const { rowAction, gridComponent } = useGridComponent(files, GridInfo);
 
+  /**
+   * 선택한 파일 다운로드 이벤트
+   * @param {*} event
+   */
   const fileAllDownload = (event) => {
     const resultData = rowAction
       .getRowAllData()
@@ -116,9 +120,12 @@ const FileDownload = () => {
 
   return (
     <div>
-      <StyleDiv inStyle={{ padding: 10, minWidth: "820px", fontSize: "14px" }}>
+      <StyleDiv inStyle={{ position: "relative", padding: 10, minWidth: "820px", fontSize: "14px" }}>
         <h3>파일 목록({`총 파일수: ${files.length}`})</h3>
-        <Button name="파일 다운로드" onClick={fileAllDownload} />
+        <StyleDiv inStyle={{ position: "absolute", right: "10px", top: "10px" }}>
+          <Button name="파일 다운로드" onClick={fileAllDownload} />
+        </StyleDiv>
+
         <StyleDiv inStyle={{ width: "100%", height: "460px", border: "1px solid white", padding: 10, background: "#f0f0f0", marginTop: 10 }}>{gridComponent}</StyleDiv>
       </StyleDiv>
     </div>

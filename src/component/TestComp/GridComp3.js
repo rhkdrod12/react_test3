@@ -73,6 +73,8 @@ const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
   // 스크롤 데이터
   const { scrollRowData, dataTranslateY, scrollDisplay } = scrollData;
   // console.log("render GridWrapper");
+  const { css } = DataInfo;
+
   return (
     <React.Fragment>
       <GridHeader HeaderInfo={HeaderInfo} scroll={scrollDisplay}></GridHeader>
@@ -81,7 +83,9 @@ const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
           {scrollRowData && scrollRowData.length > 0 ? (
             <GridBody rowAllData={scrollRowData} startIdx={scrollData.startIdx}></GridBody>
           ) : (
-            <StyleDiv inStyle={{ width: 150, margin: "10px auto", textAlign: "center" }}>데이터 없음</StyleDiv>
+            <StyleDiv className="grid-not-data" inStyle={{ width: 150, margin: "10px auto", textAlign: "center", ...css }}>
+              데이터 없음
+            </StyleDiv>
           )}
         </div>
       </ScrollYBox>
