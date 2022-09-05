@@ -20,7 +20,7 @@ export const useGridComponent = (rowAllData, gridInfo) => {
   const rowState = rowAction.getRowState();
 
   const gridComponent = <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />;
-
+  // console.log(rowState);
   return { rowState, rowAction, gridComponent };
 };
 
@@ -39,32 +39,6 @@ const GridComp = ({ rowState, rowAction, gridInfo }) => {
     </div>
   );
 };
-// const GridComp = ({ Data: rowAllData, GridInfo: gridInfo }) => {
-//   // 공통설정을 각각의 header, data, footer에 적용
-//   useEffect(() => {
-//     makeGridParam(gridInfo);
-//   }, [gridInfo]);
-//   // 기본값 생성
-//   useEffect(() => {
-//     makeDefaultValue(gridInfo.DataInfo, rowAllData);
-//   }, [rowAllData]);
-
-//   const [GridInfo, setGridInfo] = useState(gridInfo);
-//   const rowAction = useGridReducer(rowAllData);
-//   const rowState = rowAction.getRowState();
-
-//   // 컨텍스트 데이터 저장
-//   const contextData = { rowState, rowAction, GridInfo };
-//   // console.log("render GridComp %o", rowState);
-
-//   return (
-//     <div className="grid-root">
-//       <ContextProvider ContextStore={GridContextStore} Data={contextData}>
-//         <GridWrapper rowState={rowState} rowAction={rowAction} GridInfo={GridInfo} />
-//       </ContextProvider>
-//     </div>
-//   );
-// };
 
 const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
   const { HeaderInfo, DataInfo, FooterInfo } = GridInfo;
@@ -145,11 +119,13 @@ const GridHeaderColumn = memo(({ column }) => {
  */
 const GridBody = memo(({ rowAllData, transform, startIdx }) => {
   // console.log("render dataBody");
-  const { css } = useContext(GridContextStore.GridInfo).DataInfo;
-  const [selectIdx, setSelectIdx] = useState(-1);
+  const { css, event } = useContext(GridContextStore.GridInfo).DataInfo;
+  const rowAction = useContext(GridContextStore.rowAction);
 
+  const [selectIdx, setSelectIdx] = useState(-1);
+  const bodyEvent = makeEvent(event, { rowAction });
   return (
-    <StyleDiv inStyle={{ ...css }} style={{ transform: `translateY(${transform}px)` }} className="grid-body">
+    <StyleDiv inStyle={{ ...css }} style={{ transform: `translateY(${transform}px)` }} className="grid-body" {...bodyEvent}>
       {rowAllData ? rowAllData.map((row, idx) => <GridBodyRow key={idx} rowData={row} rowIdx={startIdx + idx} selectIdx={selectIdx} setSelectIdx={setSelectIdx}></GridBodyRow>) : null}
     </StyleDiv>
   );
@@ -228,14 +204,16 @@ const makeDefaultValue = (DataInfo, rowAllData) => {
       return acc;
     }, {});
 
-    if (defaultColumn) {
-      for (const row of rowAllData) {
+    let rowIndex = 0;
+    for (const row of rowAllData) {
+      if (defaultColumn) {
         for (const key in defaultColumn) {
           if (!row[key]) {
             row[key] = defaultColumn[key];
           }
         }
       }
+      row.rowIndex = rowIndex++;
     }
   }
 };

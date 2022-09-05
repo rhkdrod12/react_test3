@@ -41,7 +41,7 @@ const FileDownload = () => {
       { id: "check", width: "5%", textAlign: "center", defaultValue: "0" },
     ],
     HeaderInfo: {
-      Row: { css: { backgroundColor: "#f0f0f0", borderBottom: "1px solid black", color: "#000", letterSpacing: "2px" } },
+      Row: { css: { backgroundColor: "#f0f0f0", borderBottom: "1px solid black", color: "#000", letterSpacing: "2px", fontSize: "14px", fontWeight: "700" } },
       Column: [
         { id: "fileIndex" },
         { id: "fileFullName", textAlign: "center" },
@@ -58,6 +58,7 @@ const FileDownload = () => {
       Row: {
         select: "#3060d9",
         css: { "&:hover": { backgroundColor: "#6060d9" } },
+        event: { onClick: rowSelectEvent },
       },
       Column: [
         {
@@ -80,9 +81,7 @@ const FileDownload = () => {
 
   useEffect(() => {
     files.forEach((item, idx) => (item.fileIndex = idx + 1));
-  }, [, files]);
-
-  console.log(files);
+  }, [files]);
 
   const { rowAction, gridComponent } = useGridComponent(files, GridInfo);
 
@@ -118,11 +117,23 @@ const FileDownload = () => {
       });
   };
 
+  const onKeyUp = (event) => {
+    if (event.keyCode == "13") {
+      const value = event.target.value;
+      if (value == "") {
+        rowAction.clearRowFilter();
+      } else {
+        rowAction.setRowFilter({ fileFullName: value }, { compare: "includes" });
+      }
+    }
+  };
+
   return (
     <div>
       <StyleDiv inStyle={{ position: "relative", padding: 10, minWidth: "820px", fontSize: "14px" }}>
         <h3>파일 목록({`총 파일수: ${files.length}`})</h3>
         <StyleDiv inStyle={{ position: "absolute", right: "10px", top: "10px" }}>
+          <input placeholder="검색 - 파일명 입력 후 Enter" onKeyUp={onKeyUp} />
           <Button name="파일 다운로드" onClick={fileAllDownload} />
         </StyleDiv>
 
@@ -130,6 +141,17 @@ const FileDownload = () => {
       </StyleDiv>
     </div>
   );
+};
+
+const rowSelectEvent = (event, { id, rowIdx, rowAction }) => {
+  const rowData = rowAction.getRowData(rowIdx);
+  // if (!rowData.fileTransYn) {
+  //   if (rowData.check == "1") {
+  //     rowAction.setColumnData(rowIdx, { check: "0" });
+  //   } else {
+  //     rowAction.setColumnData(rowIdx, { check: "1" });
+  //   }
+  // }
 };
 
 const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
@@ -150,6 +172,7 @@ const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
 };
 
 const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
+  event.stopPropagation();
   const rowData = rowAction.getRowData(rowIdx);
   rowAction.setColumnData(rowIdx, { check: data == null || data == "0" ? "1" : "0" });
 };

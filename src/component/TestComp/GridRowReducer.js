@@ -8,6 +8,7 @@ export const ROW_INIT_STATE = {
   rowAllData: [],
   rowData: {},
   rowIndex: -1,
+  prevRowAllData: [],
   originRowAllData: [],
 };
 
@@ -19,7 +20,10 @@ export const ROW_ACTION = {
 
   //
   SET_ORIGIN_ROW_ALL_DATA: "setOriginRowAllData",
+  // 입력한 값으로 데이터를 필터링 처리
+  SET_ROW_FILTER: "setRowFilter",
 
+  CLEAR_ROW_FILTER: "clearRowFilter",
   // 모든 ROW에 대해 주어진 데이터로 변경처리
   SET_ROW_ALL_DATA: "setRowAllData",
   // 모든 ROW에 대한 데이터 반환
@@ -42,55 +46,27 @@ export const ROW_ACTION = {
   // 선택중인 INDEX를 반환
   GET_SELECTED_ROW_INDEX: "getSelectedRowIndex",
 };
-// {
-//   rowState: state,
-//   setRowAllData: function (rowAllData) {
-//     dispatch({
-//       type: ROW_ACTION.SET_ROW_ALL_DATA,
-//       rowAllData,
-//     });
-//   },
-//   getRowAllData: function () {
-//     return this.rowState.rowAllData;
-//   },
-//   setRowData: function (rowIndex, rowData) {
-//     dispatch({
-//       type: ROW_ACTION.SET_ROW_DATA,
-//       rowIndex,
-//       rowData,
-//     });
-//   },
-//   getRowData: function (rowIndex) {
-//     return this.rowState.rowAllData[rowIndex];
-//   },
-//   setColumnData: function (rowIndex, columnData) {
-//     dispatch({ type: ROW_ACTION.SET_COLUMN_DATA, rowData: columnData, rowIndex });
-//   },
-//   getColumnData: function (rowIndex, id) {
-//     return this.getRowData(rowIndex)?.[id];
-//   },
 
-//   setSelectedRowData: function (rowData) {
-//     dispatch({
-//       type: ROW_ACTION.SET_SELECTED_ROW_DATA,
-//       rowData,
-//     });
-//   },
-//   getSelectedRowData: function () {
-//     return this.rowState.rowData;
-//   },
-//   setSelectedRowIdex: function (rowIndex) {
-//     dispatch({ type: ROW_ACTION.SET_SELECTED_ROW_INDEX, rowIndex });
-//   },
-//   getSelectedRowIndex: function () {
-//     return this.rowState.rowIndex;
-//   },
-// },
 class GridAction {
   constructor(state, dispatch) {
     this.rowState = state;
     this.dispatch = dispatch;
   }
+  /**
+   * 입력한 옵션에 따라 filter값에 해당하는 rowData로 변경
+   * @param {Object} filter
+   * @param {Object} filterOption {compare: "equals", "startsWith", "endsWith", "includes"}
+   */
+  setRowFilter = (filter, filterOption) => {
+    this.dispatch({ type: ROW_ACTION.SET_ROW_FILTER, filter, filterOption });
+  };
+  /**
+   * 필터를 초기화한다.
+   */
+  clearRowFilter = () => {
+    this.dispatch({ type: ROW_ACTION.CLEAR_ROW_FILTER });
+  };
+
   /**
    * 현재 rowState를 변경(그리드 제어 객체)
    * @param {*} state
@@ -245,7 +221,7 @@ export const GridDataReducer = (state, action) => {
   let resultState = state;
   switch (type) {
     case ROW_ACTION.SET_INIT:
-      resultState = { originRowAllData: actionRowAllData, rowAllData: actionRowAllData, rowData: {}, rowIndex: -1 };
+      resultState = { originRowAllData: actionRowAllData, prevRowAllData: actionRowAllData, rowAllData: actionRowAllData, rowData: {}, rowIndex: -1 };
       break;
 
     case ROW_ACTION.SET_ORIGIN_ROW_ALL_DATA:
@@ -276,9 +252,78 @@ export const GridDataReducer = (state, action) => {
       rowData = stateRowAllData[rowIndex];
       resultState = { ...state, rowData, rowIndex };
       break;
+    case ROW_ACTION.SET_ROW_FILTER:
+      const filter = action.filter;
+      const filterOption = action.filterOption || {};
 
+      // prevRowAllData에 현재 상태 업데이트
+      stateRowAllData.forEach((item) => {
+        state.prevRowAllData[item.rowIndex] = item;
+      });
+
+      rowAllData = stateRowAllData.filter((value) => compare(value, filter, compareFunc(filterOption.compare ?? "equals")));
+      resultState = { ...state, rowAllData };
+      break;
+    case ROW_ACTION.CLEAR_ROW_FILTER:
+      // prevRowAllData에 현재 상태 업데이트
+      stateRowAllData.forEach((item) => {
+        state.prevRowAllData[item.rowIndex] = item;
+      });
+      resultState = { ...state, rowAllData: [...state.prevRowAllData] };
+      break;
     default:
       throw new Error("Unsupported action type:", type);
   }
   return resultState;
+};
+
+/**
+ * compareObject의 각각의 키에 해당하는 데이터를 비교하여 compare에서 모두 true가 떨어지면
+ * 같음
+ * @param {Object} value  데이터
+ * @param {Object} compareObject  비교할 key와 value를 가지고 있는 객체
+ * @param {Function} compare
+ * @returns
+ */
+const compare = (value, compareObject, compare) => {
+  if (compareObject == null) {
+    return true;
+  } else {
+    if (compareObject instanceof Object) {
+      const keys = Object.keys(compareObject);
+      for (const key of keys) {
+        if (!compare(value[key], compareObject[key])) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return true;
+    }
+  }
+};
+
+/**
+ * 선택한 파라미터에 따라 startsWith, endsWith, includes, equals를 비교하는 함수 반환
+ * @param {String} selector
+ * @returns
+ */
+const compareFunc = (selector) => {
+  if (selector == "startsWith") {
+    return (val1, val2) => {
+      return String(val1).startsWith(String(val2));
+    };
+  } else if (selector == "endsWith") {
+    return (val1, val2) => {
+      return String(val1).endsWith(String(val2));
+    };
+  } else if (selector == "includes") {
+    return (val1, val2) => {
+      return String(val1).includes(String(val2));
+    };
+  } else if (selector == "equals") {
+    return (val1, val2) => {
+      return String(val1) == String(val2);
+    };
+  }
 };
