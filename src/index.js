@@ -8,7 +8,7 @@ import Main from "./Win/Main";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
-  <Main />
+  <App />
   // </React.StrictMode>
 );
 

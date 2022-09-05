@@ -1,26 +1,16 @@
-import { CssBaseline, FormControl, Input, InputAdornment, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
-import DynamicProp from "./Component/DynamicProp";
+import { FormControl, Input, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
 import Header from "./Component/Header";
-import MemoTest from "./Component/MemoTest";
-import Menu, { InsertMenu } from "./Component/Menu";
+import { InsertMenu } from "./Component/Menu";
 // import MuiHeader from "./Component/MuiComp/MuiHeader";
 // import MuiDataGrid from "./Component/MuiDataGrid";
 // import MuiSelect from "./Component/MuiSelect";
-import MyGrid, { TstGrid } from "./Component/MyGrid2";
-import { DepthMenu } from "./Component/BasicComponent/DepthMenu";
-import "./CssModule/GlobalStyle.css";
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import MenuGrid from "./Component/TestComp/MenuGrid";
-import { StyleDiv } from "./Component/StyleComp/StyleComp";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { CSSTransition, TransitionGroup } from "react-transition-group";
-import { getCommRefRect, getCompRect, getItemRect, makeCssObject } from "./utils/commonUtils";
-import styled, { css, keyframes } from "styled-components";
-import { useMemo } from "react";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import CodeBox from "./Component/BasicComponent/CodeBox/CodeBox";
-import AccountCircle from "@mui/icons-material/AccountCircle";
+import { StyleDiv } from "./Component/StyleComp/StyleComp";
 import BottomNavibar from "./Component/TestComp/BottomNavibar";
+import MenuGrid from "./Component/TestComp/MenuGrid";
+import "./CssModule/GlobalStyle.css";
 
 function App() {
   return (
