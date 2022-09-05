@@ -7,6 +7,7 @@ import CodeBox from "./BasicComponent/CodeBox/CodeBox";
 import { Alert, AlertTitle, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 import CloseIcon from "@mui/icons-material/Close";
+import { useGridComponent } from "./TestComp/GridComp3";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -33,7 +34,7 @@ const Menu = ({ height }) => {
     source.onmessage = ({ data }) => {
       var jsonData = JSON.parse(data);
       console.log(jsonData);
-      if (jsonData.type === "HEADER")
+      if (jsonData.type === "MT001")
         setMenus((item) => {
           item
             .filter((target) => target.menuId == jsonData.upperMenu)
@@ -77,6 +78,10 @@ export const InsertMenu = () => {
       </div>
     </div>
   );
+};
+
+const MenuGrid = () => {
+  useGridComponent();
 };
 
 const InputBox = () => {
@@ -143,7 +148,7 @@ const InputBox = () => {
   useEffect(() => {
     console.log("메뉴 아이템 %o", menuItem);
     if (menuItem.type) {
-      getFetch("/menu/get3", { menuType: "MT001" }).then((data, res) => {
+      getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
         console.log("메뉴 실행 결과값:");
         console.log(data);
         setMenuList(data);
@@ -174,7 +179,15 @@ const InputBox = () => {
         <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
           <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
           <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
-          <CodeBoxInput name="upperMenu" value={upperMenu} display={"label"} label="상위 메뉴" onChange={onChange} codeData={menuList} beforeChange={beforeChange}></CodeBoxInput>
+          <CodeBoxInput
+            name="upperMenu"
+            value={upperMenu}
+            display={"label"}
+            label="상위 메뉴"
+            onChange={onChange}
+            codeData={menuList?.filter((data) => data.codeDepth == 0)}
+            beforeChange={beforeChange}
+          ></CodeBoxInput>
           {/* <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput> */}
           <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
           <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
@@ -281,7 +294,7 @@ const SendPostButton = ({ name, url, data, callback }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <Box sx={{ position: "relative", width: "100%" }}>
-        <Button variant="contained" sx={buttonSx} disabled={loading} onSubmit={handleButtonClick}>
+        <Button variant="contained" sx={buttonSx} disabled={loading} onClick={handleButtonClick}>
           {name}
         </Button>
         {loading && (

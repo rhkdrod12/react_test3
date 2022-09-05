@@ -11,6 +11,7 @@ import { StyleDiv } from "./Component/StyleComp/StyleComp";
 import BottomNavibar from "./Component/TestComp/BottomNavibar";
 import MenuGrid from "./Component/TestComp/MenuGrid";
 import "./CssModule/GlobalStyle.css";
+import FileMgm from "./Win/FileMgm";
 
 function App() {
   return (
@@ -25,8 +26,11 @@ const Transition = () => {
   return (
     <TransitionRouter>
       <Route path="/" element={<Main />}></Route>
-      <Route path="/menu/*">
-        <Route path="insertMenu" element={<InsertMenu />}></Route>
+      <Route path="/fileMgm/*">
+        <Route path="userFileMgm" element={<FileMgm />}></Route>
+      </Route>
+      <Route path="/menuMgm/*">
+        <Route path="headerMenuMgm" element={<InsertMenu />}></Route>
       </Route>
       <Route path="/test/*" element={<TestNavi />}></Route>
       <Route path="*" element={<UnKnownPage />}></Route>

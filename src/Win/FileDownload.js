@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from "react";
 import { StyleDiv } from "../Component/StyleComp/StyleComp";
-import { fileDownload2, useGetFetch } from "../Hook/useFetch";
+import { useGridComponent } from "../Component/TestComp/GridComp3";
+import { fileDownload, useGetFetch } from "../Hook/useFetch";
 import { formatSizeUnits } from "../utils/commonUtils";
 import btnClass from "./Btn.module.css";
 
@@ -85,7 +86,7 @@ export const FileDownload = () => {
       rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 1, fileTransPer: percent });
     };
 
-    fileDownload2("/api/multiDownload", { fileId: resultData.fileId }, progress)
+    fileDownload("/api/multiDownload", { fileId: resultData.fileId }, progress)
       .then((result) => {
         rowAction.setIndexColumnData(resultData.rowIdx, { fileTransYn: 2, fileTransPer: 100 });
       })
@@ -138,7 +139,7 @@ const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
       const percent = ((process.loaded * 100) / rowData.fileByte).toFixed(2);
       rowAction.setColumnData(rowIdx, { fileTransYn: 1, fileTransPer: percent });
     };
-    fileDownload2("/api/download", { fileId: rowData.fileId }, progress)
+    fileDownload("/api/download", { fileId: rowData.fileId }, progress)
       .then((result) => {
         rowAction.setColumnData(rowIdx, { fileTransYn: 2 });
       })

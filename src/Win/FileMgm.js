@@ -3,7 +3,7 @@ import RadioComp from "../Component/BasicComponent/RadioComp";
 import { StyleDiv } from "../Component/StyleComp/StyleComp";
 import { FileDownload } from "./FileDownload";
 import { FileUpload } from "./Fileupload";
-const Main = () => {
+const FileMgm = () => {
   const [select, setSelect] = useState("0");
   const onChange = useCallback((orgVal, newVal) => {
     setSelect(newVal);
@@ -24,4 +24,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default FileMgm;

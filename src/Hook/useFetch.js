@@ -89,14 +89,12 @@ export function getFetch(url, param, callback) {
       .get(url)
       .then((res) => {
         let {
-          data: { message },
+          data: { result },
         } = res;
-        resolve(message, res);
+        resolve(result, res);
       })
-      .catch((e) => {
-        const { message, code } = e;
-        console.log(e);
-        console.log(`Messgae: ${message}\nCode: ${code}`);
+      .catch((error) => {
+        console.log(axiosError(error));
         reject();
       });
   });
@@ -112,32 +110,6 @@ export function postFetch(url, data, callback) {
           data: { message },
         } = res;
         resolve(message);
-      })
-      .catch((e) => {
-        const { message, code } = e;
-        console.log(e);
-        console.log(`Messgae: ${message}\nCode: ${code}`);
-        reject();
-      });
-  });
-}
-
-export function fileDownload(url, param) {
-  url = defaultUrl + url;
-
-  return new Promise((resolve, reject) => {
-    const option = {
-      url: url, // 파일 다운로드 요청 URL
-      method: "POST", // 혹은 'POST'
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      data: param,
-    };
-
-    axios(option)
-      .then((response) => {
-        resolve(true);
       })
       .catch((e) => {
         const { message, code } = e;
@@ -240,7 +212,7 @@ const makeFormData = function (arg, exclude = []) {
   return formData;
 };
 
-export function fileDownload2(url, param, onDownloadProgress) {
+export function fileDownload(url, param, onDownloadProgress) {
   url = defaultUrl + url;
 
   if (param && param instanceof Object) {
