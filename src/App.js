@@ -115,24 +115,26 @@ const Main = () => {
   data = data.filter((child) => child.depth === 0);
 
   // console.log(data);
-  return (
-    <div>
-      메인페이지
-      <button onClick={onClick}>메뉴삽입!</button>
-      <hr style={{ paddingBottom: 10 }}></hr>
-      {/* <div style={{ padding: 10 }}>
-        <CodeBoxInput></CodeBoxInput>
-      </div> */}
-      <div style={{ width: 420 }}>
-        <div>
-          <InsertMenu></InsertMenu>
-        </div>
-        <div style={{ height: "110px", display: "flex", alignItems: "flex-end", margin: "0 10px" }}>
-          <BottomNavibar></BottomNavibar>
-        </div>
-      </div>
-    </div>
-  );
+  // return (
+  //   <div>
+  //     메인페이지
+  //     <button onClick={onClick}>메뉴삽입!</button>
+  //     <hr style={{ paddingBottom: 10 }}></hr>
+  //     {/* <div style={{ padding: 10 }}>
+  //       <CodeBoxInput></CodeBoxInput>
+  //     </div> */}
+  //     <div style={{ width: 420 }}>
+  //       <div>
+  //         <InsertMenu></InsertMenu>
+  //       </div>
+  //       <div style={{ height: "110px", display: "flex", alignItems: "flex-end", margin: "0 10px" }}>
+  //         <BottomNavibar></BottomNavibar>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+
+  return <div>없음</div>;
 };
 
 const CodeBoxInput = () => {

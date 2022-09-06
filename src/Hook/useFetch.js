@@ -6,6 +6,12 @@ import { COM_MESSAGE } from "../utils/commonMessage";
 
 const defaultUrl = "http://localhost:8080";
 
+/**
+ * 입력한 URL에 param를 포함하여 GET요청을 보냄
+ * @param {String} url 요청할 URL
+ * @param {Object} param1 요청할 파라미터
+ * @returns
+ */
 export function useGetFetch(url, { stateType = [], param, callbackFunc } = {}) {
   const [responseData, setResponseData] = useState(stateType);
   url = defaultUrl + url;

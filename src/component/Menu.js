@@ -8,6 +8,7 @@ import { Alert, AlertTitle, Box, Button, CircularProgress, Collapse, FormControl
 import { green, red } from "@mui/material/colors";
 import CloseIcon from "@mui/icons-material/Close";
 import { useGridComponent } from "./TestComp/GridComp3";
+import MenuList from "./TestComp/MenuList";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -74,6 +75,7 @@ export const InsertMenu = () => {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
+        <MenuList></MenuList>
         <InputBox></InputBox>
       </div>
     </div>
