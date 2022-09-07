@@ -78,7 +78,9 @@ const CodeBoxContainer = memo(({ data, depth }) => {
         {/* <button ref={ref} onClick={onClick(isOpen)} style={{ display: "inline-block", width: 20 }}> */}
         <LibraryAddIcon ref={ref} onClick={onClick(isOpen)} sx={{ transform: "scale(0.7)", color: "#3f3f3f", cursor: "pointer" }}></LibraryAddIcon>
         {/* </button> */}
-        {isOpen ? <CodeBoxWarpper data={data} depth={depth} ref={ref} rectDirect={rectDirect} visible={visible} animationEnd={onAnimationEnd}></CodeBoxWarpper> : null}
+        {isOpen ? (
+          <CodeBoxWarpper data={data.filter((item) => item.codeDepth == depth)} depth={depth} ref={ref} rectDirect={rectDirect} visible={visible} animationEnd={onAnimationEnd}></CodeBoxWarpper>
+        ) : null}
       </div>
     </div>
   );

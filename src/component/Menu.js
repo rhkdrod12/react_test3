@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
 import menuStyle from "../CssModule/Menu.module.css";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
@@ -8,7 +8,8 @@ import { Alert, AlertTitle, Box, Button, CircularProgress, Collapse, FormControl
 import { green, red } from "@mui/material/colors";
 import CloseIcon from "@mui/icons-material/Close";
 import { useGridComponent } from "./TestComp/GridComp3";
-import MenuList from "./TestComp/MenuList";
+import TreeList from "./TestComp/TreeList";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -62,94 +63,152 @@ const Menu = ({ height }) => {
   );
 };
 
-const MenuItem = ({ name, Number, url, className }) => {
-  // const navi = useNavigate();
-  return (
-    <div className={className}>
-      <a onClick={() => console.log(`${url}로 이동`)}>{`${Number + 1}.${name}`}</a>
-    </div>
-  );
-};
-
 export const InsertMenu = () => {
+  const [treeList, setTreeList] = useState();
+  const [menuData, setMenuData] = useState();
+
+  useEffect(() => {
+    getFetch("/menu/getAllMenu").then((res) => {
+      setTreeList(res.filter((item) => item.codeDepth == 0));
+    });
+
+    return () => {
+      setTreeList([]);
+      setMenuData({});
+    };
+  }, []);
+
+  console.log(treeList);
+  // 컴포넌트간 서로 연동이 되려면 해당 setter 또는 getter가 필요하다는건데..
+
+  const itemEvent = useMemo(
+    () => ({
+      onClick: (event, { item }) => {
+        console.log("여기 클릭 %o", item);
+        getFetch("/menu/getMenu", { menuId: item.code }).then((res) => {
+          setMenuData(res);
+        });
+      },
+    }),
+    []
+  );
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <MenuList></MenuList>
-        <InputBox></InputBox>
+        <TreeList list={treeList} itemEvent={itemEvent}></TreeList>
+        <InputBox menuData={menuData}></InputBox>
       </div>
     </div>
   );
 };
 
-const MenuGrid = () => {
-  useGridComponent();
+const DATA_INIT_STATE = {
+  data: {},
+  originData: null,
 };
 
-const InputBox = () => {
-  const [value, setValue] = useState();
-  // react는 기존의 값을 수정하는 형태보다는 새로운 값을 만들어서 넣어주는 방식으로 가야한다.
-  // react는 불변성을 지켜야, 리액트 컴포넌트가 업데이트 되었는지를 감지할 수 있으며, 이에 따라
-  // 리랜더링이 진행된다. 기존값을 바꾸는 형태로 하게 되면 업데이트를 감지하지 못할 수 있음.
-  // 어차피 for문 한번 돌리는건 그렇게 시간이 오래걸리는 작업은 아니니..
-
-  // const menuDataSet = {
-  //   menuId: { name: "메뉴 ID", show: false },
-  //   type: { name: "메뉴 타입" },
-  //   name: { name: "메뉴 이름" },
-  //   url: { name: "메뉴 URL" },
-  //   upperMenu: { name: "상위 메뉴" },
-  //   menuDepth: { name: "메뉴 깊이" },
-  //   menuOrder: { name: "정렬 순서" },
-  // };
-
-  const menuData = {
-    menuId: "",
-    type: "",
-    category: "",
-    name: "",
-    url: "",
-    upperMenu: "",
-    menuDepth: "",
-    menuOrder: "",
+class DataAction {
+  constructor(state, dispatch) {
+    this.state = state;
+    this.dispatch = dispatch;
+  }
+  setState = (state) => {
+    this.state = state;
   };
 
-  const [menuItem, setMenuItem] = useState(menuData);
-  const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
-  const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
+  setInit = (data) => {
+    this.dispatch({ type: "setInit", data });
+  };
+  setData = (data) => {
+    this.dispatch({ type: "setData", data });
+  };
+  getData = (id) => {
+    return this.state.data?.[id];
+  };
+  getAllData = () => {
+    return this.state.data;
+  };
+}
 
+const DataReducer = (state, action) => {
+  const type = action?.type;
+  const { data: stateData = {} } = state ?? DATA_INIT_STATE;
+  const { data: actionData = {} } = action;
+
+  let data;
+  let resultState = state;
+  switch (type) {
+    case "setInit":
+      resultState = { originData: actionData, data: actionData };
+      break;
+    case "setData":
+      data = { ...stateData, ...actionData };
+      resultState = { ...state, data };
+      break;
+    default:
+      throw new Error("Unsupported action type:", type);
+  }
+  return resultState;
+};
+
+const useDataReducer = (data) => {
+  const [state, dispatch] = useReducer(DataReducer, DATA_INIT_STATE);
+  const [dataAciton, setDataAction] = useState(new DataAction(state, dispatch));
+
+  useEffect(() => {
+    dispatch({ type: "setInit", data });
+  }, [data]);
+
+  return useMemo(() => new DataAction(state, dispatch), [state]);
+};
+
+const MENU_DATA = {
+  menuId: "",
+  type: "",
+  category: "",
+  name: "",
+  url: "",
+  upperMenu: "",
+  menuDepth: "",
+  menuOrder: "",
+};
+
+const InputBox = memo(({ menuData = MENU_DATA }) => {
+  console.log("ㄴㄴㄴ %o", menuData);
+
+  const dataAciton = useDataReducer(menuData);
+
+  return <InputBoxComp dataAciton={dataAciton}></InputBoxComp>;
+});
+
+const InputBoxComp = ({ dataAciton }) => {
+  const menuItem = dataAciton.getAllData();
+  console.log("menuItem %o", menuItem);
+  const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
+  const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
   const onChange = useCallback((val) => {
-    setMenuItem((item) => ({ ...item, [val.name]: val.value }));
+    console.log("바뀜바뀜 %o", val);
+    dataAciton.setData(val);
   }, []);
 
-  const onClick = (e) => {
-    postFetch("/menu/insertSee", [menuItem]).then((data) => {
-      console.log("실행 결과값:");
-      console.log(data);
-    });
-  };
-
-  const [state, setState] = useState("");
-  const onSubmit = (isResult, data) => {
-    setState(isResult);
-  };
-
-  console.log(menuItem);
-
-  const [typeCode, setTYpeCode] = useState();
+  const [typeCode, setTypeCode] = useState();
   const [menuList, setMenuList] = useState();
+  const [state, setState] = useState();
+
+  const newMenu = () => {
+    dataAciton.setInit(MENU_DATA);
+  };
 
   useEffect(() => {
     getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
-      console.log("코드 실행 결과값:");
-      console.log(data);
-      setTYpeCode(data);
+      setTypeCode(data);
     });
   }, []);
 
   useEffect(() => {
     console.log("메뉴 아이템 %o", menuItem);
-    if (menuItem.type) {
+    if (menuItem?.type) {
       getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
         console.log("메뉴 실행 결과값:");
         console.log(data);
@@ -158,25 +217,22 @@ const InputBox = () => {
     }
   }, [menuItem]);
 
-  const beforeChange = (data) => {
-    console.log("여기 ㅠefore %o", data);
-    setMenuItem((item) => ({ ...item, menuDepth: data.codeDepth + 1 }));
-  };
-
   return (
     <Paper className={menuInputContainer}>
       <Paper elevation={0} className={itemTitle} sx={{ padding: "10px" }}>
         메뉴 삽입
+        <Button onClick={newMenu} variant="contained" sx={{ float: "right", alignItems: "center" }} startIcon={<AddOutlinedIcon />}>
+          <span>새로 추가</span>
+        </Button>
       </Paper>
-      <AlertComponent
+      {/* <AlertComponent
         open={state != ""}
         state={state}
         message={{ success: "전송 성공", error: "전송 실패" }}
         closeCallback={(state) => {
           setState("");
         }}
-      />
-      {/* <div className={itemContainer}> */}
+      /> */}
       <form>
         <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
           <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
@@ -187,10 +243,9 @@ const InputBox = () => {
             display={"label"}
             label="상위 메뉴"
             onChange={onChange}
-            codeData={menuList?.filter((data) => data.codeDepth == 0)}
-            beforeChange={beforeChange}
+            codeData={menuList}
+            // beforeChange={beforeChange}
           ></CodeBoxInput>
-          {/* <MenuInput name="upperMenu" value={upperMenu} label="상위 메뉴" onChange={onChange}></MenuInput> */}
           <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
           <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
           <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
@@ -198,7 +253,7 @@ const InputBox = () => {
         </Paper>
 
         <div style={{ marginTop: 20 }}>
-          <SendPostButton name="메뉴 추가" url="/menu/insertSee" data={[menuItem]} callback={onSubmit}></SendPostButton>
+          <SendPostButton name={menuItem.menuId ? "메뉴 변경" : "메뉴 생성"} url="/menu/insertSee" data={[menuItem]} callback={"onSubmit"}></SendPostButton>
         </div>
       </form>
     </Paper>
@@ -326,9 +381,14 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, before
       console.log(data);
       setCode(data.codeName);
       beforeChange?.(data);
-      onChange({ name, value: data.code });
+      onChange({ [name]: data.code });
     },
   };
+
+  useEffect(() => {
+    const findResult = codeData?.find((item) => item.code == value);
+    setCode(findResult?.codeName ?? "");
+  }, [value]);
 
   const option = {
     depthDirection: {
@@ -336,7 +396,9 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, before
     },
   };
 
-  const codeBox = <CodeBox data={codeData} depth={0} event={event} option={option} />;
+  const codeDepth = codeData?.[0]?.codeDepth ?? 0;
+
+  const codeBox = <CodeBox data={codeData} depth={codeDepth} event={event} option={option} />;
 
   return (
     <FormControl margin="dense" size="Normal" required>
@@ -348,11 +410,11 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, before
   );
 };
 
-const MenuInput = ({ label, name, value, allowChar, onChange }) => {
+const MenuInput = ({ label, name, value = "", allowChar, onChange }) => {
   const eventObj = (event) => {
     let val = event.target.value;
     if (RegExp(allowChar).test(val)) {
-      return onChange({ name: name, value: val }, event);
+      return onChange({ [name]: val }, event);
     } else {
       return null;
     }

@@ -85,6 +85,21 @@
   animation: 0.11s fadeOut forwards;
 }
 
+.list-fade-in {
+  transform-origin: top;
+  animation: 0.2s listFadeIn forwards;
+}
+@keyframes listFadeIn {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
