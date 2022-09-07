@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetFetch } from "../../Hook/useFetch";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -6,33 +6,16 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { makeEvent } from "../../utils/commonUtils";
 import { Paper } from "@mui/material";
 
-/**
+export /**
  * TreeList를 만드는 컴포넌트
  * @returns
  */
 const TreeList = ({ list, itemEvent }) => {
-  if (!list) return null;
-
   console.log("render TreeList");
   return (
-    <StyleDiv inStyle={{ width: "450px", height: "800px", backgroundColor: "white", margin: 10, boxShadow: "0px 0px 1px 2px white", padding: "10px", display: "grid", gridTemplateRows: "70px" }}>
-      <Paper
-        elevation={0}
-        sx={{
-          padding: "10px",
-          textShadow: "1px 1px 1px rgb(124, 121, 121)",
-          fontSize: "28px",
-          fontWeight: 700,
-          boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)",
-          marginBottom: "10px",
-        }}
-      >
-        Menu 목록
-      </Paper>
-      <Paper elevation={0} sx={{ padding: "10px", boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)" }}>
-        <TreeListContainer treeList={list} depth={0} itemEvent={itemEvent} />
-      </Paper>
-    </StyleDiv>
+    <Paper elevation={0} sx={{ padding: "10px", boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)" }}>
+      <TreeListContainer treeList={list} depth={0} itemEvent={itemEvent} />
+    </Paper>
   );
 };
 
@@ -57,6 +40,13 @@ const TreeListItem = ({ name, item, hasChild = false, child, depth = 0, itemEven
   const onClick = () => {
     setShow((item) => !item);
   };
+
+  useEffect(() => {
+    return () => {
+      console.log("컴포넌트 사라짐 ");
+      setShow(false);
+    };
+  }, []);
 
   const event = makeEvent(itemEvent, { item });
 

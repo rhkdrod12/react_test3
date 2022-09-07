@@ -1,15 +1,14 @@
-import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
-import menuStyle from "../CssModule/Menu.module.css";
-import { DepthMenu } from "./BasicComponent/DepthMenu";
-import HeaderMenu from "./BasicComponent/CategoryMenu";
-import CodeBox from "./BasicComponent/CodeBox/CodeBox";
-import { Alert, AlertTitle, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper, TextField } from "@mui/material";
-import { green, red } from "@mui/material/colors";
-import CloseIcon from "@mui/icons-material/Close";
-import { useGridComponent } from "./TestComp/GridComp3";
-import TreeList from "./TestComp/TreeList";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import { Alert, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper } from "@mui/material";
+import { green, red } from "@mui/material/colors";
+import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import menuStyle from "../CssModule/Menu.module.css";
+import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
+import CodeBox from "./BasicComponent/CodeBox/CodeBox";
+import { DepthMenu } from "./BasicComponent/DepthMenu";
+import { StyleDiv } from "./StyleComp/StyleComp";
+import TreeList from "./TestComp/TreeList";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -50,22 +49,12 @@ const Menu = ({ height }) => {
 
   const menuContentStyle = menuStyle["menu-content"];
 
-  return (
-    <div className={menuContentStyle}>
-      {/* {Array.isArray(menus)
-        ? menus.map((item, index) => {
-            return <MenuItem key={index} Number={index} name={item.name} url={item.url} className={menuItemStyle}></MenuItem>;
-          })
-        : null} */}
-      {/* {Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null} */}
-      {Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null}
-    </div>
-  );
+  return <div className={menuContentStyle}>{Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null}</div>;
 };
 
 export const InsertMenu = () => {
-  const [treeList, setTreeList] = useState();
-  const [menuData, setMenuData] = useState();
+  const [treeList, setTreeList] = useState([]);
+  const [menuData, setMenuData] = useState({});
 
   useEffect(() => {
     getFetch("/menu/getAllMenu").then((res) => {
@@ -96,10 +85,30 @@ export const InsertMenu = () => {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <TreeList list={treeList} itemEvent={itemEvent}></TreeList>
+        <TempComp list={treeList} itemEvent={itemEvent}></TempComp>
         <InputBox menuData={menuData}></InputBox>
       </div>
     </div>
+  );
+};
+const TempComp = ({ list, itemEvent }) => {
+  return (
+    <StyleDiv inStyle={{ width: "450px", height: "800px", backgroundColor: "white", margin: 10, boxShadow: "0px 0px 1px 2px white", padding: "10px", display: "grid", gridTemplateRows: "70px" }}>
+      <Paper
+        elevation={0}
+        sx={{
+          padding: "10px",
+          textShadow: "1px 1px 1px rgb(124, 121, 121)",
+          fontSize: "28px",
+          fontWeight: 700,
+          boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)",
+          marginBottom: "10px",
+        }}
+      >
+        Header Menu 목록
+      </Paper>
+      <TreeList list={list} itemEvent={itemEvent}></TreeList>
+    </StyleDiv>
   );
 };
 
@@ -175,20 +184,15 @@ const MENU_DATA = {
 };
 
 const InputBox = memo(({ menuData = MENU_DATA }) => {
-  console.log("ㄴㄴㄴ %o", menuData);
-
   const dataAciton = useDataReducer(menuData);
-
   return <InputBoxComp dataAciton={dataAciton}></InputBoxComp>;
 });
 
 const InputBoxComp = ({ dataAciton }) => {
   const menuItem = dataAciton.getAllData();
-  console.log("menuItem %o", menuItem);
   const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
   const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
   const onChange = useCallback((val) => {
-    console.log("바뀜바뀜 %o", val);
     dataAciton.setData(val);
   }, []);
 
@@ -204,6 +208,11 @@ const InputBoxComp = ({ dataAciton }) => {
     getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
       setTypeCode(data);
     });
+
+    return () => {
+      setTypeCode([]);
+      setMenuList([]);
+    };
   }, []);
 
   useEffect(() => {
