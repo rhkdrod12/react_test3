@@ -169,7 +169,7 @@ const GridBodyRow = memo(({ rowData, rowIdx, selectIdx, setSelectIdx }) => {
 });
 
 const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx }) => {
-  const { id, width, textAlign, verticalAlign, css: columnCss, fommater, event, component: Component } = Column;
+  const { id, width, textAlign, verticalAlign, css: columnCss, formmater, event, component: Component } = Column;
 
   const rowAction = useContext(GridContextStore.rowAction);
   const DataInfo = useContext(GridContextStore.GridInfo).DataInfo;
@@ -185,9 +185,9 @@ const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx }) => {
   if (Component) {
     param.event = columnEvent;
     param.rowEvent = rowEvent;
-    comp = <Component {...param}>{fommater?.(columnData) || columnData}</Component>;
+    comp = <Component {...param}>{formmater?.(columnData) || columnData}</Component>;
   } else {
-    comp = <div>{fommater?.(columnData) || columnData}</div>;
+    comp = <div>{formmater?.(columnData) || columnData}</div>;
   }
 
   return (

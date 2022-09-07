@@ -55,7 +55,7 @@ export const FileDownload = () => {
     },
   };
 
-  const [files, setFiles] = useGetFetch("/api/getFileList", { param: { page: 1, pageCount: 100 } });
+  const [files, setFiles] = useGetFetch("/api/getFileList", { param: { page: 1, pageCount: 999 } });
 
   useEffect(() => {
     files.forEach((item, idx) => (item.fileIndex = idx + 1));
@@ -151,7 +151,6 @@ const fileDownloadEvent = (event, { id, rowIdx, rowAction }) => {
 
 const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {
   event.stopPropagation();
-  const rowData = rowAction.getRowData(rowIdx);
   rowAction.setColumnData(rowIdx, { check: data == null || data == "0" ? "1" : "0" });
 };
 
