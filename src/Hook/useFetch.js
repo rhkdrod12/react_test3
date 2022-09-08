@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import { useEffect, useState } from "react";
 import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
+import { JsonParser } from "jackson-js";
 
 const defaultUrl = "http://localhost:8080";
 
@@ -97,6 +98,7 @@ export function getFetch(url, param, callback) {
         let {
           data: { result },
         } = res;
+        JSON
         resolve(result, res);
       })
       .catch((error) => {

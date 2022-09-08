@@ -8,6 +8,8 @@ import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
 import CodeBox from "./BasicComponent/CodeBox/CodeBox";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
 import { StyleDiv } from "./StyleComp/StyleComp";
+import useDataReducer from "./TestComp/DataReducer";
+import useListDataReducer from "./TestComp/ListDataReducer";
 import TreeList from "./TestComp/TreeList";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
@@ -53,45 +55,56 @@ const Menu = ({ height }) => {
 };
 
 export const InsertMenu = () => {
-  const [treeList, setTreeList] = useState([]);
   const [menuData, setMenuData] = useState({});
+  const treeAction = useListDataReducer();
 
   useEffect(() => {
     getFetch("/menu/getAllMenu").then((res) => {
-      setTreeList(res.filter((item) => item.codeDepth == 0));
+      // treeAction.setInit(res.filter((item) => item.codeDepth == 0));
+      treeAction.setInit(res);
     });
-
     return () => {
-      setTreeList([]);
       setMenuData({});
     };
   }, []);
 
-  console.log(treeList);
+  console.log(treeAction.getRowAllData());
   // 컴포넌트간 서로 연동이 되려면 해당 setter 또는 getter가 필요하다는건데..
 
   const itemEvent = useMemo(
     () => ({
       onClick: (event, { item }) => {
         console.log("여기 클릭 %o", item);
-        getFetch("/menu/getMenu", { menuId: item.code }).then((res) => {
-          setMenuData(res);
-        });
+        setMenuData(item.data);
       },
     }),
     []
   );
 
+  const treemenuData = treeAction.getSelectedRowData();
+
+  console.log(treemenuData);
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <TempComp list={treeList} itemEvent={itemEvent}></TempComp>
-        <InputBox menuData={menuData}></InputBox>
+        <TempComp treeAction={treeAction}></TempComp>
+        <InputBox menuData={treemenuData.data}></InputBox>
       </div>
     </div>
   );
 };
-const TempComp = ({ list, itemEvent }) => {
+const TempComp = ({ treeAction }) => {
+  const list = treeAction.getRowAllData().filter((item) => item.codeDepth == 0);
+  const itemEvent = useMemo(
+    () => ({
+      onClick: (event, { item }) => {
+        console.log("여기 클릭 %o", item);
+        // treeAction.setSelectedRowData(item.data);
+        treeAction.setSelectedRowIndex(item.rowIndex);
+      },
+    }),
+    []
+  );
   return (
     <StyleDiv inStyle={{ width: "450px", height: "800px", backgroundColor: "white", margin: 10, boxShadow: "0px 0px 1px 2px white", padding: "10px", display: "grid", gridTemplateRows: "70px" }}>
       <Paper
@@ -112,66 +125,6 @@ const TempComp = ({ list, itemEvent }) => {
   );
 };
 
-const DATA_INIT_STATE = {
-  data: {},
-  originData: null,
-};
-
-class DataAction {
-  constructor(state, dispatch) {
-    this.state = state;
-    this.dispatch = dispatch;
-  }
-  setState = (state) => {
-    this.state = state;
-  };
-
-  setInit = (data) => {
-    this.dispatch({ type: "setInit", data });
-  };
-  setData = (data) => {
-    this.dispatch({ type: "setData", data });
-  };
-  getData = (id) => {
-    return this.state.data?.[id];
-  };
-  getAllData = () => {
-    return this.state.data;
-  };
-}
-
-const DataReducer = (state, action) => {
-  const type = action?.type;
-  const { data: stateData = {} } = state ?? DATA_INIT_STATE;
-  const { data: actionData = {} } = action;
-
-  let data;
-  let resultState = state;
-  switch (type) {
-    case "setInit":
-      resultState = { originData: actionData, data: actionData };
-      break;
-    case "setData":
-      data = { ...stateData, ...actionData };
-      resultState = { ...state, data };
-      break;
-    default:
-      throw new Error("Unsupported action type:", type);
-  }
-  return resultState;
-};
-
-const useDataReducer = (data) => {
-  const [state, dispatch] = useReducer(DataReducer, DATA_INIT_STATE);
-  const [dataAciton, setDataAction] = useState(new DataAction(state, dispatch));
-
-  useEffect(() => {
-    dispatch({ type: "setInit", data });
-  }, [data]);
-
-  return useMemo(() => new DataAction(state, dispatch), [state]);
-};
-
 const MENU_DATA = {
   menuId: "",
   type: "",
@@ -183,26 +136,14 @@ const MENU_DATA = {
   menuOrder: "",
 };
 
-const InputBox = memo(({ menuData = MENU_DATA }) => {
-  const dataAciton = useDataReducer(menuData);
-  return <InputBoxComp dataAciton={dataAciton}></InputBoxComp>;
-});
-
-const InputBoxComp = ({ dataAciton }) => {
+const InputBox = memo(({ menuData }) => {
+  const dataAciton = useDataReducer(menuData, MENU_DATA);
   const menuItem = dataAciton.getAllData();
-  const { "item-Container": itemContainer, "menu-input-container": menuInputContainer, "item-Title": itemTitle, "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
   const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
-  const onChange = useCallback((val) => {
-    dataAciton.setData(val);
-  }, []);
 
-  const [typeCode, setTypeCode] = useState();
-  const [menuList, setMenuList] = useState();
+  const [typeCodeList, setTypeCode] = useState([]);
+  const [menuList, setMenuList] = useState([]);
   const [state, setState] = useState();
-
-  const newMenu = () => {
-    dataAciton.setInit(MENU_DATA);
-  };
 
   useEffect(() => {
     getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
@@ -219,16 +160,23 @@ const InputBoxComp = ({ dataAciton }) => {
     console.log("메뉴 아이템 %o", menuItem);
     if (menuItem?.type) {
       getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
-        console.log("메뉴 실행 결과값:");
+        console.log("메뉴 실행 결과값: %o", data);
         console.log(data);
         setMenuList(data);
       });
     }
   }, [menuItem]);
 
+  const newMenu = () => {
+    dataAciton.setInit(MENU_DATA);
+  };
+  const onChange = useCallback((val) => {
+    dataAciton.setData(val);
+  }, []);
+
   return (
-    <Paper className={menuInputContainer}>
-      <Paper elevation={0} className={itemTitle} sx={{ padding: "10px" }}>
+    <Paper className={menuStyle["menu-input-container"]}>
+      <Paper elevation={0} className={menuStyle["item-Title"]} sx={{ padding: "10px" }}>
         메뉴 삽입
         <Button onClick={newMenu} variant="contained" sx={{ float: "right", alignItems: "center" }} startIcon={<AddOutlinedIcon />}>
           <span>새로 추가</span>
@@ -244,7 +192,7 @@ const InputBoxComp = ({ dataAciton }) => {
       /> */}
       <form>
         <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
-          <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCode}></CodeBoxInput>
+          <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCodeList}></CodeBoxInput>
           <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
           <CodeBoxInput
             name="upperMenu"
@@ -267,7 +215,7 @@ const InputBoxComp = ({ dataAciton }) => {
       </form>
     </Paper>
   );
-};
+});
 
 const AlertComponent = ({ children, open: Open, state: State, message, closeCallback }) => {
   const [open, setOpen] = useState(Open);

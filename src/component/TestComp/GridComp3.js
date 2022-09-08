@@ -4,7 +4,7 @@ import { copyObjectBykey, makeDisplayFlexAlign, makeEvent } from "../../utils/co
 import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider/ContextProvider";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "./GridComp.css";
-import { useGridReducer } from "./GridRowReducer";
+import useListDataReducer from "./ListDataReducer";
 
 export const useGridComponent = (rowAllData, gridInfo) => {
   // 공통설정을 각각의 header, data, footer에 적용
@@ -16,7 +16,7 @@ export const useGridComponent = (rowAllData, gridInfo) => {
     makeDefaultValue(gridInfo.DataInfo, rowAllData);
   }, [rowAllData]);
 
-  const rowAction = useGridReducer(rowAllData);
+  const rowAction = useListDataReducer(rowAllData);
   const rowState = rowAction.getRowState();
 
   const gridComponent = <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />;

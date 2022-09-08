@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useGetFetch } from "../../Hook/useFetch";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { makeEvent } from "../../utils/commonUtils";
 import { Paper } from "@mui/material";
+import { Fade } from "../BasicComponent/Fade";
 
 export /**
  * TreeList를 만드는 컴포넌트
@@ -19,46 +20,44 @@ const TreeList = ({ list, itemEvent }) => {
   );
 };
 
-const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "" }) => {
+const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "", onAnimationEnd }) => {
   return (
-    <React.Fragment>
+    <StyleDiv className={className} inStyle={{ paddingLeft: depth * 15 }} onAnimationEnd={onAnimationEnd}>
       {treeList && treeList.length > 0 ? (
         treeList.map((item, idx) => {
           const hasChild = item.childCodes && item.childCodes.length > 0;
-          const childItem = hasChild ? <TreeListContainer className={"list-fade-in"} treeList={item.childCodes} depth={depth + 1} itemEvent={itemEvent} /> : null;
-          return <TreeListItem key={idx} className={className} name={item.codeName} item={item} hasChild={hasChild} depth={item.codeDepth} child={childItem} itemEvent={itemEvent} />;
+          return <TreeListItem key={idx} className={className} name={item.codeName} item={item} hasChild={hasChild} depth={item.codeDepth} itemEvent={itemEvent} />;
         })
       ) : (
         <div>데이터 없음</div>
       )}
-    </React.Fragment>
+    </StyleDiv>
   );
 };
 
-const TreeListItem = ({ name, item, hasChild = false, child, depth = 0, itemEvent, className }) => {
+const TreeListItem = ({ name, item, hasChild = false, depth = 0, itemEvent }) => {
   const [show, setShow] = useState(false);
-  const onClick = () => {
-    setShow((item) => !item);
+
+  const onClick = (event) => {
+    setShow((val) => !val);
   };
 
-  useEffect(() => {
-    return () => {
-      console.log("컴포넌트 사라짐 ");
-      setShow(false);
-    };
-  }, []);
-
   const event = makeEvent(itemEvent, { item });
+  const child = hasChild ? (
+    <Fade state={show} fadeIn="listFadeIn" fadeOut="listFadeOut">
+      <TreeListContainer treeList={item.childCodes} depth={depth + 1} itemEvent={itemEvent} />
+    </Fade>
+  ) : null;
 
   return (
     <React.Fragment>
-      <StyleDiv className={className} inStyle={{ display: "grid", gridTemplateColumns: "25px minmax(100px, auto)", alignItems: "center", paddingLeft: depth * 15, height: 30 }}>
+      <StyleDiv inStyle={{ display: "grid", gridTemplateColumns: "25px minmax(100px, auto)", alignItems: "center", height: 30 }}>
         {hasChild ? <AddBoxIcon sx={{ padding: "2px", cursor: "pointer" }} onClick={onClick} /> : <ArrowRightIcon sx={{ padding: "2px" }} />}
         <span style={{ padding: "2px", cursor: "pointer" }} {...event}>
           {name}
         </span>
       </StyleDiv>
-      {show && child}
+      {hasChild && child}
     </React.Fragment>
   );
 };

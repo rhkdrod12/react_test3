@@ -1,6 +1,17 @@
 import { useMemo } from "react";
 import { useEffect, useReducer, useState } from "react";
 
+const useListDataReducer = (rowAllData) => {
+  const [state, dispatch] = useReducer(GridDataReducer, ROW_INIT_STATE);
+
+  // rowAllData 변경시 rowAllData를 해당 데이터로 변경처리
+  useEffect(() => {
+    dispatch({ type: ROW_ACTION.SET_INIT, rowAllData: rowAllData ?? [] });
+  }, [rowAllData]);
+
+  //return useGridAction(state, dispatch);
+  return useMemo(() => new GridAction(state, dispatch), [state]);
+};
 /**
  * ROW_DATA의 초기 구조
  */
@@ -52,6 +63,19 @@ class GridAction {
     this.rowState = state;
     this.dispatch = dispatch;
   }
+
+  /**
+   * 입력한 파라미터로 초기화한다.
+   * @param {Array} rowAllData
+   */
+  setInit = (rowAllData) => {
+    rowAllData = rowAllData?.map((item, idx) => {
+      item.rowIndex = idx;
+      return item;
+    });
+    this.dispatch({ type: ROW_ACTION.SET_INIT, rowAllData });
+  };
+
   /**
    * 입력한 옵션에 따라 filter값에 해당하는 rowData로 변경
    * @param {Object} filter
@@ -188,7 +212,7 @@ class GridAction {
    * 현재 그리드 포지션을 입력받은 값으로 변경
    * @param {Number} rowIndex
    */
-  setSelectedRowIdex = (rowIndex) => {
+  setSelectedRowIndex = (rowIndex) => {
     this.dispatch({ type: ROW_ACTION.SET_SELECTED_ROW_INDEX, rowIndex });
   };
   /**
@@ -199,18 +223,6 @@ class GridAction {
     return this.rowState.rowIndex;
   };
 }
-
-export const useGridReducer = (rowAllData) => {
-  const [state, dispatch] = useReducer(GridDataReducer, ROW_INIT_STATE);
-
-  // rowAllData 변경시 rowAllData를 해당 데이터로 변경처리
-  useEffect(() => {
-    dispatch({ type: ROW_ACTION.SET_INIT, rowAllData });
-  }, [rowAllData]);
-
-  //return useGridAction(state, dispatch);
-  return useMemo(() => new GridAction(state, dispatch), [state]);
-};
 
 export const GridDataReducer = (state, action) => {
   const type = action?.type;
@@ -327,3 +339,5 @@ const compareFunc = (selector) => {
     };
   }
 };
+
+export default useListDataReducer;
