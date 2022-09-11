@@ -15,8 +15,8 @@ const FileMgm = () => {
   });
 
   const data = [
-    { id: "fileMgm", value: 0, name: "파일관리" },
-    { id: "fileDownload", value: 1, name: "파일다운로드", checked: true },
+    { id: "fileMgm", value: 0, name: "파일관리", checked: true },
+    { id: "fileDownload", value: 1, name: "파일다운로드" },
     { id: "fileUpload", value: 2, name: "파일업로드" },
   ];
 
@@ -80,7 +80,7 @@ const FileMgmComp = () => {
           css: { cursor: "pointer" },
         },
         { id: "fileByte", textAlign: "right", formmater: formatSizeUnits },
-        { id: "fileOther", component: Delete },
+        { id: "fileOther", component: DeleteWarpper },
         { id: "fileTransYn" },
         { id: "check", component: CheckBox, event: { onClick: fileCheckBoxClick } },
       ],
@@ -97,6 +97,10 @@ const FileMgmComp = () => {
       <div>{gridComponent}</div>
     </div>
   );
+};
+
+const DeleteWarpper = ({ id, data, rowData, rowAction, rowIdx, colIdx, event }) => {
+  return <Delete width="20px" height="20px" fill="white" cursor="pointer" />;
 };
 
 const fileCheckBoxClick = (event, { id, data, rowIdx, rowAction }) => {

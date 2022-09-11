@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from "react";
 import { StyleDiv } from "../Component/StyleComp/StyleComp";
 import { useGridComponent } from "../Component/TestComp/GridComp3";
+import { COMPARE_STRING } from "../Component/TestComp/ListDataReducer";
 import { fileDownload, useGetFetch } from "../Hook/useFetch";
 import { formatSizeUnits } from "../utils/commonUtils";
 import btnClass from "./Btn.module.css";
@@ -11,7 +12,7 @@ export const FileDownload = () => {
       height: 40,
     },
     Column: [
-      { id: "fileIndex", name: "번호", width: "5%", textAlign: "center" },
+      { id: "rowIndex", name: "번호", width: "5%", textAlign: "center" },
       { id: "fileFullName", name: "파일이름", width: "50%" },
       { id: "fileByte", name: "파일크기", width: "10%" },
       { id: "fileTransPer", name: "진행", width: "10%", textAlign: "center", defaultValue: "0" },
@@ -21,7 +22,7 @@ export const FileDownload = () => {
     HeaderInfo: {
       Row: { css: { backgroundColor: "#f0f0f0", borderBottom: "1px solid black", color: "#000", letterSpacing: "2px", fontSize: "14px", fontWeight: "700" } },
       Column: [
-        { id: "fileIndex" },
+        { id: "rowIndex" },
         { id: "fileFullName", textAlign: "center" },
         { id: "fileByte", textAlign: "center" },
         { id: "fileTransPer", textAlign: "center" },
@@ -39,6 +40,7 @@ export const FileDownload = () => {
         event: { onClick: rowSelectEvent },
       },
       Column: [
+        { id: "rowIndex", formmater: (val) => val + 1 },
         {
           id: "fileFullName",
           css: { cursor: "pointer" },
@@ -46,7 +48,7 @@ export const FileDownload = () => {
             onClick: fileDownloadEvent,
           },
         },
-        { id: "fileByte", textAlign: "right", fommater: formatSizeUnits },
+        { id: "fileByte", textAlign: "right", formmater: formatSizeUnits },
         { id: "fileTransYn" },
         { id: "fileTransPer", component: ProgressBarMgm },
         { id: "check", component: CheckBox, event: { onClick: fileCheckBoxClick } },
@@ -57,9 +59,9 @@ export const FileDownload = () => {
 
   const [files, setFiles] = useGetFetch("/api/getFileList", { param: { page: 1, pageCount: 999 } });
 
-  useEffect(() => {
-    files.forEach((item, idx) => (item.fileIndex = idx + 1));
-  }, [files]);
+  // useEffect(() => {
+  //   files.forEach((item, idx) => (item.fileIndex = idx + 1));
+  // }, [files]);
 
   const { rowAction, gridComponent } = useGridComponent(files, GridInfo);
 
@@ -101,7 +103,7 @@ export const FileDownload = () => {
       if (value == "") {
         rowAction.clearRowFilter();
       } else {
-        rowAction.setRowFilter({ fileFullName: value }, { compare: "includes" });
+        rowAction.setRowFilter({ fileFullName: value }, COMPARE_STRING.INCLUDES);
       }
     }
   };

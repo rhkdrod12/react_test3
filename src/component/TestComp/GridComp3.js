@@ -1,12 +1,15 @@
 import React, { memo, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { ScrollYBox, useScrollYData } from "../../Hook/useScroll";
-import { copyObjectBykey, makeDisplayFlexAlign, makeEvent } from "../../utils/commonUtils";
+import { copyObjectBykey, makeDisplayFlexAlign, makeEvent, makeFunc } from "../../utils/commonUtils";
 import { ContextProvider, createMutilContext } from "../BasicComponent/ContextProvider/ContextProvider";
 import { StyleDiv } from "../StyleComp/StyleComp";
 import "./GridComp.css";
 import useListDataReducer from "./ListDataReducer";
 
 export const useGridComponent = (rowAllData, gridInfo) => {
+  // 데이터 제어 객체 생성
+  const rowAction = useListDataReducer();
+
   // 공통설정을 각각의 header, data, footer에 적용
   useEffect(() => {
     makeGridParam(gridInfo);
@@ -14,11 +17,10 @@ export const useGridComponent = (rowAllData, gridInfo) => {
   // 기본값 생성
   useEffect(() => {
     makeDefaultValue(gridInfo.DataInfo, rowAllData);
+    rowAction.setInit(rowAllData);
   }, [rowAllData]);
 
-  const rowAction = useListDataReducer(rowAllData);
   const rowState = rowAction.getRowState();
-
   const gridComponent = <GridComp rowState={rowState} rowAction={rowAction} gridInfo={gridInfo} />;
   // console.log(rowState);
   return { rowState, rowAction, gridComponent };
@@ -30,20 +32,21 @@ const GridComp = ({ rowState, rowAction, gridInfo }) => {
   // 컨텍스트 데이터 저장
   const contextData = { rowState, rowAction, GridInfo };
   // console.log("render GridComp %o", rowState);
+  const rowAllData = rowAction.getRowAllData();
 
   return (
     <div className="grid-root">
       <ContextProvider ContextStore={GridContextStore} Data={contextData}>
-        <GridWrapper rowState={rowState} rowAction={rowAction} GridInfo={GridInfo} />
+        <GridWrapper rowAllData={rowAllData} rowAction={rowAction} GridInfo={GridInfo} />
       </ContextProvider>
     </div>
   );
 };
 
-const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
+const GridWrapper = memo(({ rowAllData, rowAction, GridInfo }) => {
   const { HeaderInfo, DataInfo, FooterInfo } = GridInfo;
   // 스크롤 처리
-  const [scrollData, ref] = useScrollYData(rowState.rowAllData, DataInfo.Scroll);
+  const [scrollData, ref] = useScrollYData(rowAllData, DataInfo.Scroll);
   // 스크롤 데이터
   const { scrollRowData, dataTranslateY, scrollDisplay } = scrollData;
   // console.log("render GridWrapper");
@@ -55,7 +58,7 @@ const GridWrapper = memo(({ rowState, rowAction, GridInfo }) => {
       <ScrollYBox scrollData={scrollData} ref={ref}>
         <div className="grid-data-scrollCotainer" style={{ transform: `translateY(${dataTranslateY}px)` }}>
           {scrollRowData && scrollRowData.length > 0 ? (
-            <GridBody rowAllData={scrollRowData} startIdx={scrollData.startIdx}></GridBody>
+            <GridBody rowAllData={scrollRowData} rowAction={rowAction} startIdx={scrollData.startIdx}></GridBody>
           ) : (
             <StyleDiv className="grid-not-data" inStyle={{ width: 150, margin: "10px auto", textAlign: "center", ...css }}>
               데이터 없음
@@ -117,16 +120,17 @@ const GridHeaderColumn = memo(({ column }) => {
 /**
  * 그리드 Body부분(데이터 표현 부분)
  */
-const GridBody = memo(({ rowAllData, transform, startIdx }) => {
+const GridBody = memo(({ rowAllData, rowAction, startIdx }) => {
   // console.log("render dataBody");
   const { css, event } = useContext(GridContextStore.GridInfo).DataInfo;
-  const rowAction = useContext(GridContextStore.rowAction);
-
   const [selectIdx, setSelectIdx] = useState(-1);
   const bodyEvent = makeEvent(event, { rowAction });
+
   return (
-    <StyleDiv inStyle={{ ...css }} style={{ transform: `translateY(${transform}px)` }} className="grid-body" {...bodyEvent}>
-      {rowAllData ? rowAllData.map((row, idx) => <GridBodyRow key={idx} rowData={row} rowIdx={startIdx + idx} selectIdx={selectIdx} setSelectIdx={setSelectIdx}></GridBodyRow>) : null}
+    <StyleDiv inStyle={{ ...css }} className="grid-body" {...bodyEvent}>
+      {rowAllData &&
+        rowAllData.length > 0 &&
+        rowAllData.map((row, idx) => <GridBodyRow key={idx} rowData={row} rowIdx={startIdx + idx} selectIdx={selectIdx} setSelectIdx={setSelectIdx}></GridBodyRow>)}
     </StyleDiv>
   );
 });
@@ -150,7 +154,7 @@ const GridBodyRow = memo(({ rowData, rowIdx, selectIdx, setSelectIdx }) => {
   const onClick = () => {
     let idx = selectIdx != rowIdx ? rowIdx : -1;
     setSelectIdx(idx);
-    rowAction.setSelectedRowIdex(idx);
+    rowAction.setSelectedRowIndex(idx);
   };
 
   if (selectIdx == rowIdx) {
@@ -180,14 +184,15 @@ const GridBodyColumn = memo(({ columnData, Column, rowIdx, colIdx }) => {
   const param = { id, data: columnData, rowData: rowAction.getRowData(rowIdx), rowIdx, colIdx, rowAction, Column, RowColumn, Row };
   const columnEvent = makeEvent(event, param);
   const rowEvent = makeEvent(Row.event, param);
+  const dataFormmater = makeFunc(formmater, param);
 
   let comp;
   if (Component) {
     param.event = columnEvent;
     param.rowEvent = rowEvent;
-    comp = <Component {...param}>{formmater?.(columnData) || columnData}</Component>;
+    comp = <Component {...param}>{dataFormmater?.(columnData) || columnData}</Component>;
   } else {
-    comp = <div>{formmater?.(columnData) || columnData}</div>;
+    comp = <div>{dataFormmater?.(columnData) || columnData}</div>;
   }
 
   return (

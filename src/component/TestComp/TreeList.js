@@ -20,9 +20,9 @@ const TreeList = ({ list, itemEvent }) => {
   );
 };
 
-const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "", onAnimationEnd }) => {
+const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "" }) => {
   return (
-    <StyleDiv className={className} inStyle={{ paddingLeft: depth * 15 }} onAnimationEnd={onAnimationEnd}>
+    <StyleDiv className={className} inStyle={{ paddingLeft: 15 }}>
       {treeList && treeList.length > 0 ? (
         treeList.map((item, idx) => {
           const hasChild = item.childCodes && item.childCodes.length > 0;

@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { useEffect, useState } from "react";
 import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
-import { JsonParser } from "jackson-js";
+import JSOG from "jsog";
 
 const defaultUrl = "http://localhost:8080";
 
@@ -24,14 +24,12 @@ export function useGetFetch(url, { stateType = [], param, callbackFunc } = {}) {
     axios
       .get(url)
       .then((res) => {
-        let {
-          data: { result: message },
-        } = res;
-
+        const result = JSOG.parse(res.request.response).result;
         if (typeof callbackFunc === "function") {
-          callbackFunc(message);
+          callbackFunc(result);
         }
-        setResponseData(message);
+
+        setResponseData(result);
       })
       .catch((error) => {
         console.log(axiosError(error));
@@ -95,15 +93,11 @@ export function getFetch(url, param, callback) {
     axios
       .get(url)
       .then((res) => {
-        let {
-          data: { result },
-        } = res;
-        JSON
-        resolve(result, res);
+        resolve(JSOG.parse(res.request.response).result, res);
       })
       .catch((error) => {
         console.log(axiosError(error));
-        reject();
+        reject(axiosError(error));
       });
   });
 }

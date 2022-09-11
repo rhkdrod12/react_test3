@@ -168,6 +168,15 @@ export const getItemRect = (compRef, itemRef, { positionX = "RIGHT", positionY =
 export const getHeight = () => {};
 
 /**
+ * func에 param을 인수로 추가
+ * @param {function} func
+ * @param {Object} newParams
+ */
+export const makeFunc = (func, newParams) => {
+  return func ? (e, params) => func(e, { ...params, ...newParams }) : null;
+};
+
+/**
  * 이벤트들을 받아 params을 추가시킴
  * @param {*} events
  * @param {*} newParams
@@ -177,8 +186,7 @@ export const makeEvent = (events, newParams) => {
   if (events) {
     const result = {};
     for (const key in events) {
-      const func = events[key];
-      result[key] = (e, params) => func(e, { ...params, ...newParams });
+      result[key] = makeFunc(events[key], newParams);
     }
     return result;
   }

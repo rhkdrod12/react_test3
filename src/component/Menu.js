@@ -2,14 +2,14 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper } from "@mui/material";
 import { green, red } from "@mui/material/colors";
-import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import menuStyle from "../CssModule/Menu.module.css";
 import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
 import CodeBox from "./BasicComponent/CodeBox/CodeBox";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
 import { StyleDiv } from "./StyleComp/StyleComp";
 import useDataReducer from "./TestComp/DataReducer";
-import useListDataReducer from "./TestComp/ListDataReducer";
+import useListDataReducer, { ListDataAction } from "./TestComp/ListDataReducer";
 import TreeList from "./TestComp/TreeList";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
@@ -55,58 +55,83 @@ const Menu = ({ height }) => {
 };
 
 export const InsertMenu = () => {
-  const [menuData, setMenuData] = useState({});
+  // 트리용 데이터 리스트 생성
   const treeAction = useListDataReducer();
 
   useEffect(() => {
     getFetch("/menu/getAllMenu").then((res) => {
-      // treeAction.setInit(res.filter((item) => item.codeDepth == 0));
       treeAction.setInit(res);
     });
     return () => {
-      setMenuData({});
+      treeAction.setInit([]);
     };
   }, []);
 
-  console.log(treeAction.getRowAllData());
-  // 컴포넌트간 서로 연동이 되려면 해당 setter 또는 getter가 필요하다는건데..
-
-  const itemEvent = useMemo(
-    () => ({
-      onClick: (event, { item }) => {
-        console.log("여기 클릭 %o", item);
-        setMenuData(item.data);
-      },
-    }),
-    []
-  );
-
+  const itemList = treeAction.getRowAllData();
   const treemenuData = treeAction.getSelectedRowData();
-
-  console.log(treemenuData);
+  console.log("treemenuData : %o", treemenuData);
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <TempComp treeAction={treeAction}></TempComp>
+        <TempComp itemList={itemList} treeAction={treeAction}></TempComp>
         <InputBox menuData={treemenuData.data}></InputBox>
       </div>
     </div>
   );
 };
-const TempComp = ({ treeAction }) => {
-  const list = treeAction.getRowAllData().filter((item) => item.codeDepth == 0);
+
+/**
+ * @param {{itemList: Object, treeAction: ListDataAction}}
+ */
+const TempComp = ({ itemList, treeAction }) => {
+  const list = itemList.filter((item) => item.codeDepth == 0);
   const itemEvent = useMemo(
     () => ({
       onClick: (event, { item }) => {
         console.log("여기 클릭 %o", item);
-        // treeAction.setSelectedRowData(item.data);
         treeAction.setSelectedRowIndex(item.rowIndex);
       },
     }),
-    []
+    [treeAction]
   );
+
+  const addNewMenu = (event) => {
+    const action = treeAction;
+    /**
+     * 자 목표는 선택된 데이터가 있으면 해당 데이터의 하위로 생성
+     * 선택된게 없으면 최상위로 생성
+     */
+    const selectedData = action.getSelectedRowData();
+
+    const newData = { ...selectedData, code: "", rowIndex: "", upperCode: selectedData.code, codeDepth: selectedData.codeDepth + 1, codeName: "신규작성", data: {}, childCodes: [] };
+    newData.data = {
+      ...selectedData.data,
+      menuId: "",
+      name: "신규작성",
+      upperMenu: selectedData.code,
+      menuDepth: selectedData.codeDepth,
+      status: "create",
+      menuOrder: selectedData.childCodes.length + 1,
+    };
+
+    selectedData.childCodes.push(newData);
+
+    action.addRowData(newData, true);
+  };
+
   return (
-    <StyleDiv inStyle={{ width: "450px", height: "800px", backgroundColor: "white", margin: 10, boxShadow: "0px 0px 1px 2px white", padding: "10px", display: "grid", gridTemplateRows: "70px" }}>
+    <StyleDiv
+      inStyle={{
+        width: "450px",
+        height: "800px",
+        backgroundColor: "white",
+        margin: 10,
+        boxShadow: "0px 0px 1px 2px white",
+        padding: "10px",
+        display: "grid",
+        gridTemplateRows: "70px 35px",
+      }}
+    >
       <Paper
         elevation={0}
         sx={{
@@ -120,6 +145,11 @@ const TempComp = ({ treeAction }) => {
       >
         Header Menu 목록
       </Paper>
+      <StyleDiv>
+        <Button onClick={addNewMenu} variant="contained" sx={{ float: "right", alignItems: "center", height: "30px" }} startIcon={<AddOutlinedIcon />}>
+          <span>새로 추가</span>
+        </Button>
+      </StyleDiv>
       <TreeList list={list} itemEvent={itemEvent}></TreeList>
     </StyleDiv>
   );
@@ -161,7 +191,6 @@ const InputBox = memo(({ menuData }) => {
     if (menuItem?.type) {
       getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
         console.log("메뉴 실행 결과값: %o", data);
-        console.log(data);
         setMenuList(data);
       });
     }
@@ -178,9 +207,6 @@ const InputBox = memo(({ menuData }) => {
     <Paper className={menuStyle["menu-input-container"]}>
       <Paper elevation={0} className={menuStyle["item-Title"]} sx={{ padding: "10px" }}>
         메뉴 삽입
-        <Button onClick={newMenu} variant="contained" sx={{ float: "right", alignItems: "center" }} startIcon={<AddOutlinedIcon />}>
-          <span>새로 추가</span>
-        </Button>
       </Paper>
       {/* <AlertComponent
         open={state != ""}
