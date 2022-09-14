@@ -11,22 +11,24 @@ export /**
  * TreeList를 만드는 컴포넌트
  * @returns
  */
-const TreeList = ({ list, itemEvent }) => {
-  console.log("render TreeList");
+const TreeList = ({ list, itemEvent, selectedIndex, depth = 0 }) => {
+  // console.log("render TreeList %o", list);
+
   return (
     <Paper elevation={0} sx={{ padding: "10px", boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)" }}>
-      <TreeListContainer treeList={list} depth={0} itemEvent={itemEvent} />
+      <TreeListContainer treeList={list} depth={depth} itemEvent={itemEvent} selectedIndex={selectedIndex} />
     </Paper>
   );
 };
 
-const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "" }) => {
+const TreeListContainer = ({ treeList, upperCode, depth = 0, itemEvent, className = "", selectedIndex }) => {
+  const depthItem = treeList.filter((item) => item.codeDepth == depth && item.upperCode == upperCode);
+
   return (
     <StyleDiv className={className} inStyle={{ paddingLeft: 15 }}>
-      {treeList && treeList.length > 0 ? (
-        treeList.map((item, idx) => {
-          const hasChild = item.childCodes && item.childCodes.length > 0;
-          return <TreeListItem key={idx} className={className} name={item.codeName} item={item} hasChild={hasChild} depth={item.codeDepth} itemEvent={itemEvent} />;
+      {depthItem && depthItem.length > 0 ? (
+        depthItem.map((item, idx) => {
+          return <TreeListItem key={idx} lassName={className} name={item.codeName} item={item} treeList={treeList} depth={item.codeDepth} itemEvent={itemEvent} selectedIndex={selectedIndex} />;
         })
       ) : (
         <div>데이터 없음</div>
@@ -35,29 +37,31 @@ const TreeListContainer = ({ treeList, depth = 0, itemEvent, className = "" }) =
   );
 };
 
-const TreeListItem = ({ name, item, hasChild = false, depth = 0, itemEvent }) => {
+const TreeListItem = ({ name, item, treeList, depth = 0, itemEvent, selectedIndex }) => {
   const [show, setShow] = useState(false);
-
+  // console.log("render TreeListItem %o", item);
   const onClick = (event) => {
     setShow((val) => !val);
   };
 
   const event = makeEvent(itemEvent, { item });
-  const child = hasChild ? (
+  const child = treeList.find((child) => child.upperCode == item.code) ? (
     <Fade state={show} fadeIn="listFadeIn" fadeOut="listFadeOut">
-      <TreeListContainer treeList={item.childCodes} depth={depth + 1} itemEvent={itemEvent} />
+      <TreeListContainer treeList={treeList} upperCode={item.code} depth={depth + 1} itemEvent={itemEvent} selectedIndex={selectedIndex} />
     </Fade>
   ) : null;
 
+  const background = selectedIndex == item.rowIndex ? "#dbedff" : "";
+
   return (
     <React.Fragment>
-      <StyleDiv inStyle={{ display: "grid", gridTemplateColumns: "25px minmax(100px, auto)", alignItems: "center", height: 30 }}>
-        {hasChild ? <AddBoxIcon sx={{ padding: "2px", cursor: "pointer" }} onClick={onClick} /> : <ArrowRightIcon sx={{ padding: "2px" }} />}
+      <StyleDiv inStyle={{ display: "grid", gridTemplateColumns: "25px minmax(100px, auto)", alignItems: "center", height: 30, background: background }}>
+        {child ? <AddBoxIcon sx={{ padding: "2px", cursor: "pointer" }} onClick={onClick} /> : <ArrowRightIcon sx={{ padding: "2px" }} />}
         <span style={{ padding: "2px", cursor: "pointer" }} {...event}>
           {name}
         </span>
       </StyleDiv>
-      {hasChild && child}
+      {child}
     </React.Fragment>
   );
 };

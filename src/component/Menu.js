@@ -1,16 +1,19 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, Box, Button, CircularProgress, Collapse, FormControl, IconButton, InputLabel, OutlinedInput, Paper } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import menuStyle from "../CssModule/Menu.module.css";
 import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
+import { makeEvent } from "../utils/commonUtils";
 import CodeBox from "./BasicComponent/CodeBox/CodeBox";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
 import { StyleDiv } from "./StyleComp/StyleComp";
 import useDataReducer from "./TestComp/DataReducer";
 import useListDataReducer, { ListDataAction } from "./TestComp/ListDataReducer";
 import TreeList from "./TestComp/TreeList";
+import Modal from "@mui/material/Modal";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
 
@@ -74,7 +77,7 @@ export const InsertMenu = () => {
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <TempComp itemList={itemList} treeAction={treeAction}></TempComp>
-        <InputBox menuData={treemenuData.data}></InputBox>
+        <InputBox menuData={treemenuData.data} treeAction={treeAction}></InputBox>
       </div>
     </div>
   );
@@ -96,12 +99,11 @@ const TempComp = ({ itemList, treeAction }) => {
   );
 
   const addNewMenu = (event) => {
-    const action = treeAction;
     /**
      * 자 목표는 선택된 데이터가 있으면 해당 데이터의 하위로 생성
      * 선택된게 없으면 최상위로 생성
      */
-    const selectedData = action.getSelectedRowData();
+    const selectedData = treeAction.getSelectedRowData();
 
     const newData = { ...selectedData, code: "", rowIndex: "", upperCode: selectedData.code, codeDepth: selectedData.codeDepth + 1, codeName: "신규작성", data: {}, childCodes: [] };
     newData.data = {
@@ -116,8 +118,21 @@ const TempComp = ({ itemList, treeAction }) => {
 
     selectedData.childCodes.push(newData);
 
-    action.addRowData(newData, true);
+    treeAction.addRowData(newData, true);
   };
+
+  const deleteMenu = (event) => {
+    const selectedData = treeAction.getSelectedRowData();
+
+    // 없으면 신규
+    if (selectedData.code == "") {
+      treeAction.removeRowData(selectedData.rowIndex);
+    } else {
+      console.log("삭제 요청");
+    }
+  };
+
+  const selectedIndex = treeAction.getSelectedRowIndex();
 
   return (
     <StyleDiv
@@ -146,12 +161,42 @@ const TempComp = ({ itemList, treeAction }) => {
         Header Menu 목록
       </Paper>
       <StyleDiv>
-        <Button onClick={addNewMenu} variant="contained" sx={{ float: "right", alignItems: "center", height: "30px" }} startIcon={<AddOutlinedIcon />}>
-          <span>새로 추가</span>
+        <Button onClick={addNewMenu} variant="contained" sx={{ float: "right", alignItems: "center", height: "30px", marginLeft: "4px" }} startIcon={<AddOutlinedIcon />}>
+          <span>추가</span>
+        </Button>
+        <Button onClick={deleteMenu} variant="contained" sx={{ float: "right", alignItems: "center", height: "30px", marginLeft: "4px" }} startIcon={<RemoveOutlinedIcon />}>
+          <span>삭제</span>
         </Button>
       </StyleDiv>
-      <TreeList list={list} itemEvent={itemEvent}></TreeList>
+      <TreeList list={itemList} itemEvent={itemEvent} selectedIndex={selectedIndex}></TreeList>
     </StyleDiv>
+  );
+};
+
+const CommModal = (show, message) => {
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    setOpen(show);
+  }, [show]);
+
+  return (
+    <Modal open={open} onClose={handleClose} aria-labelledby="parent-modal-title" aria-describedby="parent-modal-description">
+      <Box sx={{ width: 400 }}>
+        <h2 id="parent-modal-title">Text in a modal</h2>
+        <p id="parent-modal-description">{message}</p>
+        <Button onClick={handleClose} variant="contained" sx={{ float: "right", alignItems: "center", height: "30px", marginLeft: "4px" }}>
+          <span>닫기</span>
+        </Button>
+      </Box>
+    </Modal>
   );
 };
 
@@ -166,49 +211,68 @@ const MENU_DATA = {
   menuOrder: "",
 };
 
-const InputBox = memo(({ menuData }) => {
-  const dataAciton = useDataReducer(menuData, MENU_DATA);
-  const menuItem = dataAciton.getAllData();
-  const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
+const InputBox = memo(
+  /**
+   * @param {{menuData: Object, treeAction: ListDataAction}}
+   */
+  ({ menuData, treeAction }) => {
+    const menuItem = menuData || MENU_DATA;
+    const { type, name, url, upperMenu, category, menuDepth, menuOrder } = menuItem;
 
-  const [typeCodeList, setTypeCode] = useState([]);
-  const [menuList, setMenuList] = useState([]);
-  const [state, setState] = useState();
+    const [typeCodeList, setTypeCode] = useState([]);
+    const [menuList, setMenuList] = useState([]);
 
-  useEffect(() => {
-    getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
-      setTypeCode(data);
-    });
-
-    return () => {
-      setTypeCode([]);
-      setMenuList([]);
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log("메뉴 아이템 %o", menuItem);
-    if (menuItem?.type) {
-      getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
-        console.log("메뉴 실행 결과값: %o", data);
-        setMenuList(data);
+    useEffect(() => {
+      getFetch("/Code/getType", { code: "MT000" }).then((data, res) => {
+        setTypeCode(data);
       });
-    }
-  }, [menuItem]);
+      return () => {
+        setTypeCode([]);
+        setMenuList([]);
+      };
+    }, []);
 
-  const newMenu = () => {
-    dataAciton.setInit(MENU_DATA);
-  };
-  const onChange = useCallback((val) => {
-    dataAciton.setData(val);
-  }, []);
+    useEffect(() => {
+      console.log("메뉴 아이템 %o", menuItem);
+      if (menuItem?.type) {
+        getFetch("/menu/get3", { menuType: menuItem.type }).then((data, res) => {
+          console.log("메뉴 실행 결과값: %o", data);
+          setMenuList(data);
+        });
+      }
+    }, [menuItem]);
 
-  return (
-    <Paper className={menuStyle["menu-input-container"]}>
-      <Paper elevation={0} className={menuStyle["item-Title"]} sx={{ padding: "10px" }}>
-        메뉴 삽입
-      </Paper>
-      {/* <AlertComponent
+    const onChange = useCallback((event, val) => {
+      // dataAciton.setData(val);
+      let rowData = treeAction.getSelectedRowData();
+      rowData.data = { ...rowData.data, ...val };
+      treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
+    }, []);
+
+    const onMenuNameChange = useCallback((event, val) => {
+      // dataAciton.setData(val);
+      let rowData = treeAction.getSelectedRowData();
+      rowData.data = { ...rowData.data, ...val };
+      rowData = { ...rowData, codeName: val.name };
+      treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
+      // treeAction.setSelectedRowData(rowData);
+    }, []);
+
+    useEffect(() => {
+      // let rowData = treeAction.getSelectedRowData();
+      // rowData.data = menuItem;
+      // rowData = { ...rowData, codeName: menuItem.name };
+      // //treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
+      // treeAction.setSelectedRowData(rowData);
+    }, [menuItem]);
+
+    console.log("여기여기: %o", menuItem);
+    return (
+      <Paper className={menuStyle["menu-input-container"]}>
+        <Paper elevation={0} className={menuStyle["item-Title"]} sx={{ padding: "10px" }}>
+          메뉴 삽입
+        </Paper>
+        {/* <AlertComponent
         open={state != ""}
         state={state}
         message={{ success: "전송 성공", error: "전송 실패" }}
@@ -216,32 +280,33 @@ const InputBox = memo(({ menuData }) => {
           setState("");
         }}
       /> */}
-      <form>
-        <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
-          <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCodeList}></CodeBoxInput>
-          <MenuInput name="name" value={name} label="메뉴 이름" onChange={onChange}></MenuInput>
-          <CodeBoxInput
-            name="upperMenu"
-            value={upperMenu}
-            display={"label"}
-            label="상위 메뉴"
-            onChange={onChange}
-            codeData={menuList}
-            // beforeChange={beforeChange}
-          ></CodeBoxInput>
-          <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
-          <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
-          <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
-          <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange} allowChar={/^[0-9]*$/}></MenuInput>
-        </Paper>
+        <form>
+          <Paper elevation={2} sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
+            <CodeBoxInput name="type" value={type} display={"label"} label="메뉴 타입" onChange={onChange} codeData={typeCodeList}></CodeBoxInput>
+            <MenuInput name="name" value={name} label="메뉴 이름" onChange={onMenuNameChange}></MenuInput>
+            <CodeBoxInput
+              name="upperMenu"
+              value={upperMenu}
+              display={"label"}
+              label="상위 메뉴"
+              onChange={onChange}
+              codeData={menuList}
+              // beforeChange={beforeChange}
+            ></CodeBoxInput>
+            <MenuInput name="category" value={category} label="메뉴 범주" onChange={onChange}></MenuInput>
+            <MenuInput name="menuDepth" value={menuDepth} label="메뉴 깊이" onChange={onChange}></MenuInput>
+            <MenuInput name="url" value={url} label="메뉴 URL" onChange={onChange}></MenuInput>
+            <MenuInput name="menuOrder" value={menuOrder} label="메뉴 순서" onChange={onChange} allowChar={/^[0-9]*$/}></MenuInput>
+          </Paper>
 
-        <div style={{ marginTop: 20 }}>
-          <SendPostButton name={menuItem.menuId ? "메뉴 변경" : "메뉴 생성"} url="/menu/insertSee" data={[menuItem]} callback={"onSubmit"}></SendPostButton>
-        </div>
-      </form>
-    </Paper>
-  );
-});
+          <div style={{ marginTop: 20 }}>
+            <SendPostButton name={menuItem.menuId ? "메뉴 변경" : "메뉴 생성"} url="/menu/insertSee" data={[menuItem]} callback={"onSubmit"}></SendPostButton>
+          </div>
+        </form>
+      </Paper>
+    );
+  }
+);
 
 const AlertComponent = ({ children, open: Open, state: State, message, closeCallback }) => {
   const [open, setOpen] = useState(Open);
@@ -393,11 +458,11 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, before
   );
 };
 
-const MenuInput = ({ label, name, value = "", allowChar, onChange }) => {
+const MenuInput = ({ label, name, value = "", allowChar, onChange, onKeyPress }) => {
   const eventObj = (event) => {
     let val = event.target.value;
     if (RegExp(allowChar).test(val)) {
-      return onChange({ [name]: val }, event);
+      return onChange(event, { [name]: val });
     } else {
       return null;
     }
@@ -408,7 +473,7 @@ const MenuInput = ({ label, name, value = "", allowChar, onChange }) => {
       <InputLabel htmlFor="component-outlined" sx={{ background: "white" }}>
         {label}
       </InputLabel>
-      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={eventObj} />
+      <OutlinedInput id="component-outlined" name={name} label={label} value={value} onChange={eventObj} onKeyPress={onKeyPress} />
     </FormControl>
   );
 };

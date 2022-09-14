@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import { useEffect, useReducer, useState } from "react";
 
+class Data {
+  constructor(param) {
+    this.rowIndex = param?.rowIndex || -1;
+    this.rowData = param?.rowData || {};
+  }
+}
+
 /** */
 class ListDataState {
   constructor(param) {
@@ -148,7 +155,7 @@ export class ListDataAction {
    * @param {Object} rowData
    */
   setRowData = (rowIndex, rowData) => {
-    this.dispatch({ type: "getRowAllData", rowIndex, rowData });
+    this.dispatch({ type: "setRowData", rowIndex, rowData });
   };
   /**
    * 입력한 index의 rowdata를 반환
@@ -265,7 +272,7 @@ const ROW_INIT_STATE = new ListDataState();
  */
 const useListDataReducer = (rowAllData) => {
   const [state, dispatch] = useReducer(ListDataReducer, new ListDataState());
-  const [dataAction, setDataAction] = useState(new ListDataAction(state, dispatch));
+  const [dataAction, setDataAction] = useState(() => new ListDataAction(state, dispatch));
 
   // rowAllData 변경시 rowAllData를 해당 데이터로 변경처리
   useEffect(() => {
