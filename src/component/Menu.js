@@ -12,7 +12,7 @@ import { DepthMenu } from "./BasicComponent/DepthMenu";
 import { StyleDiv } from "./StyleComp/StyleComp";
 import useDataReducer from "./TestComp/DataReducer";
 import useListDataReducer, { ListDataAction } from "./TestComp/ListDataReducer";
-import TreeList from "./TestComp/TreeList";
+import GraphList, { GraphConfig } from "./TestComp/TreeList";
 import Modal from "@mui/material/Modal";
 
 const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuStyle;
@@ -77,11 +77,24 @@ export const InsertMenu = () => {
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <TempComp itemList={itemList} treeAction={treeAction}></TempComp>
-        <InputBox menuData={treemenuData.data} treeAction={treeAction}></InputBox>
+        <InputBox menuData={treemenuData} treeAction={treeAction}></InputBox>
       </div>
     </div>
   );
 };
+
+class MenuVo {
+  constructor({ menuId, type, category, name, url, upperMenu, menuDepth, menuOrder }) {
+    this.menuId = menuId;
+    this.type = type;
+    this.category = category;
+    this.name = name;
+    this.url = url;
+    this.upperMenu = upperMenu;
+    this.menuDepth = menuDepth;
+    this.menuOrder = menuOrder;
+  }
+}
 
 /**
  * @param {{itemList: Object, treeAction: ListDataAction}}
@@ -105,18 +118,9 @@ const TempComp = ({ itemList, treeAction }) => {
      */
     const selectedData = treeAction.getSelectedRowData();
 
-    const newData = { ...selectedData, code: "", rowIndex: "", upperCode: selectedData.code, codeDepth: selectedData.codeDepth + 1, codeName: "신규작성", data: {}, childCodes: [] };
-    newData.data = {
-      ...selectedData.data,
-      menuId: "",
-      name: "신규작성",
-      upperMenu: selectedData.code,
-      menuDepth: selectedData.codeDepth,
-      status: "create",
-      menuOrder: selectedData.childCodes.length + 1,
-    };
+    const order = treeAction.getRowAllData().filter((item) => item.upperMenu == selectedData.menuId).length + 1 || 1;
 
-    selectedData.childCodes.push(newData);
+    const newData = new MenuVo({ ...selectedData, name: "신규작성", menuId: null, menuOrder: order, upperMenu: selectedData.menuId, menuDepth: selectedData.menuDepth + 1 });
 
     treeAction.addRowData(newData, true);
   };
@@ -132,7 +136,7 @@ const TempComp = ({ itemList, treeAction }) => {
     }
   };
 
-  const selectedIndex = treeAction.getSelectedRowIndex();
+  const selectedValue = treeAction.getSelectedRowData().menuId;
 
   return (
     <StyleDiv
@@ -168,10 +172,12 @@ const TempComp = ({ itemList, treeAction }) => {
           <span>삭제</span>
         </Button>
       </StyleDiv>
-      <TreeList list={itemList} itemEvent={itemEvent} selectedIndex={selectedIndex}></TreeList>
+      <GraphList list={itemList} itemEvent={itemEvent} selectedValue={selectedValue} graphConfig={graphConfig} />
     </StyleDiv>
   );
 };
+
+const graphConfig = new GraphConfig({ name: "name", value: "menuId", depth: "menuDepth", parent: "upperMenu" });
 
 const CommModal = (show, message) => {
   const [open, setOpen] = React.useState(false);
@@ -243,28 +249,14 @@ const InputBox = memo(
     }, [menuItem]);
 
     const onChange = useCallback((event, val) => {
-      // dataAciton.setData(val);
-      let rowData = treeAction.getSelectedRowData();
-      rowData.data = { ...rowData.data, ...val };
-      treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
+      const rowData = { ...treeAction.getSelectedRowData(), ...val };
+      treeAction.setSelectedRowData(rowData);
     }, []);
 
     const onMenuNameChange = useCallback((event, val) => {
-      // dataAciton.setData(val);
-      let rowData = treeAction.getSelectedRowData();
-      rowData.data = { ...rowData.data, ...val };
-      rowData = { ...rowData, codeName: val.name };
-      treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
-      // treeAction.setSelectedRowData(rowData);
+      const rowData = { ...treeAction.getSelectedRowData(), ...val };
+      treeAction.setSelectedRowData(rowData);
     }, []);
-
-    useEffect(() => {
-      // let rowData = treeAction.getSelectedRowData();
-      // rowData.data = menuItem;
-      // rowData = { ...rowData, codeName: menuItem.name };
-      // //treeAction.setRowData(treeAction.getSelectedRowIndex(), rowData);
-      // treeAction.setSelectedRowData(rowData);
-    }, [menuItem]);
 
     console.log("여기여기: %o", menuItem);
     return (
