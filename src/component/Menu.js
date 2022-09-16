@@ -19,18 +19,10 @@ const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuSty
 
 const Menu = ({ height }) => {
   // customHook에서 state를 만들어서 반환시키기 때문에 state가 변화하면 이 화면도 자동적으로 갱신 될 것임
-  const [menus, setMenus] = useGetFetch("/menu/get", {
-    param: { menuType: "HEADER" },
+  const [menus, setMenus] = useGetFetch("/menu/get2", {
+    param: { menuType: "MT001" },
     callbackFunc: (data) => {
-      console.log(data);
-      data.forEach((item) => {
-        const id = item.menuId;
-        data.forEach((target) => {
-          if (target.upperMenu && target.upperMenu == id) {
-            item.childMenu.push(target);
-          }
-        });
-      });
+      setMenus(data);
     },
   });
 
@@ -39,22 +31,24 @@ const Menu = ({ height }) => {
     const source = new EventSource("http://localhost:8080/menu/sse");
     source.onmessage = ({ data }) => {
       var jsonData = JSON.parse(data);
-      console.log(jsonData);
-      if (jsonData.type === "MT001")
-        setMenus((item) => {
-          item
-            .filter((target) => target.menuId == jsonData.upperMenu)
-            .forEach((target) => {
-              target.childMenu.push(target);
-            });
-          return [...item, jsonData];
+      console.log("jsse:data : %o", jsonData);
+      if (jsonData.type === "MT001") {
+        setMenus((list) => {
+          const findMenu = list.find((item) => item.menuId == jsonData.menuId);
+          if (findMenu) {
+            return list.map((item) => (item.menuId == jsonData.menuId ? jsonData : item));
+          } else {
+            list.push(jsonData);
+            return list;
+          }
         });
+      }
     };
   }, []);
 
-  const menuContentStyle = menuStyle["menu-content"];
+  console.log(`헤더메뉴 ${menus}`);
 
-  return <div className={menuContentStyle}>{Array.isArray(menus) ? <DepthMenu menuList={menus} height={height}></DepthMenu> : null}</div>;
+  return <div className={menuStyle["menu-content"]}>{Array.isArray(menus) ? <DepthMenu menuList={menus} upperMenu={2} depth={1} height={height}></DepthMenu> : null}</div>;
 };
 
 export const InsertMenu = () => {
@@ -78,6 +72,9 @@ export const InsertMenu = () => {
       <div style={{ display: "flex", justifyContent: "center" }}>
         <TempComp itemList={itemList} treeAction={treeAction}></TempComp>
         <InputBox menuData={treemenuData} treeAction={treeAction}></InputBox>
+      </div>
+      <div style={{ marginTop: 20 }}>
+        <SendPostButton name={"메뉴 저장"} url="/menu/insertSee" data={itemList} callback={"onSubmit"}></SendPostButton>
       </div>
     </div>
   );
@@ -129,14 +126,14 @@ const TempComp = ({ itemList, treeAction }) => {
     const selectedData = treeAction.getSelectedRowData();
 
     // 없으면 신규
-    if (selectedData.code == "") {
+    if (!selectedData.menuId) {
       treeAction.removeRowData(selectedData.rowIndex);
     } else {
       console.log("삭제 요청");
     }
   };
 
-  const selectedValue = treeAction.getSelectedRowData().menuId;
+  const selectedIndex = treeAction.getSelectedRowIndex();
 
   return (
     <StyleDiv
@@ -172,7 +169,7 @@ const TempComp = ({ itemList, treeAction }) => {
           <span>삭제</span>
         </Button>
       </StyleDiv>
-      <GraphList list={itemList} itemEvent={itemEvent} selectedValue={selectedValue} graphConfig={graphConfig} />
+      <GraphList list={itemList} itemEvent={itemEvent} selectedIndex={selectedIndex} graphConfig={graphConfig} />
     </StyleDiv>
   );
 };
@@ -450,16 +447,14 @@ const CodeBoxInput = ({ label, name, value, setValue, onChange, codeData, before
   );
 };
 
-const MenuInput = ({ label, name, value = "", allowChar, onChange, onKeyPress }) => {
+const MenuInput = ({ label = "", name, value = "", allowChar, onChange, onKeyPress }) => {
   const eventObj = (event) => {
-    let val = event.target.value;
+    let val = event.target.value || "";
     if (RegExp(allowChar).test(val)) {
-      return onChange(event, { [name]: val });
-    } else {
-      return null;
+      onChange(event, { [name]: val });
     }
   };
-
+  console.log(`render ${name}`);
   return (
     <FormControl margin="dense" size="Normal" required>
       <InputLabel htmlFor="component-outlined" sx={{ background: "white" }}>
@@ -473,6 +468,9 @@ const MenuInput = ({ label, name, value = "", allowChar, onChange, onKeyPress })
 const Item = ({ children, name, value, onChange }) => {
   console.log(`render ${name}`);
   const { "item-Content": itemContent, "item-Name": itemName, "item-Box": itemBox } = menuStyle;
+  if (value === undefined || value === null) {
+    value = "";
+  }
 
   return (
     <div className={itemContent}>

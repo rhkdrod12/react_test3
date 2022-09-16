@@ -6,15 +6,15 @@ import { getRect } from "../../utils/commonUtils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useNavigate } from "react-router";
 
-export const DepthMenu = ({ menuList, height = 40 }) => {
+export const DepthMenu = ({ menuList, depth = 0, upperMenu, height = 40 }) => {
   return (
     <MenuContainer inStyle={{ height }}>
       {menuList
         ? menuList
-            .filter((item) => item.menuDepth == 0)
+            .filter((item) => item.upperMenu == upperMenu && item.menuDepth == depth)
             .map((item, idx) => {
               return (
-                <MenuButton key={idx} data={item} depth={0}>
+                <MenuButton key={idx} data={item} menuList={menuList} depth={depth}>
                   <MainMenuBtn data={item} height={height}></MainMenuBtn>
                 </MenuButton>
               );
@@ -39,10 +39,11 @@ const MainMenuBtn = ({ data, isOpen, height = 40 }) => {
   );
 };
 
-const MenuButton = ({ children, data, depth = 0 }) => {
+const MenuButton = ({ children, data, menuList, depth = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
-  const subMenu = data.childMenu && data.childMenu.length > 0;
+  const subMenuList = menuList.filter((item) => item.upperMenu == data.menuId);
+  const subMenu = subMenuList && subMenuList.length > 0;
 
   const onClick = useCallback(
     (event) => {
@@ -56,7 +57,7 @@ const MenuButton = ({ children, data, depth = 0 }) => {
 
   /** default direction: ["right", "top"] */
   const depthDirection = {
-    1: ["left", "bottom"],
+    2: ["left", "bottom"],
   };
 
   return (
@@ -64,31 +65,32 @@ const MenuButton = ({ children, data, depth = 0 }) => {
       <div ref={ref} onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className="menu-content main-menu">
         {/* 자식에게 props 추가하여 전달! */}
         {React.cloneElement(children, { isOpen })}
-        {isOpen && subMenu ? <SubMenuContent menuList={data.childMenu} upperRef={ref} depth={depth + 1} depthDirection={depthDirection} /> : null}
+        {isOpen && subMenu ? <SubMenuContent childMenuList={subMenuList} menuList={menuList} upperRef={ref} depth={depth + 1} depthDirection={depthDirection} /> : null}
       </div>
     </React.Fragment>
   );
 };
 
 /*********************************************************************************************************************************/
-const SubMenuContent = ({ menuList, upperRef, minWidth, depth = 0, depthDirection = {} }) => {
+const SubMenuContent = ({ childMenuList, menuList, upperRef, minWidth, depth = 0, depthDirection = {} }) => {
   const direction = depthDirection[depth] ? depthDirection[depth] : ["right", "top"];
   const { top, left, width } = getRect(upperRef, ...direction, { offsetY: 1 });
   return (
     <StyleDiv inStyle={{ top, left, minWidth: minWidth || width }} className={"sub-side-menu-container"}>
-      {menuList
+      {childMenuList
         .filter((menu) => menu.menuDepth == depth)
         .map((menu, menuIdx) => {
-          return <SubMenuButton key={menuIdx} data={menu} depth={depth} depthDirection={depthDirection}></SubMenuButton>;
+          return <SubMenuButton key={menuIdx} data={menu} menuList={menuList} depth={depth} depthDirection={depthDirection}></SubMenuButton>;
         })}
     </StyleDiv>
   );
 };
 
-const SubMenuButton = ({ data, depth, minWidth, depthDirection }) => {
+const SubMenuButton = ({ data, menuList, depth, minWidth, depthDirection }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
-  const subMenu = data.childMenu && data.childMenu.length > 0;
+  const subMenuList = menuList.filter((item) => item.upperMenu == data.menuId);
+  const subMenu = subMenuList && subMenuList.length > 0;
 
   const navi = useNavigate();
   const onClick = useCallback(
@@ -110,7 +112,7 @@ const SubMenuButton = ({ data, depth, minWidth, depthDirection }) => {
           <div>{data.name}</div>
           <ChevronRightIcon fontSize="small" color="disabled" sx={{ opacity: `${subMenu ? 1 : 0}` }} />
         </div>
-        {isOpen && subMenu ? <SubMenuContent menuList={data.childMenu} upperRef={ref} minWidth={minWidth} depth={depth + 1} depthDirection={depthDirection} /> : null}
+        {isOpen && subMenu ? <SubMenuContent childMenuList={subMenuList} menuList={menuList} upperRef={ref} minWidth={minWidth} depth={depth + 1} depthDirection={depthDirection} /> : null}
       </div>
     </React.Fragment>
   );
