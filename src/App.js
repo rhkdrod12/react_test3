@@ -12,6 +12,7 @@ import BottomNavibar from "./Component/TestComp/BottomNavibar";
 import MenuGrid from "./Component/TestComp/MenuGrid";
 import "./CssModule/GlobalStyle.css";
 import FileMgm from "./Win/FileMgm";
+import UserChat from "./Component/UserChat";
 
 function App() {
   return (
@@ -31,6 +32,9 @@ const Transition = () => {
       </Route>
       <Route path="/menuMgm/*">
         <Route path="headerMenuMgm" element={<InsertMenu />}></Route>
+      </Route>
+      <Route path="/chat/*">
+        <Route path="userChat" element={<UserChat />}></Route>
       </Route>
       <Route path="/test/*" element={<TestNavi />}></Route>
       <Route path="*" element={<UnKnownPage />}></Route>

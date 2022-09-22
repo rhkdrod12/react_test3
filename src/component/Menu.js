@@ -30,8 +30,8 @@ const Menu = ({ height }) => {
     console.log("SSE 실행");
     const source = new EventSource("http://localhost:8080/menu/sse");
     source.onmessage = ({ data }) => {
-      var jsonData = JSON.parse(data);
-      console.log("jsse:data : %o", jsonData);
+      var jsonData = JSON.parse(data).body;
+      console.log("jsse:data : %o", jsonData);      
       if (jsonData.type === "MT001") {
         setMenus((list) => {
           const findMenu = list.find((item) => item.menuId == jsonData.menuId);
@@ -43,6 +43,9 @@ const Menu = ({ height }) => {
           }
         });
       }
+    };
+    source.onerror = (error) => {
+      console.log(error);
     };
   }, []);
 
