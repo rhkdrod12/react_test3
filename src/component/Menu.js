@@ -5,7 +5,7 @@ import { Alert, Box, Button, CircularProgress, Collapse, FormControl, IconButton
 import { green, red } from "@mui/material/colors";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import menuStyle from "../CssModule/Menu.module.css";
-import { getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
+import { DEFAULT_URL, getFetch, postFetch, useGetFetch } from "../Hook/useFetch";
 import { makeEvent } from "../utils/commonUtils";
 import CodeBox from "./BasicComponent/CodeBox/CodeBox";
 import { DepthMenu } from "./BasicComponent/DepthMenu";
@@ -19,19 +19,14 @@ const { "menu-content": menuContentStyle, "menu-item": menuItemStyle } = menuSty
 
 const Menu = ({ height }) => {
   // customHook에서 state를 만들어서 반환시키기 때문에 state가 변화하면 이 화면도 자동적으로 갱신 될 것임
-  const [menus, setMenus] = useGetFetch("/menu/get2", {
-    param: { menuType: "MT001" },
-    callbackFunc: (data) => {
-      setMenus(data);
-    },
-  });
+  const [menus, setMenus] = useGetFetch("/menu/get2", { param: { menuType: "MT001" } });
 
   useEffect(() => {
     console.log("SSE 실행");
-    const source = new EventSource("http://localhost:8080/menu/sse");
+    const source = new EventSource(`${DEFAULT_URL}/menu/sse`);
     source.onmessage = ({ data }) => {
-      var jsonData = JSON.parse(data).body;
-      console.log("jsse:data : %o", jsonData);      
+      var jsonData = JSON.parse(data).body.result;
+      console.log("jsse:data : %o", jsonData);
       if (jsonData.type === "MT001") {
         setMenus((list) => {
           const findMenu = list.find((item) => item.menuId == jsonData.menuId);
@@ -49,7 +44,7 @@ const Menu = ({ height }) => {
     };
   }, []);
 
-  console.log(`헤더메뉴 ${menus}`);
+  console.log(`헤더메뉴 %o`, menus);
 
   return <div className={menuStyle["menu-content"]}>{Array.isArray(menus) ? <DepthMenu menuList={menus} upperMenu={2} depth={1} height={height}></DepthMenu> : null}</div>;
 };

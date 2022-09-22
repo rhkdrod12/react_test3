@@ -5,7 +5,7 @@ import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
 import JSOG from "jsog";
 
-const defaultUrl = "http://localhost:8080";
+export const DEFAULT_URL = "http://localhost:8080";
 
 /**
  * 입력한 URL에 param를 포함하여 GET요청을 보냄
@@ -13,9 +13,10 @@ const defaultUrl = "http://localhost:8080";
  * @param {Object} param1 요청할 파라미터
  * @returns
  */
-export function useGetFetch(url, { stateType = [], param, callbackFunc } = {}) {
+export const useGetFetch = (url, { stateType = [], param } = {}, callbackFunc) => {
   const [responseData, setResponseData] = useState(stateType);
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
+
   useEffect(() => {
     if (param && param instanceof Object) {
       url += "?" + queryString.stringify(param);
@@ -37,7 +38,7 @@ export function useGetFetch(url, { stateType = [], param, callbackFunc } = {}) {
   }, [url]);
 
   return [responseData, setResponseData];
-}
+};
 
 /**
  * axios 통신시 발생하는 에러메시지 처리
@@ -64,7 +65,7 @@ const axiosError = (error) => {
 };
 export function usePostFetch(url, data, stateType = []) {
   const [responseData, setResponseData] = useState(stateType);
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
   useEffect(() => {
     axios
       .post(url, data)
@@ -83,8 +84,7 @@ export function usePostFetch(url, data, stateType = []) {
 }
 
 export function getFetch(url, param, callback) {
-  url = defaultUrl + url;
-
+  url = DEFAULT_URL + url;
   if (param && param instanceof Object) {
     url += "?" + queryString.stringify(param);
   }
@@ -103,7 +103,7 @@ export function getFetch(url, param, callback) {
 }
 
 export function postFetch(url, data, callback) {
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
   return new Promise((resolve, reject) => {
     axios
       .post(url, data)
@@ -128,7 +128,7 @@ export function postFetch(url, data, callback) {
  * @param {Object} data
  */
 export function rxJsPost(url, data) {
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
   return new Observable((observer) => {
     axios
       .post(url, data)
@@ -150,7 +150,7 @@ export function rxJsPost(url, data) {
  * @returns
  */
 export function fileRxjsUpload(url, fileInfo, onUploadProgress) {
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
   // 객체를 fromData 형태로 가공
   const formData = makeFormData(fileInfo, ["axiosSource"]);
 
@@ -215,7 +215,7 @@ const makeFormData = function (arg, exclude = []) {
 };
 
 export function fileDownload(url, param, onDownloadProgress) {
-  url = defaultUrl + url;
+  url = DEFAULT_URL + url;
 
   if (param && param instanceof Object) {
     url += "?" + queryString.stringify(param);

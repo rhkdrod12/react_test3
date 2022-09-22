@@ -18,6 +18,14 @@ const UserChat = () => {
         setChatId("");
       });
   };
+
+  useEffect(() => {
+    return () => {
+      console.log("이거 실행되나?");
+      setChatId("");
+    };
+  }, []);
+
   console.log("UserChat render %o", messageSender?.message);
   return (
     <div style={{ display: "flex", margin: "0 auto", flexDirection: "column", justifyContent: "center", backgroundColor: "white", width: "50%", height: "100%" }}>
