@@ -1,12 +1,14 @@
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { getFetch, useGetFetch } from "../Hook/useFetch";
+import { DEFAULT_URL, getFetch, makeGetParam, useGetFetch } from "../Hook/useFetch";
 
 const UserChat = () => {
   const [chatId, setChatId] = useState("");
-  const messageSender = useChatEvent(chatId);
+  const [name, setName] = useState("익명 사용자");
+
+  const messageSender = useChatEvent(chatId, name);
   //const [chatId] = useGetFetch("/chat/create", { stateType: "" });
 
   const onCreate = () => {
@@ -17,6 +19,11 @@ const UserChat = () => {
       .catch((error) => {
         setChatId("");
       });
+  };
+
+  const onChange = (event) => {
+    const value = event.target.value;
+    setName(value);
   };
 
   useEffect(() => {
@@ -33,6 +40,7 @@ const UserChat = () => {
         <div>채팅테스트 방ID: {chatId}</div>
       ) : (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <input type="text" placeholder="사용자이름" value={name} onChange={onChange}></input>
           <ConnectChat setChatId={setChatId}></ConnectChat>
           <Button onClick={onCreate} variant="contained" sx={{ alignItems: "center", height: "30px", marginLeft: "4px" }}>
             <span>방생성</span>
@@ -142,14 +150,18 @@ const SendMessageComp = ({ messageSender }) => {
  * chat message를 보내기위한 hook
  * @returns {MessageSender}
  */
-const useChatEvent = (chatId) => {
+const useChatEvent = (chatId, name) => {
   const [message, setMessage] = useState([]);
   const [messageSender, setMessageSender] = useState();
 
   console.log("useChatEvent render");
   useEffect(() => {
     if (chatId) {
-      const source = new EventSource(`http://localhost:8080/chat/beginChat/${chatId}`);
+      // URL 생성
+      const url = makeGetParam(`${DEFAULT_URL}/chat/beginChat/${chatId}`, { name });
+      // 이벤트 생성
+      const source = new EventSource(url, { withCredentials: true });
+      //
       source.onmessage = ({ data }) => {
         var jsonData = JSON.parse(data).body;
 

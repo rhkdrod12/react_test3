@@ -5,7 +5,23 @@ import queryString from "query-string";
 import { COM_MESSAGE } from "../utils/commonMessage";
 import JSOG from "jsog";
 
+axios.defaults.withCredentials = true;
+
 export const DEFAULT_URL = "http://localhost:8080";
+// export const DEFAULT_URL = "";
+
+/**
+ * URL에 파라미터를 주입
+ * @param {String} url
+ * @param {Object} param
+ * @returns
+ */
+export const makeGetParam = (url, param) => {
+  if (param && param instanceof Object) {
+    return url + "?" + queryString.stringify(param);
+  }
+  return url;
+};
 
 /**
  * 입력한 URL에 param를 포함하여 GET요청을 보냄
@@ -18,17 +34,15 @@ export const useGetFetch = (url, { stateType = [], param } = {}, callbackFunc) =
   url = DEFAULT_URL + url;
 
   useEffect(() => {
-    if (param && param instanceof Object) {
-      url += "?" + queryString.stringify(param);
-    }
+    // 파라미터 삽입
+    url = makeGetParam(url, param);
 
     axios
       .get(url)
       .then((res) => {
         const result = JSOG.parse(res.request.response).result;
-        if (typeof callbackFunc === "function") {
-          callbackFunc(result);
-        }
+
+        if (typeof callbackFunc === "function") callbackFunc(result);
 
         setResponseData(result);
       })
@@ -40,29 +54,6 @@ export const useGetFetch = (url, { stateType = [], param } = {}, callbackFunc) =
   return [responseData, setResponseData];
 };
 
-/**
- * axios 통신시 발생하는 에러메시지 처리
- * @param {*} error
- */
-const axiosError = (error) => {
-  if (error.code) {
-    if (error.name == "AxiosError") {
-      if (error.code == "ERR_NETWORK") {
-        return { result: false, ...COM_MESSAGE.ERR_NETWORK };
-      } else if (error.code == "ERR_BAD_RESPONSE") {
-        return error.response.data;
-      } else if (error.code == "ERR_BAD_REQUEST") {
-        return error.response.data;
-      } else {
-        return { result: false, ...COM_MESSAGE.ERR };
-      }
-    } else if (error.name == "CanceledError") {
-      if (error.code == "ERR_CANCELED") {
-        return { result: false, ...COM_MESSAGE.CANCEL_REQUEST };
-      }
-    }
-  }
-};
 export function usePostFetch(url, data, stateType = []) {
   const [responseData, setResponseData] = useState(stateType);
   url = DEFAULT_URL + url;
@@ -121,6 +112,30 @@ export function postFetch(url, data, callback) {
       });
   });
 }
+
+/**
+ * axios 통신시 발생하는 에러메시지 처리
+ * @param {*} error
+ */
+const axiosError = (error) => {
+  if (error.code) {
+    if (error.name == "AxiosError") {
+      if (error.code == "ERR_NETWORK") {
+        return { result: false, ...COM_MESSAGE.ERR_NETWORK };
+      } else if (error.code == "ERR_BAD_RESPONSE") {
+        return error.response.data;
+      } else if (error.code == "ERR_BAD_REQUEST") {
+        return error.response.data;
+      } else {
+        return { result: false, ...COM_MESSAGE.ERR };
+      }
+    } else if (error.name == "CanceledError") {
+      if (error.code == "ERR_CANCELED") {
+        return { result: false, ...COM_MESSAGE.CANCEL_REQUEST };
+      }
+    }
+  }
+};
 
 /**
  * URL에 BODY에 데이터를 포함하여 POST요청을 한다.
